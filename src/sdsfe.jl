@@ -12,7 +12,7 @@ export sfmodel_spec, sfmodel_init, sfmodel_opt,
         sddirection,
         @sfdirection,
         @model, @depvar, 
-        @frontier,@envar,@ivvar,
+        @frontier,@envar,@ivvar,@frontierWx,
         @μ, @mu,  @σᵤ², @sigma_u_2,  @σᵥ², @sigma_v_2, 
 
         @hscale,  

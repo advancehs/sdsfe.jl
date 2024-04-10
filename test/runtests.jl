@@ -39,6 +39,7 @@ sfmodel_spec(sfpanel(SSF_OAD2024),sftype(prod), sfdist(half), wy(Wx) ,wu(Wx),wv(
                     @timevar(t), @idvar(id),
                     @depvar(y),
                     @frontier(noconstant,z1,qf),
+                    @frontierWx(z1,qf),
                     @hscale(z2,qu),                # h(.) function
                     @envar(qf,qu),
                     @ivvar(z3,z4),
