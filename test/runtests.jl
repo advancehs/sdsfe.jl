@@ -35,7 +35,7 @@ Wx[1]= W;
 #                     @hscale(z),                # h(.) function
 #                     @σᵤ²(_cons),
 #                     @σᵥ²(_cons), message = true);    
-sfmodel_spec(sfpanel(SSF_OAD2024),sftype(prod), sfdist(half), wy(Wx) ,wu(Wx),wv(Wx),
+sfmodel_spec(sfpanel(SSF_OAD2024),sftype(prod), sfdist(half), wy(Wx), wx(Wx),wu(Wx),wv(Wx),
                     @timevar(t), @idvar(id),
                     @depvar(y),
                     @frontier(noconstant,z1,qf),

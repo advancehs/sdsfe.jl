@@ -6,7 +6,7 @@ export sfmodel_spec, sfmodel_init, sfmodel_opt,
        # likelihood functions 
         LL_T, simple_check, simple_check2,
        # macros for _spec; 
-        depvar, timevar, idvar, wy, wu, wv,
+        depvar, timevar, idvar, wy, wx, wu, wv,
         sfdist, sftype,
         @sfdist, @sftype,
         sddirection,
