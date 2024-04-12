@@ -591,7 +591,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
            sf_init1  = Optim.minimizer(mfun0)
            b_ini1 = sf_init1[1:num.nofx]
            t_ini1  = sf_init1[num.nofx+1: num.nofx+num.nofq]
-           phi_ini = get(_dicINI, :eqphi, ivvar \ envar)
+           phi_ini = get(_dicINI, :eqphi, vec(ivvar \ envar))
            eta_ini = get(_dicINI, :eqeta, ones(num.nofeta)*0.1)
            d2_ini1 = sf_init1[num.nofx+num.nofq+1: num.nofx+num.nofq+num.nofw]
            g_ini1  = sf_init1[num.nofx+num.nofq+num.nofw+1: num.nofx+num.nofq+num.nofw+num.nofv]
@@ -729,8 +729,8 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
     _coevec            = Optim.minimizer(mfun)  # coef. vec.
     # numerical_hessian  = hessian!(_Hessian, _coevec)  # Hessain 
 
-  numerical_hessian = Calculus.hessian(rho -> LL_T(tagD[:modelid], 
-                         yvar, xvar, qvar, wvar, vvar, zvar, envar, ivvar,
+  numerical_hessian = ForwardDiff.hessian(rho -> LL_T(tagD[:modelid], 
+                          yvar, xvar, qvar, wvar, vvar, zvar, envar, ivvar,
                           Wy, Wu, Wv, _porc, num, pos, rho,
                               eigvalu,   rowIDT, _dicM[:misc]), _coevec)
   println("############################################################")

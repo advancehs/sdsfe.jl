@@ -562,9 +562,6 @@ function getvar(::Type{SSFOADH}, dat::DataFrame)
   Wx = _dicM[:wx]
   Wu = _dicM[:wu]
   Wv = _dicM[:wv]
-  global name_new_ivvar
-  global name_exovar
-  global name_xuvar
 
     
   envar = dat[:, _dicM[:envar]]   

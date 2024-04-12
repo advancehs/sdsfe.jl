@@ -1,5 +1,6 @@
 using Test
 using sdsfe
+using Optim:LineSearches
 
 # include("..\\src\\sdsfe.jl")
 
@@ -14,13 +15,14 @@ using DataFrames
 # dat=DataFrame(XLSX.readtable("C:\\Users\\10197\\yuv_nox_mu\\spxtsfayuv.xlsx", "Sheet1"  #filename
 #            ));
 
-dat=DataFrame(XLSX.readtable("C:\\Users\\10197\\yuven_nox\\spxtsfayuv.xlsx", "Sheet1"  #filename
-));
+dat=DataFrame(XLSX.readtable("C:\\Users\\10197\\yuven_nox\\spxtsfayuv.xlsx", "Sheet1" ));
+# dat=DataFrame(XLSX.readtable("C:\\Users\\10197\\yuven_nox_mu\\spxtsfayuv.xlsx", "Sheet1" ));
 
 dat[!, :_cons] .= 1.0;
 
 # file = matopen("C:\\Users\\10197\\yuv_nox_mu\\wm.mat");
 file = matopen("C:\\Users\\10197\\yuven_nox\\wm.mat");
+# file = matopen("C:\\Users\\10197\\yuven_nox_mu\\wm.mat");
 
 
 W = read(file, "wm"); # note that this does NOT introduce a variable ``varname`` into scope
@@ -49,7 +51,7 @@ sfmodel_spec(sfpanel(SSF_OAD2024),sftype(prod), sfdist(half), wy(Wx), wx(Wx),wu(
                     
 sfmodel_opt(warmstart_solver(NelderMead()),   
                     warmstart_maxIT(600),
-                    main_solver(NelderMead()), 
+                    main_solver(BFGS(linesearch=LineSearches.BackTracking())), 
                     main_maxIT(20000), 
                     tolerance(1e-6));
 

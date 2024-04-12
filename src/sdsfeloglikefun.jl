@@ -19,7 +19,6 @@ end
 function simple_check2(xs)
     any(x -> isless(x,0.0)  ,sigs2)
 end
-
 function LL_T(::Type{SSFOAH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,en,iv,
     Wy::Matrix, Wu::Matrix, Wv::Matrix,
 PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
@@ -47,8 +46,8 @@ PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT:
 
    ϵ = PorC*(y - x * β)
    T = size(rowIDT,1)
-   # print(T)
 
+try
    if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
     lik = zero(eltype(y));
@@ -57,13 +56,10 @@ PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT:
     @views Mtau = (I(N)-tau*Wu[1])\I(N);
     @views Mrho =  (I(N)-rhomy*Wv[1])\I(N);
     @views Pi = σᵥ²*(Mrho*Mrho');
-    @views detPi = det(Pi)
-
-        # print("c")
-        # @views Pi = broadcast(x -> isnan(x) || isinf(x) ? rand(1000000:2000000) : x, Pi)
-        # @views detPi = map(x -> x < 0 ? 1000000 : x, detPi)
-        @views lndetPi = log(detPi);
-        @views invPi = (Pi)\I(N);
+    
+    @views lndetPi = log(det(Pi));
+    
+    @views invPi = (I(N)-rhomy*(Wv[1])')*(I(N)-rhomy*Wv[1])/σᵥ²;
 
         @floop begin
         @inbounds for ttt=1:T  
@@ -74,8 +70,6 @@ PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT:
                 @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                 @views es2 = -0.5*ϵs'*invPi*ϵs ;
                 @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
-        
-                # @views sigs2 = map(x -> x < 0 ? 10000 : x, sigs2)
 
                     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
                                 0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
@@ -98,17 +92,11 @@ elseif length(Wy)>1
 
     @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
     @views Mtau = (I(N)-tau*Wu[ttt])\I(N);
-            
-    # @views Mrho_before = I(N)-rhomy*Wv[ttt]
-    # @views Mrho_before = broadcast(x -> isnan(x) || isinf(x) ?  1e-7 + rand() * (2e-7 - 1e-7) : x, Mrho_before)
     @views Mrho =  (I(N)-rhomy*Wv[ttt])\I(N);
             
     @views Pi = σᵥ²*(Mrho*Mrho');
-    @views detPi = det(Pi)
-        # @views Pi = broadcast(x -> isnan(x) || isinf(x) ? rand(1000000:2000000) : x, Pi)
-        # @views detPi = map(x -> x < 0 ? 1000000 : x, detPi)
-        @views lndetPi = log(detPi);
-        @views invPi = (Pi)\I(N);
+    @views lndetPi = log(det(Pi));
+        @views invPi = (I(N)-rhomy*(Wv[ttt])')*(I(N)-rhomy*Wv[ttt])/σᵥ²;
         
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
@@ -118,7 +106,6 @@ elseif length(Wy)>1
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
 
-    # @views sigs2 = map(x -> x < 0 ? 1e-4 : x, sigs2)
             
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
                     0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
@@ -135,6 +122,12 @@ elseif length(Wy)>1
     
 end #  if length(Wy)==1
 
+    return -lik
+
+catch e
+# 处理异常的代码
+println("操作失败，发生错误：$e")
+    return 1e100
 #     # 计算 lik
 # # if simple_check2( normcdf(μ / sqrt(σᵤ²)))  || simple_check2(sigs2)
 # #     return 1e9
@@ -159,7 +152,7 @@ end #  if length(Wy)==1
 # # end # simple_check2( normcdf(μ / sqrt(σᵤ²)))  || simple_check2(sigs2)
 #    return ls
 
-    return -lik
+    end
 end
 
 
@@ -192,8 +185,7 @@ PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT:
 
    ϵ = PorC*(y - x * β)
    T = size(rowIDT,1)
-   # print(T)
-
+try
    if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
     lik = zero(eltype(y));
@@ -209,13 +201,9 @@ PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT:
 
 
     @views Pi = σᵥ²*(Mrho*Mrho');
-    @views detPi = det(Pi)
-
-        # print("c")
-        @views Pi = broadcast(x -> isnan(x) || isinf(x) ? rand(1000000:2000000) : x, Pi)
-        @views detPi = map(x -> x < 0 ? 1000000 : x, detPi)
-        @views lndetPi = log(detPi);
-        @views invPi = (Pi)\I(N);
+    @views lndetPi = log(det(Pi));
+    
+        @views invPi = (I(N)-rhomy*(Wv[1])')*(I(N)-rhomy*Wv[1])/σᵥ²;
 
         @floop begin
         @inbounds for ttt=1:T  
@@ -227,7 +215,6 @@ PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT:
                 @views es2 = -0.5*ϵs'*invPi*ϵs ;
                 @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
         
-                @views sigs2 = map(x -> x < 0 ? 10000 : x, sigs2)
 
                     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
                                 0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
@@ -249,20 +236,13 @@ elseif length(Wy)>1
 @inbounds for ttt=1:T
 
     @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
-    @views Mtau_before = I(N)-tau*Wu[ttt]
-    @views Mtau_before = broadcast(x -> isnan(x) || isinf(x) ? rand(1000000:2000000) : x, Mtau_before)
-    @views Mtau = (Mtau_before)\I(N);
+    @views Mtau = (I(N)-tau*Wu[ttt])\I(N);
             
-    @views Mrho_before = I(N)-rhomy*Wv[ttt]
-    @views Mrho_before = broadcast(x -> isnan(x) || isinf(x) ?  1e-7 + rand() * (2e-7 - 1e-7) : x, Mrho_before)
-    @views Mrho =  (Mrho_before)\I(N);
+    @views Mrho =  (I(N)-rhomy*Wv[ttt])\I(N);
             
     @views Pi = σᵥ²*(Mrho*Mrho');
-    @views detPi = det(Pi)
-        @views Pi = broadcast(x -> isnan(x) || isinf(x) ? rand(1000000:2000000) : x, Pi)
-        @views detPi = map(x -> x < 0 ? 1000000 : x, detPi)
-        @views lndetPi = log(detPi);
-        @views invPi = (Pi)\I(N);
+    @views lndetPi = log(det(Pi));
+        @views invPi = (I(N)-rhomy*(Wv[ttt])')*(I(N)-rhomy*Wv[ttt])/σᵥ²;
         
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
@@ -272,23 +252,27 @@ elseif length(Wy)>1
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
 
-    @views sigs2 = map(x -> x < 0 ? 1e-4 : x, sigs2)
             
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
                     0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                         0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
         
-    if simple_check(temp)
-        # print("a")
-        lik += -1e9
-    else
-        lik += temp
-    end # simple_check(temp)
+            if simple_check(temp)
+                # print("a")
+                lik += -1e9
+            else
+                lik += temp
+            end # simple_check(temp)
     end # for ttt=1:T
     end # begin
     
 end #  if length(Wy)==1
-   
+
+    return -lik
+catch e
+# 处理异常的代码
+println("操作失败，发生错误：$e")
+    return 1e100
 
 #     # 计算 lik
 # # if simple_check2( normcdf(μ / sqrt(σᵤ²)))  || simple_check2(sigs2)
@@ -313,8 +297,7 @@ end #  if length(Wy)==1
 #    end
 # # end # simple_check2( normcdf(μ / sqrt(σᵤ²)))  || simple_check2(sigs2)
 #    return ls
-
-    return -lik
+end
 end
 
 
@@ -334,9 +317,7 @@ function LL_T(::Type{SSFOADH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w,
    eps = zeros(eltype(EN),num.nofobs,num.nofeta);
 
    # %%%%%%%%%%%%%%
-#    @inbounds  for ii=1:num.nofeta
-#         eps[:,ii]=EN[:,ii]-IV*phi[((Int(ii)-1)*Int(nofiv)+1):(Int(ii)*Int(nofiv))];
-#     end
+
     @views phi = reshape(phi, :, num.nofeta)
     @views eps = EN- IV*phi
 
@@ -344,6 +325,8 @@ function LL_T(::Type{SSFOADH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w,
     @views logdetll = log(det(LL))
     @views invll = LL\I(num.nofeta)
     likx = zero(eltype(y));
+
+try 
 @floop begin
 
    @inbounds  for iitt =1:num.nofobs
@@ -388,38 +371,15 @@ end # @floop begin
     lik = zero(eltype(y));
     @views N = rowIDT[1,2];
     @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));   
-    # @views Mtau_before = I(N)-tau*Wu[1]
-        # if isapprox(det(Mtau_before), 0) 
-        #     asasa = 1e-8  # 扰动的大小
-        #     Innn = Diagonal(ones(size(Mtau_before, 1)))
-        #     Mtau_before = Mtau_before + asasa*Innn
-        # end
-    # @views Mtau_before = broadcast(x -> isnan(x) || isinf(x) ?  rand(10000:2000000)  : x, Mtau_before)
     @views Mtau = (I(N)-tau*Wu[1])\I(N);
-    # 1e-7 + rand() * (2e-7 - 1e-7) 
-    # @views Mrho_before = I(N)-rhomy*Wv[1]
-        # if isapprox(det(Mrho_before), 0) 
-        #     asasa = 1e-8  # 扰动的大小
-        #     Innn = Diagonal(ones(size(Mrho_before, 1)))
-        #     Mrho_before = Mrho_before + asasa*Innn
-        # end
-    # @views Mrho_before = broadcast(x -> isnan(x) || isinf(x) ?  rand(10000:2000000)   : x, Mrho_before)
     @views Mrho =  (I(N)-rhomy*Wv[1])\I(N);
     
     @views Pi = σᵥ²*(Mrho*Mrho');
-    @views detPi = det(Pi)
+    @views lndetPi = log(det(Pi));
+        
+    @views invPi =  (I(N)-rhomy*(Wv[1])')*(I(N)-rhomy*Wv[1])/σᵥ²;
+        @floop begin
 
-        # print("c")
-        # if isapprox(det(Pi), 0) 
-        #     asasa = 1e-8  # 扰动的大小
-        #     Innn = Diagonal(ones(size(Pi, 1)))
-        #     Pi = Pi + asasa*Innn
-        # end
-        # @views Pi = broadcast(x -> isnan(x) || isinf(x) ? rand(10000:2000000) : x, Pi)
-        # @views detPi = map(x -> x < 0 ? 1000 : x, detPi)
-        @views lndetPi = log(detPi);
-        @views invPi = (Pi) \I(N);
-    @floop begin
     @inbounds  for ttt=1:T  
                 @views ind = rowIDT[ttt,1];
                 @views his = Mtau*hi[ind];
@@ -429,12 +389,10 @@ end # @floop begin
                 @views es2 = -0.5*ϵs'*invPi*ϵs ;
                 @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
         
-                # @views sigs2 = map(x -> x < 0 ? 1000 : x, sigs2)
 
         @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
                         0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                         0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
-                # end
                 if simple_check(temp)
                     # print("a")
                     lik += -1e9
@@ -453,22 +411,14 @@ elseif length(Wy)>1
 @inbounds for ttt=1:T
 
     @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));  
-            
-    # @views Mtau_before = I(N)-tau*Wu[ttt]
-    # @views Mtau_before = broadcast(x -> isnan(x) || isinf(x) ?  rand(10000:2000000)  : x, Mtau_before)
+
     @views Mtau = (I(N)-tau*Wu[ttt])\I(N);
-            
-    # @views Mrho_before = I(N)-rhomy*Wv[ttt]
-    # @views Mrho_before = broadcast(x -> isnan(x) || isinf(x) ?  rand(10000:2000000)   : x, Mrho_before)
     @views Mrho =  (I(N)-rhomy*Wv[ttt])\I(N);
             
     @views Pi = σᵥ²*(Mrho*Mrho');
     @views detPi = det(Pi)
-            
-        # @views Pi = broadcast(x -> isnan(x) || isinf(x) ? rand(10000:2000000) : x, Pi)
-        # @views detPi = map(x -> x < 0 ? 1000 : x, detPi)
-        @views lndetPi = log(detPi);
-        @views invPi = (Pi) \I(N);
+    @views lndetPi = log(detPi);
+    @views invPi = (I(N)-rhomy*(Wv[ttt])')*(I(N)-rhomy*Wv[ttt])/σᵥ²;
         
                 @views ind = rowIDT[ttt,1];
                 @views his = Mtau*hi[ind];
@@ -477,9 +427,6 @@ elseif length(Wy)>1
                 @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                 @views es2 = -0.5*ϵs'*invPi*ϵs ;
                 @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
-        
-                # @views sigs2 = map(x -> x < 0 ? 1000 : x, sigs2)
-
             
         @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
                         0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
@@ -495,6 +442,11 @@ elseif length(Wy)>1
 end # begin
 
 end # length(Wy)==1 
+return -lik-likx
+catch e
+# 处理异常的代码
+println("操作失败，发生错误：$e")
+    return 1e100
 
 #     # 计算 lik
 # # if simple_check2( normcdf(μ / sqrt(σᵤ²)))  || simple_check2(sigs2)
@@ -521,8 +473,7 @@ end # length(Wy)==1
 #    return ls
     # print(lik)
     # print(likx)
-
-    return -lik-likx
+end
 end
 
 
@@ -546,9 +497,7 @@ function LL_T(::Type{SSFOADT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w,
    eps = zeros(eltype(EN),num.nofobs,num.nofeta);
 
    # %%%%%%%%%%%%%%
-    # for ii=1:num.nofeta
-    #     eps[:,ii]=EN[:,ii]-IV*phi[((Int(ii)-1)*Int(nofiv)+1):(Int(ii)*Int(nofiv))];
-    # end
+
     phi = reshape(phi, :, num.nofeta)
     @views eps = EN- IV*phi
 
@@ -556,7 +505,7 @@ function LL_T(::Type{SSFOADT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w,
     @views logdetll = log(det(LL))
     @views invll = LL\I(num.nofeta)
     likx = zero(eltype(y));
-
+    try
     @floop begin
     @inbounds for iitt =1:num.nofobs
         @views  tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
@@ -592,47 +541,22 @@ function LL_T(::Type{SSFOADT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w,
 
    μ   = δ1
 
-
    ϵ = PorC*(y - x*β )
    T = size(rowIDT,1)
-   # print(T)
 
    if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
     lik = zero(eltype(y));
     @views N = rowIDT[1,2];
-    @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));   
-    # @views Mtau_before = I(N)-tau*Wu[1]
-        # if isapprox(det(Mtau_before), 0) 
-        #     asasa = 1e-8  # 扰动的大小
-        #     Innn = Diagonal(ones(size(Mtau_before, 1)))
-        #     Mtau_before = Mtau_before + asasa*Innn
-        # end
-    # @views Mtau_before = broadcast(x -> isnan(x) || isinf(x) ?  rand(10000:2000000)  : x, Mtau_before)
+    @views lndetIrhoW = log(det(I(N)-gamma*Wy[1])); 
+        
     @views Mtau = (I(N)-tau*Wu[1])\I(N);
-    # 1e-7 + rand() * (2e-7 - 1e-7) 
-    # @views Mrho_before = I(N)-rhomy*Wv[1]
-        # if isapprox(det(Mrho_before), 0) 
-        #     asasa = 1e-8  # 扰动的大小
-        #     Innn = Diagonal(ones(size(Mrho_before, 1)))
-        #     Mrho_before = Mrho_before + asasa*Innn
-        # end
-    # @views Mrho_before = broadcast(x -> isnan(x) || isinf(x) ?  rand(10000:2000000)   : x, Mrho_before)
     @views Mrho =  (I(N)-rhomy*Wv[1])\I(N);
     
     @views Pi = σᵥ²*(Mrho*Mrho');
     @views lndetPi = log(det(Pi));
-    @views invPi = (Pi) \I(N);
-        # print("c")
-        @floop begin
-        # if isapprox(det(Pi), 0) 
-        #     asasa = 1e-8  # 扰动的大小
-        #     Innn = Diagonal(ones(size(Pi, 1)))
-        #     Pi = Pi + asasa*Innn
-        # end
-        # @views Pi = broadcast(x -> isnan(x) || isinf(x) ? rand(10000:2000000) : x, Pi)
-        # @views detPi = map(x -> x < 0 ? 1000 : x, detPi)
-
+    @views invPi = (I(N)-rhomy*(Wv[1])')*(I(N)-rhomy*Wv[1])/σᵥ²;
+    @floop begin
     @inbounds  for ttt=1:T  
                 @views ind = rowIDT[ttt,1];
                 @views his = Mtau*hi[ind];
@@ -642,12 +566,9 @@ function LL_T(::Type{SSFOADT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w,
                 @views es2 = -0.5*ϵs'*invPi*ϵs ;
                 @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
         
-                # @views sigs2 = map(x -> x < 0 ? 1000 : x, sigs2)
-
         @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
                         0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                         0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
-                # end
                 if simple_check(temp)
                     # print("a")
                     lik += -1e9
@@ -667,21 +588,14 @@ elseif length(Wy)>1
 
     @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));  
             
-    # @views Mtau_before = I(N)-tau*Wu[ttt]
-    # @views Mtau_before = broadcast(x -> isnan(x) || isinf(x) ?  rand(10000:2000000)  : x, Mtau_before)
     @views Mtau = (I(N)-tau*Wu[ttt])\I(N);
-            
-    # @views Mrho_before = I(N)-rhomy*Wv[ttt]
-    # @views Mrho_before = broadcast(x -> isnan(x) || isinf(x) ?  rand(10000:2000000)   : x, Mrho_before)
     @views Mrho =  (I(N)-rhomy*Wv[ttt])\I(N);
             
     @views Pi = σᵥ²*(Mrho*Mrho');
     @views detPi = det(Pi)
             
-        # @views Pi = broadcast(x -> isnan(x) || isinf(x) ? rand(10000:2000000) : x, Pi)
-        # @views detPi = map(x -> x < 0 ? 1000 : x, detPi)
     @views lndetPi = log(detPi);
-    @views invPi = (Pi) \I(N);
+    @views invPi = (I(N)-rhomy*(Wv[ttt])')*(I(N)-rhomy*Wv[ttt])/σᵥ²;
         
                 @views ind = rowIDT[ttt,1];
                 @views his = Mtau*hi[ind];
@@ -690,9 +604,6 @@ elseif length(Wy)>1
                 @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                 @views es2 = -0.5*ϵs'*invPi*ϵs ;
                 @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
-        
-                # @views sigs2 = map(x -> x < 0 ? 1000 : x, sigs2)
-
             
         @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
                         0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
@@ -708,7 +619,12 @@ elseif length(Wy)>1
 end # begin
 
 end # length(Wy)==1 
-
+return -lik-likx
+catch e
+# 处理异常的代码
+println("操作失败，发生错误：$e")
+    return 1e100
+    
 #     # 计算 lik
 # # if simple_check2( normcdf(μ / sqrt(σᵤ²)))  || simple_check2(sigs2)
 # #     return 1e9
@@ -732,9 +648,10 @@ end # length(Wy)==1
 #    end
 # # end # simple_check2( normcdf(μ / sqrt(σᵤ²)))  || simple_check2(sigs2)
 #    return ls
-
-    return -lik-likx
 end
+end
+
+
 
 
 
