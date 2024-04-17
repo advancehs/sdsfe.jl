@@ -8,11 +8,188 @@
 #? ----------- truncated normal, marginal effect function -------
 
 
+function marg_ssfoadt(ttt::Int, iii::Int, N::Int,# PorC::Int64, 
+     pos::NamedTuple, eigvalu::NamedTuple,coef::Array{Float64, 1},
+      Qmarg, Wmarg,Zmarg)
+
+     h = exp(Qmarg'*coef[pos.begq : pos.endq])
+     σᵤ = exp(0.5 * Wmarg'*coef[pos.begw : pos.endw]) # σᵤ
+     μ = Zmarg'*coef[pos.begz : pos.endz]  # mu, a scalar
+     
+     taup = coef[pos.begtau]
+     tau  = eigvalu.rumin/(1+exp(taup))+eigvalu.rumax*exp(taup)/(1+exp(taup));
+     Wu = _dicM[:wu]
+    if Wu!=Nothing 
+         if length(Wu)==1
+              Mtau = (I(N)-tau*Wu[1])\I(N);
+              hs = Mtau[iii]*h;
+         else
+              Mtau = (I(N)-tau*Wu[ttt])\I(N);
+              hs = Mtau[iii]*h;
+         end
+    else
+        Mtau = 1;
+        hs = 1*h;
+    end
+     hsμ  = hs*μ
+     hsσᵤ = hs*σᵤ 
+      Λ  = hsμ/hsσᵤ 
+    
+     uncondU = hsσᵤ* (Λ + normpdf(Λ) / normcdf(Λ)) # kx1
+   
+end   
 
 
-#? --------------------------------------------------------------------
-#? - Panel Spatial stochastic Model, marginal effect function -
-#? -------------------------------------------------------------------- 
+#? -- panel FE Orea and Al, truncated normal, , get marginal effect ----
+ 
+function get_marg(::Type{SSFOADT}, 
+     pos::NamedTuple, num::NamedTuple, coef::Array{Float64, 1}, 
+     Q::Matrix, W::Matrix,Z::Matrix, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+
+        #* Note that Y and X are within-transformed by `getvar`, 
+        #* but Q, W, V are still in the original level.
+
+     mm_q = Array{Float64}(undef, num.nofq, num.nofobs)                  
+     mm_w = Array{Float64}(undef, num.nofw, num.nofobs)    
+     mm_z = Array{Float64}(undef, num.nofz, num.nofobs)  
+
+     T = size(rowIDT,1)
+
+     @inbounds for ttt=1:T
+          ind = rowIDT[ttt,1];
+          for iii in ind
+               @views N = rowIDT[1,2];
+
+
+               @views marg = ForwardDiff.gradient(marg -> marg_ssfoadt(ttt, iii,N, pos,eigvalu, coef, 
+                                                  marg[1 : num.nofq],
+                                                  marg[num.nofq+1 : num.nofq+num.nofw],
+                                                  marg[num.nofq+num.nofw+1 : num.nofq+num.nofw+num.nofz] ),
+                              vcat(  Q[iii,:], W[iii,:],Z[iii,:]) );                            
+
+               mm_q[:,iii] = marg[1 : num.nofq]
+               mm_w[:,iii] = marg[num.nofq+1 : num.nofq+num.nofw]
+               mm_z[:,iii] = marg[num.nofq+num.nofw+1 : end]
+          end # iii in ind
+     end  #  ttt=1:T
+
+     margeff = DataFrame(mm_q', _dicM[:hscale])
+     mm_w = DataFrame(mm_w', _dicM[:σᵤ²])
+     mm_z = DataFrame(mm_z', _dicM[:μ]) # the base set
+
+     #* purge off the constant var's marginal effect from the DataFrame
+     margeff = nonConsDataFrame(margeff, Q)
+     mm_w = nonConsDataFrame(mm_w, W)
+     mm_z = nonConsDataFrame(mm_z, Z)
+
+     #* if same var in different equations, add up the marg eff
+     margeff = addDataFrame(margeff, mm_w)
+     margeff = addDataFrame(margeff, mm_z)
+
+      #* prepare info for printing
+      margMean = (; zip(Symbol.(names(margeff)) , round.(mean.(eachcol(margeff)); digits=5))...)
+
+      #* modify variable names to indicate marginal effects
+      newname = Symbol.(fill("marg_", (size(margeff,2), 1)) .* names(margeff))
+      margeff = rename!(margeff, vec(newname))
+
+     return  margeff, margMean
+end  
+
+
+
+
+function marg_ssfoadh(ttt::Int, iii::Int, N::Int,# PorC::Int64, 
+     pos::NamedTuple, eigvalu::NamedTuple,coef::Array{Float64, 1},
+      Qmarg, Wmarg)
+
+     h = exp(Qmarg'*coef[pos.begq : pos.endq])
+     σᵤ = exp(0.5 * Wmarg'*coef[pos.begw : pos.endw]) # σᵤ
+     μ = 0
+     
+     taup = coef[pos.begtau]
+     tau  = eigvalu.rumin/(1+exp(taup))+eigvalu.rumax*exp(taup)/(1+exp(taup));
+     Wu = _dicM[:wu]
+    if Wu!=Nothing 
+         if length(Wu)==1
+              Mtau = (I(N)-tau*Wu[1])\I(N);
+              hs = Mtau[iii]*h;
+         else
+              Mtau = (I(N)-tau*Wu[ttt])\I(N);
+              hs = Mtau[iii]*h;
+         end
+    else
+        Mtau = 1;
+        hs = 1*h;
+    end
+     hsμ  = hs*μ
+     hsσᵤ = hs*σᵤ 
+      Λ  = hsμ/hsσᵤ 
+    
+     uncondU = hsσᵤ* (Λ + normpdf(Λ) / normcdf(Λ)) # kx1
+   
+end   
+
+
+#? -- panel FE Orea and Al, truncated normal, , get marginal effect ----
+ 
+function get_marg(::Type{SSFOADH}, 
+     pos::NamedTuple, num::NamedTuple, coef::Array{Float64, 1}, 
+     Q::Matrix, W::Matrix, z, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+
+        #* Note that Y and X are within-transformed by `getvar`, 
+        #* but Q, W, V are still in the original level.
+
+     mm_q = Array{Float64}(undef, num.nofq, num.nofobs)                  
+     mm_w = Array{Float64}(undef, num.nofw, num.nofobs)    
+     # mm_z = Array{Float64}(undef, num.nofz, num.nofobs)  
+
+     T = size(rowIDT,1)
+
+     @inbounds for ttt=1:T
+          ind = rowIDT[ttt,1];
+          for iii in ind
+               @views N = rowIDT[1,2];
+
+
+               @views marg = ForwardDiff.gradient(marg -> marg_ssfoadh(ttt, iii,N, pos,eigvalu, coef, 
+                                                  marg[1 : num.nofq],
+                                                  marg[num.nofq+1 : num.nofq+num.nofw],
+                                                   ),
+                              vcat(  Q[iii,:], W[iii,:] ) );                            
+
+               mm_q[:,iii] = marg[1 : num.nofq]
+               mm_w[:,iii] = marg[num.nofq+1 : num.nofq+num.nofw]
+               # mm_z[:,iii] = marg[num.nofq+num.nofw+1 : end]
+          end # iii in ind
+     end  #  ttt=1:T
+
+     margeff = DataFrame(mm_q', _dicM[:hscale])
+     mm_w = DataFrame(mm_w', _dicM[:σᵤ²])
+     # mm_z = DataFrame(mm_z', _dicM[:μ]) # the base set
+
+     #* purge off the constant var's marginal effect from the DataFrame
+     margeff = nonConsDataFrame(margeff, Q)
+     mm_w = nonConsDataFrame(mm_w, W)
+     # mm_z = nonConsDataFrame(mm_z, Z)
+
+     #* if same var in different equations, add up the marg eff
+     margeff = addDataFrame(margeff, mm_w)
+     # margeff = addDataFrame(margeff, mm_z)
+
+      #* prepare info for printing
+      margMean = (; zip(Symbol.(names(margeff)) , round.(mean.(eachcol(margeff)); digits=5))...)
+
+      #* modify variable names to indicate marginal effects
+      newname = Symbol.(fill("marg_", (size(margeff,2), 1)) .* names(margeff))
+      margeff = rename!(margeff, vec(newname))
+
+     return  margeff, margMean
+end  
+
+
+
+
 function marg_ssfoah(ttt::Int, iii::Int, N::Int,# PorC::Int64, 
      pos::NamedTuple, eigvalu::NamedTuple,coef::Array{Float64, 1},
       Qmarg, Wmarg)
@@ -192,219 +369,6 @@ end
 
 
 
-function marg_ssfoadh(ttt::Int, iii::Int, N::Int,# PorC::Int64, 
-     pos::NamedTuple, eigvalu::NamedTuple,coef::Array{Float64, 1},
-      Qmarg, Wmarg)
-
-     h = exp(Qmarg'*coef[pos.begq : pos.endq])
-     σᵤ = exp(0.5 * Wmarg'*coef[pos.begw : pos.endw]) # σᵤ
-     μ = 0
-     
-     taup = coef[pos.begtau]
-     tau  = eigvalu.rumin/(1+exp(taup))+eigvalu.rumax*exp(taup)/(1+exp(taup));
-     Wu = _dicM[:wu]
-     if length(Wu)==1
-          Mtau = (I(N)-tau*Wu[1])\I(N);
-          hs = Mtau[iii]*h;
-     else
-          Mtau = (I(N)-tau*Wu[ttt])\I(N);
-          hs = Mtau[iii]*h;
-     end
-     hsμ  = hs*μ
-     hsσᵤ = hs*σᵤ 
-      Λ  = hsμ/hsσᵤ 
-    
-     uncondU = hsσᵤ* (Λ + normpdf(Λ) / normcdf(Λ)) # kx1
-   
-end   
-
-
-#? -- panel FE Orea and Al, truncated normal, , get marginal effect ----
- 
-function get_marg(::Type{SSFOADH}, 
-     pos::NamedTuple, num::NamedTuple, coef::Array{Float64, 1}, 
-     Q::Matrix, W::Matrix, z, eigvalu::NamedTuple, rowIDT::Matrix{Any})
-
-        #* Note that Y and X are within-transformed by `getvar`, 
-        #* but Q, W, V are still in the original level.
-
-     mm_q = Array{Float64}(undef, num.nofq, num.nofobs)                  
-     mm_w = Array{Float64}(undef, num.nofw, num.nofobs)    
-     # mm_z = Array{Float64}(undef, num.nofz, num.nofobs)  
-
-     T = size(rowIDT,1)
-
-     @inbounds for ttt=1:T
-          ind = rowIDT[ttt,1];
-          for iii in ind
-               @views N = rowIDT[1,2];
-
-
-               @views marg = ForwardDiff.gradient(marg -> marg_ssfoadh(ttt, iii,N, pos,eigvalu, coef, 
-                                                  marg[1 : num.nofq],
-                                                  marg[num.nofq+1 : num.nofq+num.nofw],
-                                                   ),
-                              vcat(  Q[iii,:], W[iii,:] ) );                            
-
-               mm_q[:,iii] = marg[1 : num.nofq]
-               mm_w[:,iii] = marg[num.nofq+1 : num.nofq+num.nofw]
-               # mm_z[:,iii] = marg[num.nofq+num.nofw+1 : end]
-          end # iii in ind
-     end  #  ttt=1:T
-
-     margeff = DataFrame(mm_q', _dicM[:hscale])
-     mm_w = DataFrame(mm_w', _dicM[:σᵤ²])
-     # mm_z = DataFrame(mm_z', _dicM[:μ]) # the base set
-
-     #* purge off the constant var's marginal effect from the DataFrame
-     margeff = nonConsDataFrame(margeff, Q)
-     mm_w = nonConsDataFrame(mm_w, W)
-     # mm_z = nonConsDataFrame(mm_z, Z)
-
-     #* if same var in different equations, add up the marg eff
-     margeff = addDataFrame(margeff, mm_w)
-     # margeff = addDataFrame(margeff, mm_z)
-
-      #* prepare info for printing
-      margMean = (; zip(Symbol.(names(margeff)) , round.(mean.(eachcol(margeff)); digits=5))...)
-
-      #* modify variable names to indicate marginal effects
-      newname = Symbol.(fill("marg_", (size(margeff,2), 1)) .* names(margeff))
-      margeff = rename!(margeff, vec(newname))
-
-     return  margeff, margMean
-end  
-
-
-
-
-function marg_ssfoadt(ttt::Int, iii::Int, N::Int,# PorC::Int64, 
-     pos::NamedTuple, eigvalu::NamedTuple,coef::Array{Float64, 1},
-      Qmarg, Wmarg,Zmarg)
-
-     h = exp(Qmarg'*coef[pos.begq : pos.endq])
-     σᵤ = exp(0.5 * Wmarg'*coef[pos.begw : pos.endw]) # σᵤ
-     μ = Zmarg'*coef[pos.begz : pos.endz]  # mu, a scalar
-     
-     taup = coef[pos.begtau]
-     tau  = eigvalu.rumin/(1+exp(taup))+eigvalu.rumax*exp(taup)/(1+exp(taup));
-     Wu = _dicM[:wu]
-     if length(Wu)==1
-          Mtau = (I(N)-tau*Wu[1])\I(N);
-          hs = Mtau[iii]*h;
-     else
-          Mtau = (I(N)-tau*Wu[ttt])\I(N);
-          hs = Mtau[iii]*h;
-     end
-     hsμ  = hs*μ
-     hsσᵤ = hs*σᵤ 
-      Λ  = hsμ/hsσᵤ 
-    
-     uncondU = hsσᵤ* (Λ + normpdf(Λ) / normcdf(Λ)) # kx1
-   
-end   
-
-
-#? -- panel FE Orea and Al, truncated normal, , get marginal effect ----
- 
-function get_marg(::Type{SSFOADT}, 
-     pos::NamedTuple, num::NamedTuple, coef::Array{Float64, 1}, 
-     Q::Matrix, W::Matrix,Z::Matrix, eigvalu::NamedTuple, rowIDT::Matrix{Any})
-
-        #* Note that Y and X are within-transformed by `getvar`, 
-        #* but Q, W, V are still in the original level.
-
-     mm_q = Array{Float64}(undef, num.nofq, num.nofobs)                  
-     mm_w = Array{Float64}(undef, num.nofw, num.nofobs)    
-     mm_z = Array{Float64}(undef, num.nofz, num.nofobs)  
-
-     T = size(rowIDT,1)
-
-     @inbounds for ttt=1:T
-          ind = rowIDT[ttt,1];
-          for iii in ind
-               @views N = rowIDT[1,2];
-
-
-               @views marg = ForwardDiff.gradient(marg -> marg_ssfoadt(ttt, iii,N, pos,eigvalu, coef, 
-                                                  marg[1 : num.nofq],
-                                                  marg[num.nofq+1 : num.nofq+num.nofw],
-                                                  marg[num.nofq+num.nofw+1 : num.nofq+num.nofw+num.nofz] ),
-                              vcat(  Q[iii,:], W[iii,:],Z[iii,:]) );                            
-
-               mm_q[:,iii] = marg[1 : num.nofq]
-               mm_w[:,iii] = marg[num.nofq+1 : num.nofq+num.nofw]
-               mm_z[:,iii] = marg[num.nofq+num.nofw+1 : end]
-          end # iii in ind
-     end  #  ttt=1:T
-
-     margeff = DataFrame(mm_q', _dicM[:hscale])
-     mm_w = DataFrame(mm_w', _dicM[:σᵤ²])
-     mm_z = DataFrame(mm_z', _dicM[:μ]) # the base set
-
-     #* purge off the constant var's marginal effect from the DataFrame
-     margeff = nonConsDataFrame(margeff, Q)
-     mm_w = nonConsDataFrame(mm_w, W)
-     mm_z = nonConsDataFrame(mm_z, Z)
-
-     #* if same var in different equations, add up the marg eff
-     margeff = addDataFrame(margeff, mm_w)
-     margeff = addDataFrame(margeff, mm_z)
-
-      #* prepare info for printing
-      margMean = (; zip(Symbol.(names(margeff)) , round.(mean.(eachcol(margeff)); digits=5))...)
-
-      #* modify variable names to indicate marginal effects
-      newname = Symbol.(fill("marg_", (size(margeff,2), 1)) .* names(margeff))
-      margeff = rename!(margeff, vec(newname))
-
-     return  margeff, margMean
-end  
-
-
-
-
-
-
-
-
-
-function nonConsDataFrame(D::DataFrame, M::Matrix)
-     # Given a DataFrame containing the marginal effects 
-     # of a set of exogenous determinants $(x1, x2, ..., xn)$
-     # on E(u), it return the DataFrame where the marginal 
-     # effect of constant $x$s are removed.
- 
-     # D: the marginal effect DataFrame; 
-     # M: the matrix of (x1, .., xn) where the marginal 
-     #    efect is calculated from.
- 
-    counter = 0      
-    for w in collect(names(D),)
-         counter += 1
-         if length(unique(M[:, counter])) == 1 # is a constant
-             select!(D, Not(Symbol(w)))
-         end
-    end 
-    return D
- end
-
-
- function addDataFrame(Main::DataFrame, A::DataFrame)
-     # Combine two DataFrame with unions of columns.
-     # For same-name columns, the values are added together.
-
-   for k in collect(names(A),) # deal with the wvar
-             if k ∈ names(Main)
-                  Main[:, Symbol(k)] = Main[:, Symbol(k)] + A[:, Symbol(k)]
-             else 
-                  insertcols!(Main, Symbol(k) => A[:, Symbol(k)])
-             end
-    end 
-    return Main  
-end 
-
-
 # 对beta求导
 function IrhoW(gamma::Float64, rowIDT::Matrix{Any} )
 
@@ -439,7 +403,6 @@ function IrhoW(gamma::Float64, rowIDT::Matrix{Any} )
 
     return dire,indire
 end
-
 
 # 对theta求导
 function IrhoWW(gamma::Float64, rowIDT::Matrix{Any} )
@@ -545,6 +508,8 @@ function IrhoWWIrhoWW(gamma::Float64,dgamma::Float64, rowIDT::Matrix{Any} )
 	return dire, indire
 end
 
+
+
 function get_mareffx_single( b::Array{Float64, 1}, dire0::Float64, indire0::Float64, V::Matrix,gamma::Float64,dgamma::Float64,rowIDT::Matrix{Any})
 
      if(length(b)==1)
@@ -621,4 +586,39 @@ function get_mareffx_single( b::Array{Float64, 1}, dire0::Float64, indire0::Floa
 end
 
 
-
+function nonConsDataFrame(D::DataFrame, M::Matrix)
+     # Given a DataFrame containing the marginal effects 
+     # of a set of exogenous determinants $(x1, x2, ..., xn)$
+     # on E(u), it return the DataFrame where the marginal 
+     # effect of constant $x$s are removed.
+ 
+     # D: the marginal effect DataFrame; 
+     # M: the matrix of (x1, .., xn) where the marginal 
+     #    efect is calculated from.
+ 
+    counter = 0      
+    for w in collect(names(D),)
+         counter += 1
+         if length(unique(M[:, counter])) == 1 # is a constant
+             select!(D, Not(Symbol(w)))
+         end
+    end 
+    return D
+ end
+ 
+ 
+ 
+ function addDataFrame(Main::DataFrame, A::DataFrame)
+       # Combine two DataFrame with unions of columns.
+       # For same-name columns, the values are added together.
+ 
+     for k in collect(names(A),) # deal with the wvar
+               if k ∈ names(Main)
+                    Main[:, Symbol(k)] = Main[:, Symbol(k)] + A[:, Symbol(k)]
+               else 
+                    insertcols!(Main, Symbol(k) => A[:, Symbol(k)])
+               end
+      end 
+      return Main  
+ end 
+ 

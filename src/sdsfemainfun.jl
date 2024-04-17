@@ -98,118 +98,122 @@ sfmodel_spec(sfpanel(TRE), sftype(prod), sfdist(half),
 """
 function sfmodel_spec(arg::Vararg; message::Bool=false) 
 
-    global _dicM 
-           _dicM = Dict{Symbol, Any}()  # nullify and initiate new dictionaries when a new model is specified
+  global _dicM 
+         _dicM = Dict{Symbol, Any}()  # nullify and initiate new dictionaries when a new model is specified
 
 # 在给定的 Julia 代码中，_dicM = Dict{Symbol, Any}() 这一行创建了一个空的字典。
 # 在 Julia 中，Dict{Symbol, Any} 是一个字典类型的声明，其中 Symbol 表示键的类型，Any 表示值的类型，
 # 这意味着这个字典可以接受任何类型的值。
 # 因此，_dicM 是一个名为 _dicM 的变量，它被初始化为一个空的字典，可以用于存储任意类型的键值对。
 
-         #* -- creates default values ---
+       #* -- creates default values ---
 
-        for k in (:panel, :timevar, :idvar,  :dist, :type, :depvar, :frontier,:frontierWx, :mareffx, :mareffu,  
-          :μ, :hscale,  :σᵤ², :σᵥ²,  :hasDF, :transfer, :misc) # take out :data, :η, :λ, :τ, in this revision
-         _dicM[k] = nothing
+      for k in (:panel, :timevar, :idvar,  :dist, :type, :depvar, :frontier,:frontierWx, :mareffx, :mareffu,  
+                  :μ, :hscale,  :σᵤ², :σᵥ²,  :hasDF, :transfer, :misc) # take out :data, :η, :λ, :τ, in this revision
+          _dicM[k] = nothing
+      end
+   
+      #* -- replace the defaults with user's values ---          
+
+      for d in :($(arg))
+          _dicM[d[1]] = d[2]
+      end 
+
+      (haskey(_dicM, :wy))    ||  (_dicM[:wy] = :($(wy()))[2])
+      (haskey(_dicM, :wx))    ||  (_dicM[:wx] = :($(wx()))[2])
+      (haskey(_dicM, :wu))    ||  (_dicM[:wu] = :($(wu()))[2])
+      (haskey(_dicM, :wv))    ||  (_dicM[:wv] = :($(wv()))[2])
+
+
+
+      #* ==== Method 2, matrix input (such as in simulations), create a DataFrame
+
+         _dicM[:hasDF]    = true
+         _dicM[:transfer] = false
+
+
+      if typeof(_dicM[:depvar]) != Array{Symbol,1} # not a DataFrame
+
+         _dicM[:hasDF] = false 
+
+         isa(_dicM[:depvar][1], Vector) || isa(_dicM[:depvar][1], Matrix) || throw("
+         `depvar()` has to be a Vector or Matrix (e.g., Array{Float64, 1} or Array{Float64, 2}). 
+         Check with `isa(your_thing, Matrix)` or `isa(your_thing, Vector)`. 
+         Try `convert()`, `reshape()`, `Matrix()`, or something similar.")
+
+         comDF = _dicM[:depvar][1]  # create the first data column of comDF
+         varname = [:depvar]
+         _dicM[:depvar] = [:depvar]
+
+         for k in (:timevar, :idvar, :frontier,:frontierWx, :mareffx, :mareffu,  :μ, :hscale,  :σᵤ², :σᵥ²) 
+             if _dicM[k] !== nothing # if not nothing, must be Array
+                isa(_dicM[k], Vector) || isa(_dicM[k][1], Vector) || isa(_dicM[k][1], Matrix) || throw("
+                   `k` has to be a Vector or Matrix (e.g., Array{Float64, 1} or Array{Float64, 2}). 
+                   Check with `isa(your_thing, Matrix)` or `isa(your_thing, Vector)`. 
+                   To convert, try `convert()`, `reshape()`, `Matrix()`, or something similar.")
+ 
+                (isa(_dicM[k], Vector)  && length(_dicM[k][1]) == 1) ?  _dicM[k] = [_dicM[k]] : nothing # ugly fix for pure vector input
+ 
+                @views comDF = hcat(comDF, _dicM[k][1]) # combine the data
+                aa = Symbol[]
+                for i in 1:size(_dicM[k][1], 2)
+                    push!(aa, Symbol(String(k)*"_var$(i)")) # create name for the data
+                end                  
+                varname = vcat(varname, aa) # combine the dataname
+                _dicM[k] = aa
+             end 
+         end # for k in (...)
+
+
+         comDF = DataFrame(comDF, varname)
+         _dicM[:sdf] = comDF
+
+      end # if typeof(...)
+
+   
+      #* -- check the model identifier and the model type ---
+
+      (_dicM[:dist] !== nothing) || throw("You need to specify dist().")
+      (_dicM[:type] !== nothing) || throw("You need to specify type().")
+
+      #* --- get the model identifier -------
+
+      s = uppercase(String(_dicM[:dist][1])[1:1])
+      # direc = uppercase(String(_dicM[:direction][1]))  ## 使用direction判断方向
+
+      global tagD
+      if _dicM[:panel] !== nothing  #  panel 
+        
+
+        if (_dicM[:panel] == [:SSF_OA2019]) && (s=="T") 
+          tagD = Dict{Symbol, Type{SSFOAT}}()
+          tagD[:modelid] = SSFOAT
+        elseif (_dicM[:panel] == [:SSF_OA2019]) && (s=="H") 
+          tagD = Dict{Symbol, Type{SSFOAH}}()
+          tagD[:modelid] = SSFOAH 
+        elseif (_dicM[:panel] == [:SSF_OAD2024]) && (s=="T") 
+          tagD = Dict{Symbol, Type{SSFOADT}}()
+          tagD[:modelid] = SSFOADT
+        elseif (_dicM[:panel] == [:SSF_OAD2024]) && (s=="H") 
+          tagD = Dict{Symbol, Type{SSFOADH}}()
+          tagD[:modelid] = SSFOADH 
+        else 
+            throw("The `sfpanel()` and/or `sfdist()` are not specified correctly.")
         end
-        #* -- replace the defaults with user's values ---          
+      end 
+      #* ---- check if the model has the correct syntax ---
 
-        for d in :($(arg))
-            _dicM[d[1]] = d[2]
-        end 
+      # SFrontiers.checksyn(tagD[:modelid])!!!!!!!!!!!!!!!!!!!!!!!!
 
-        (haskey(_dicM, :wy))   || (throw("You need to specify wy()."))
-        (haskey(_dicM, :wx))    ||  (_dicM[:wx] = :($(wx()))[2])
-        (haskey(_dicM, :wu))    ||  (_dicM[:wu] = :($(wu()))[2])
-        (haskey(_dicM, :wv))    ||  (_dicM[:wv] = :($(wv()))[2])
-
-
-
-        #* ==== Method 2, matrix input (such as in simulations), create a DataFrame
-
-           _dicM[:hasDF]    = true
-           _dicM[:transfer] = false
-
-
-        if typeof(_dicM[:depvar]) != Array{Symbol,1} # not a DataFrame
-
-           _dicM[:hasDF] = false 
-
-           isa(_dicM[:depvar][1], Vector) || isa(_dicM[:depvar][1], Matrix) || throw("
-           `depvar()` has to be a Vector or Matrix (e.g., Array{Float64, 1} or Array{Float64, 2}). 
-           Check with `isa(your_thing, Matrix)` or `isa(your_thing, Vector)`. 
-           Try `convert()`, `reshape()`, `Matrix()`, or something similar.")
-
-           comDF = _dicM[:depvar][1]  # create the first data column of comDF
-           varname = [:depvar]
-           _dicM[:depvar] = [:depvar]
-
-           for k in (:timevar, :idvar, :frontier,:frontierWx, :μ, :hscale,  :σᵤ², :σᵥ²) 
-               if _dicM[k] !== nothing # if not nothing, must be Array
-                  isa(_dicM[k], Vector) || isa(_dicM[k][1], Vector) || isa(_dicM[k][1], Matrix) || throw("
-                     `k` has to be a Vector or Matrix (e.g., Array{Float64, 1} or Array{Float64, 2}). 
-                     Check with `isa(your_thing, Matrix)` or `isa(your_thing, Vector)`. 
-                     To convert, try `convert()`, `reshape()`, `Matrix()`, or something similar.")
-   
-                  (isa(_dicM[k], Vector)  && length(_dicM[k][1]) == 1) ?  _dicM[k] = [_dicM[k]] : nothing # ugly fix for pure vector input
-   
-                  @views comDF = hcat(comDF, _dicM[k][1]) # combine the data
-                  aa = Symbol[]
-                  for i in 1:size(_dicM[k][1], 2)
-                      push!(aa, Symbol(String(k)*"_var$(i)")) # create name for the data
-                  end                  
-                  varname = vcat(varname, aa) # combine the dataname
-                  _dicM[k] = aa
-               end 
-           end # for k in (...)
-
-
-           comDF = DataFrame(comDF, varname)
-           _dicM[:sdf] = comDF
-
-        end # if typeof(...)
-
-     
-        #* -- check the model identifier and the model type ---
-
-        (_dicM[:dist] !== nothing) || throw("You need to specify dist().")
-        (_dicM[:type] !== nothing) || throw("You need to specify type().")
-
-        #* --- get the model identifier -------
-
-        s = uppercase(String(_dicM[:dist][1])[1:1])
-        # direc = uppercase(String(_dicM[:direction][1]))  ## 使用direction判断方向
-
-        global tagD
-        if _dicM[:panel] !== nothing  #  panel 
-          
-          if (_dicM[:panel] == [:SSF_OA2019]) && (s=="T") 
-            tagD = Dict{Symbol, Type{SSFOAT}}()
-            tagD[:modelid] = SSFOAT
-          elseif (_dicM[:panel] == [:SSF_OA2019]) && (s=="H") 
-            tagD = Dict{Symbol, Type{SSFOAH}}()
-            tagD[:modelid] = SSFOAH 
-          elseif (_dicM[:panel] == [:SSF_OAD2024]) && (s=="T") 
-            tagD = Dict{Symbol, Type{SSFOADT}}()
-            tagD[:modelid] = SSFOADT
-          elseif (_dicM[:panel] == [:SSF_OAD2024]) && (s=="H") 
-            tagD = Dict{Symbol, Type{SSFOADH}}()
-            tagD[:modelid] = SSFOADH 
-          else 
-              throw("The `sfpanel()` and/or `sfdist()` are not specified correctly.")
-          end
-        end 
-        #* ---- check if the model has the correct syntax ---
-
-        # SFrontiers.checksyn(tagD[:modelid])!!!!!!!!!!!!!!!!!!!!!!!!
-
-        #* ----- make return ----------- 
-        if message 
-          printstyled("A dictionary from sfmodel_spec() is generated.\n"; color = :green)  
-        end  
-        return _dicM # for debugging purpose
+      #* ----- make return ----------- 
+      if message 
+        printstyled("A dictionary from sfmodel_spec() is generated.\n"; color = :green)  
+      end  
+      return _dicM # for debugging purpose
 
 end  # end of sfmodel_spec()
+
+
 
 
 
@@ -369,42 +373,44 @@ sfmodel_opt(warmstart_solver(NelderMead()),
 """
 function sfmodel_opt(arg::Vararg; message::Bool=false) # create a dictionary of maximization options
 
-    global _dicOPT
-           _dicOPT = Dict{Symbol, Any}()
+  global _dicOPT
+         _dicOPT = Dict{Symbol, Any}()
 
-    #* -- creates the default ---
+  #* -- creates the default ---
 
-    _dicOPT[:warmstart_solver] = :(NelderMead())
-    _dicOPT[:warmstart_maxIT]  =  100
-    _dicOPT[:main_solver]      = :(Newton())
-    _dicOPT[:main_maxIT]       =  2000
-    _dicOPT[:tolerance]        =  1.0e-8
-    _dicOPT[:verbose]          =  true
-    _dicOPT[:banner]           =  true
-    _dicOPT[:ineff_index]      =  true
-    _dicOPT[:marginal]         =  true
-    _dicOPT[:mareffx]          =  true
-    _dicOPT[:mareffu]          =  true
-    _dicOPT[:table_format]     = :(text)
+  _dicOPT[:warmstart_solver] = :(NelderMead())
+  _dicOPT[:warmstart_maxIT]  =  100
+  _dicOPT[:main_solver]      = :(Newton())
+  _dicOPT[:main_maxIT]       =  2000
+  _dicOPT[:tolerance]        =  1.0e-8
+  _dicOPT[:verbose]          =  true
+  _dicOPT[:banner]           =  true
+  _dicOPT[:ineff_index]      =  true
+  _dicOPT[:marginal]         =  true
+  _dicOPT[:mareffx]          =  true
+  _dicOPT[:mareffu]          =  true
+  _dicOPT[:table_format]     = :(text)
 
-    #* -- replace the defaults with the user's value ---
+  #* -- replace the defaults with the user's value ---
 
-    for d in :($(arg))
-        _dicOPT[d[1]] = d[2]
-    end    
-    
-    #* ---- error checking --
+  for d in :($(arg))
+      _dicOPT[d[1]] = d[2]
+  end    
+  
+  #* ---- error checking --
 
-    if (_dicOPT[:main_solver] === nothing) || (_dicOPT[:main_maxIT] === nothing) || (_dicOPT[:tolerance] === nothing)
-         throw("You cannot give empty keyword values to `main_solver()`, `main_maxIT()`, or `tolerance()`. If you want to use the default, you may do so by dropping (not emptying keyword values) the keywords.")
-    end
-    
-    if message 
-      printstyled("A dictionary from sfmodel_opt() is generated.\n"; color = :green)  
-    end  
-    return _dicOPT # for debugging purpose
+  if (_dicOPT[:main_solver] === nothing) || (_dicOPT[:main_maxIT] === nothing) || (_dicOPT[:tolerance] === nothing)
+       throw("You cannot give empty keyword values to `main_solver()`, `main_maxIT()`, or `tolerance()`. If you want to use the default, you may do so by dropping (not emptying keyword values) the keywords.")
+  end
+  
+  if message 
+    printstyled("A dictionary from sfmodel_opt() is generated.\n"; color = :green)  
+  end  
+  return _dicOPT # for debugging purpose
 
 end    # end of sfmodel_opt()
+
+
 
 
 
@@ -542,64 +548,538 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
        #*  Make it Array{Float64,1}; otherwise Array{Float64,2}. ---#     
        #*       Could also use sf_init[:,1]. *#
       if tagD[:modelid] == SSFOAH
-       sf_init = vcat(b_ini, t_ini, d2_ini, g_ini, gammma_ini, tau_ini, rho_ini)  
-          
+          if Wy!=Nothing  # yuv
+              if Wu!=Nothing 
+                  if Wv!=Nothing #yuv
+                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, gammma_ini, tau_ini, rho_ini)  
+                  else # yu
+                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, gammma_ini, tau_ini)  
+                  end    
+              else 
+                  if Wv!=Nothing #yv
+                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, gammma_ini, rho_ini)  
+                  else #y
+                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, gammma_ini)  
+                  end
+              end
+          else
+              if Wu!=Nothing 
+                  if Wv!=Nothing #uv
+                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, tau_ini, rho_ini)  
+                  else # u
+                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, tau_ini)  
+                  end    
+              else 
+                  if Wv!=Nothing #v
+                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, rho_ini)  
+                  else # 
+                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini)  
+                  end
+              end
+          end            
       elseif tagD[:modelid] == SSFOAT
-       sf_init = vcat(b_ini, t_ini, d2_ini, g_ini, d1_ini, gammma_ini, tau_ini, rho_ini) 
-          
+          if Wy!=Nothing  # yuv
+              if Wu!=Nothing 
+                  if Wv!=Nothing #yuv
+                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, gammma_ini, tau_ini, rho_ini)  
+                  else # yu
+                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, gammma_ini, tau_ini)  
+                  end    
+              else 
+                  if Wv!=Nothing #yv
+                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, gammma_ini, rho_ini)  
+                  else #y
+                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, gammma_ini)  
+                  end
+              end
+          else
+              if Wu!=Nothing 
+                  if Wv!=Nothing #uv
+                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, tau_ini, rho_ini)  
+                  else # u
+                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, tau_ini)  
+                  end    
+              else 
+                  if Wv!=Nothing #v
+                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, rho_ini)  
+                  else # 
+                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini)  
+                  end
+              end
+          end            
       elseif tagD[:modelid] == SSFOADH
-          sf_init0 = vcat(b_ini, t_ini, d2_ini, g_ini, gammma_ini, tau_ini, rho_ini)  
-          (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
-         eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAH, sfdat)
-          mfun0 = optimize(rho -> LL_T(SSFOAH, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
-                                              Wy, Wu, Wv,_porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
-                                        sf_init0,         # initial values  
-                                        NelderMead(),       # different from search run
-                                        Optim.Options(g_tol = 1.0e-6,
-                                        iterations  = 2000, # different from search run
-                                        store_trace = false,
-                                        show_trace  = false))
-
-           sf_init1  = Optim.minimizer(mfun0)
- 
- 
-           b_ini1 = sf_init1[1:num.nofx]
-           t_ini1  = sf_init1[num.nofx+1: num.nofx+num.nofq]
-           phi_ini = get(_dicINI, :eqphi, vec(ivvar \ envar))
-           eta_ini = get(_dicINI, :eqeta, ones(num.nofeta)*0.1)
-           d2_ini1 = sf_init1[num.nofx+num.nofq+1: num.nofx+num.nofq+num.nofw]
-           g_ini1  = sf_init1[num.nofx+num.nofq+num.nofw+1: num.nofx+num.nofq+num.nofw+num.nofv]
-           gammma_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+1]
-           tau_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+2]
-           rho_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+3]
+          if Wy!=Nothing  # yuv
+              if Wu!=Nothing 
+                  if Wv!=Nothing #yuv
+                       sf_init0 = vcat(b_ini, t_ini, d2_ini,  g_ini, gammma_ini, tau_ini, rho_ini)  
+                       sf_init0 = vec(sf_init0)   
+                      
+                    (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAH, sfdat)
+                       mfun0 = optimize(rho -> LL_T(SSFOAH, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0,  envar0, ivvar0,
+                                                              _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
+                                                        sf_init0,         # initial values  
+                                                        NelderMead(),       # different from search run
+                                                        Optim.Options(g_tol = 1.0e-6,
+                                                        iterations  = 2000, # different from search run
+                                                        store_trace = false,
+                                                        show_trace  = false))
+  
+                       sf_init1  = Optim.minimizer(mfun0)
+             
+                       b_ini1 = sf_init1[1:num.nofx]
+                       t_ini1  = sf_init1[num.nofx+1: num.nofx+num.nofq]
+                       phi_ini = get(_dicINI, :eqphi, vec(ivvar \ envar))
+                       eta_ini = get(_dicINI, :eqeta, ones(num.nofeta)*0.1)
+                       d2_ini1 = sf_init1[num.nofx+num.nofq+1: num.nofx+num.nofq+num.nofw]
+                       g_ini1  = sf_init1[num.nofx+num.nofq+num.nofw+1: num.nofx+num.nofq+num.nofw+num.nofv]
+                       gammma_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+1]
+                       tau_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+2]
+                       rho_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+3]
+                  
+                       sf_init = vcat(b_ini1, t_ini1, phi_ini,eta_ini, d2_ini1, g_ini1, gammma_ini1, tau_ini1, rho_ini1)  
+  
+                  else # yu
+                       sf_init0 = vcat(b_ini, t_ini, d2_ini,  g_ini, gammma_ini, tau_ini)  
+                       sf_init0 = vec(sf_init0)   
           
-       sf_init = vcat(b_ini1, t_ini1, phi_ini,eta_ini, d2_ini1, g_ini1, gammma_ini1, tau_ini1, rho_ini1)  
+                    (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAH, sfdat)
+                       mfun0 = optimize(rho -> LL_T(SSFOAH, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                                                              _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
+                                                        sf_init0,         # initial values  
+                                                        NelderMead(),       # different from search run
+                                                        Optim.Options(g_tol = 1.0e-6,
+                                                        iterations  = 2000, # different from search run
+                                                        store_trace = false,
+                                                        show_trace  = false))
+  
+                       sf_init1  = Optim.minimizer(mfun0)
+             
+                       b_ini1  = sf_init1[1:num.nofx]
+                       t_ini1  = sf_init1[num.nofx+1: num.nofx+num.nofq]
+                       phi_ini = get(_dicINI, :eqphi, vec(ivvar \ envar))
+                       eta_ini = get(_dicINI, :eqeta, ones(num.nofeta)*0.1)
+                       d2_ini1 = sf_init1[num.nofx+num.nofq+1: num.nofx+num.nofq+num.nofw]
+                       g_ini1  = sf_init1[num.nofx+num.nofq+num.nofw+1: num.nofx+num.nofq+num.nofw+num.nofv]
+                       gammma_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+1]
+                       tau_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+2]
+                       sf_init = vcat(b_ini1, t_ini1, phi_ini,eta_ini, d2_ini1, g_ini1, gammma_ini1, tau_ini1)  
+  
+                  end    
+              else 
+                  if Wv!=Nothing #yv
+                       sf_init0 = vcat(b_ini, t_ini, d2_ini,  g_ini, gammma_ini, rho_ini)  
+                       sf_init0 = vec(sf_init0)   
+          
+                    (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAH, sfdat)
+                       mfun0 = optimize(rho -> LL_T(SSFOAH, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                                                              _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
+                                                        sf_init0,         # initial values  
+                                                        NelderMead(),       # different from search run
+                                                        Optim.Options(g_tol = 1.0e-6,
+                                                        iterations  = 2000, # different from search run
+                                                        store_trace = false,
+                                                        show_trace  = false))
+  
+                       sf_init1  = Optim.minimizer(mfun0)
+             
+                       b_ini1 = sf_init1[1:num.nofx]
+                       t_ini1  = sf_init1[num.nofx+1: num.nofx+num.nofq]
+                       phi_ini = get(_dicINI, :eqphi, vec(ivvar \ envar))
+                       eta_ini = get(_dicINI, :eqeta, ones(num.nofeta)*0.1)
+                       d2_ini1 = sf_init1[num.nofx+num.nofq+1: num.nofx+num.nofq+num.nofw]
+                       g_ini1  = sf_init1[num.nofx+num.nofq+num.nofw+1: num.nofx+num.nofq+num.nofw+num.nofv]
+                       gammma_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+1]
+                       rho_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+2]
+                  
+                       sf_init = vcat(b_ini1, t_ini1, phi_ini,eta_ini, d2_ini1, g_ini1, gammma_ini1, rho_ini1)  
+                  else #y
+                       sf_init0 = vcat(b_ini, t_ini, d2_ini,  g_ini, gammma_ini)  
+                       sf_init0 = vec(sf_init0)   
+          
+                    (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAH, sfdat)
+                       mfun0 = optimize(rho -> LL_T(SSFOAH, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                                                              _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
+                                                        sf_init0,         # initial values  
+                                                        NelderMead(),       # different from search run
+                                                        Optim.Options(g_tol = 1.0e-6,
+                                                        iterations  = 2000, # different from search run
+                                                        store_trace = false,
+                                                        show_trace  = false))
+  
+                       sf_init1  = Optim.minimizer(mfun0)
+             
+                       b_ini1 = sf_init1[1:num.nofx]
+                       t_ini1  = sf_init1[num.nofx+1: num.nofx+num.nofq]
+                       phi_ini = get(_dicINI, :eqphi, vec(ivvar \ envar))
+                       eta_ini = get(_dicINI, :eqeta, ones(num.nofeta)*0.1)
+                       d2_ini1 = sf_init1[num.nofx+num.nofq+1: num.nofx+num.nofq+num.nofw]
+                       g_ini1  = sf_init1[num.nofx+num.nofq+num.nofw+1: num.nofx+num.nofq+num.nofw+num.nofv]
+                       gammma_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+1]
+  
+                  
+                       sf_init = vcat(b_ini1, t_ini1, phi_ini,eta_ini, d2_ini1, g_ini1, gammma_ini1)  
+                  end
+              end
+          else
+              if Wu!=Nothing 
+                  if Wv!=Nothing #uv
+                       sf_init0 = vcat(b_ini, t_ini, d2_ini,  g_ini, tau_ini, rho_ini) 
+                       sf_init0 = vec(sf_init0)   
+          
+                    (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAH, sfdat)
+                       mfun0 = optimize(rho -> LL_T(SSFOAH, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                                                              _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
+                                                        sf_init0,         # initial values  
+                                                        NelderMead(),       # different from search run
+                                                        Optim.Options(g_tol = 1.0e-6,
+                                                        iterations  = 2000, # different from search run
+                                                        store_trace = false,
+                                                        show_trace  = false))
+  
+                       sf_init1  = Optim.minimizer(mfun0)
+             
+                       b_ini1 = sf_init1[1:num.nofx]
+                       t_ini1  = sf_init1[num.nofx+1: num.nofx+num.nofq]
+                       phi_ini = get(_dicINI, :eqphi, vec(ivvar \ envar))
+                       eta_ini = get(_dicINI, :eqeta, ones(num.nofeta)*0.1)
+                       d2_ini1 = sf_init1[num.nofx+num.nofq+1: num.nofx+num.nofq+num.nofw]
+                       g_ini1  = sf_init1[num.nofx+num.nofq+num.nofw+1: num.nofx+num.nofq+num.nofw+num.nofv]
+                       tau_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+1]
+                       rho_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+2]
+                  
+                       sf_init = vcat(b_ini1, t_ini1, phi_ini,eta_ini, d2_ini1, g_ini1, tau_ini1, rho_ini1)  
+                      
+                  else # u
+                       sf_init0 = vcat(b_ini, t_ini, d2_ini,  g_ini, tau_ini)  
+                       sf_init0 = vec(sf_init0)   
+          
+                    (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAH, sfdat)
+                       mfun0 = optimize(rho -> LL_T(SSFOAH, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                                                              _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
+                                                        sf_init0,         # initial values  
+                                                        NelderMead(),       # different from search run
+                                                        Optim.Options(g_tol = 1.0e-6,
+                                                        iterations  = 2000, # different from search run
+                                                        store_trace = false,
+                                                        show_trace  = false))
+  
+                       sf_init1  = Optim.minimizer(mfun0)
+             
+                       b_ini1 = sf_init1[1:num.nofx]
+                       t_ini1  = sf_init1[num.nofx+1: num.nofx+num.nofq]
+                       phi_ini = get(_dicINI, :eqphi, vec(ivvar \ envar))
+                       eta_ini = get(_dicINI, :eqeta, ones(num.nofeta)*0.1)
+                       d2_ini1 = sf_init1[num.nofx+num.nofq+1: num.nofx+num.nofq+num.nofw]
+                       g_ini1  = sf_init1[num.nofx+num.nofq+num.nofw+1: num.nofx+num.nofq+num.nofw+num.nofv]
+                       tau_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+1]
+                  
+                       sf_init = vcat(b_ini1, t_ini1, phi_ini,eta_ini, d2_ini1, g_ini1, tau_ini1)  
+                  end    
+              else 
+                  if Wv!=Nothing #v
+                      
+                       sf_init0 = vcat(b_ini, t_ini, d2_ini,  g_ini, rho_ini)  
+                       sf_init0 = vec(sf_init0)   
+          
+                    (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAH, sfdat)
+                      
+                       mfun0 = optimize(rho -> LL_T(SSFOAH, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                                                              _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
+                                                        sf_init0,         # initial values  
+                                                        NelderMead(),       # different from search run
+                                                        Optim.Options(g_tol = 1.0e-6,
+                                                        iterations  = 2000, # different from search run
+                                                        store_trace = false,
+                                                        show_trace  = false))
+  
+                       sf_init1  = Optim.minimizer(mfun0)
+             
+                       b_ini1 = sf_init1[1:num.nofx]
+                       t_ini1  = sf_init1[num.nofx+1: num.nofx+num.nofq]
+                       phi_ini = get(_dicINI, :eqphi, vec(ivvar \ envar))
+                       eta_ini = get(_dicINI, :eqeta, ones(num.nofeta)*0.1)
+                       d2_ini1 = sf_init1[num.nofx+num.nofq+1: num.nofx+num.nofq+num.nofw]
+                       g_ini1  = sf_init1[num.nofx+num.nofq+num.nofw+1: num.nofx+num.nofq+num.nofw+num.nofv]
+                       rho_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+1]
+                  
+                       sf_init = vcat(b_ini1, t_ini1, phi_ini,eta_ini, d2_ini1, g_ini1, rho_ini1)  
+                  else  # 
+  
+                     sf_init0 = vcat(b_ini, t_ini, d2_ini,  g_ini)  
+                       sf_init0 = vec(sf_init0)   
+                          
+                    (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAH, sfdat)
+                       mfun0 = optimize(rho -> LL_T(SSFOAH, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                                                              _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
+                                                        sf_init0,         # initial values  
+                                                        NelderMead(),       # different from search run
+                                                        Optim.Options(g_tol = 1.0e-6,
+                                                        iterations  = 2000, # different from search run
+                                                        store_trace = false,
+                                                        show_trace  = false))
+  
+                       sf_init1  = Optim.minimizer(mfun0)
+             
+                       b_ini1 = sf_init1[1:num.nofx]
+                       t_ini1  = sf_init1[num.nofx+1: num.nofx+num.nofq]
+                       phi_ini = get(_dicINI, :eqphi, vec(ivvar \ envar))
+                       eta_ini = get(_dicINI, :eqeta, ones(num.nofeta)*0.1)
+                       d2_ini1 = sf_init1[num.nofx+num.nofq+1: num.nofx+num.nofq+num.nofw]
+                       g_ini1  = sf_init1[num.nofx+num.nofq+num.nofw+1: num.nofx+num.nofq+num.nofw+num.nofv]
+                  
+                       sf_init = vcat(b_ini1, t_ini1, phi_ini,eta_ini, d2_ini1, g_ini1 )  
+                  end
+              end
+          end  # Wy!=Nothing  # yuv
 
       elseif tagD[:modelid] == SSFOADT
-          sf_init0 = vcat(b_ini, t_ini, d2_ini, g_ini, d1_ini, gammma_ini, tau_ini, rho_ini)  
-          (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
-         eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAT, sfdat)
-          mfun0 = optimize(rho -> LL_T(SSFOAT, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
-                                              Wy, Wu, Wv,_porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
-                                        sf_init0,         # initial values  
-                                        NelderMead(),       # different from search run
-                                        Optim.Options(g_tol = 1.0e-6,
-                                        iterations  = 2000, # different from search run
-                                        store_trace = false,
-                                        show_trace  = false))
-
-           sf_init1  = Optim.minimizer(mfun0)
-           b_ini1 = sf_init1[1:num.nofx]
-           t_ini1  = sf_init1[num.nofx+1: num.nofx+num.nofq]
-           phi_ini = get(_dicINI, :eqphi, vec(ivvar \ envar))
-           eta_ini = get(_dicINI, :eqeta, ones(num.nofeta)*0.1)
-           d2_ini1 = sf_init1[num.nofx+num.nofq+1: num.nofx+num.nofq+num.nofw]
-           g_ini1  = sf_init1[num.nofx+num.nofq+num.nofw+1: num.nofx+num.nofq+num.nofw+num.nofv]
-           d1_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+1: num.nofx+num.nofq+num.nofw+num.nofv+num.nofz]
-           gammma_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+1]
-           tau_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+2]
-           rho_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+3]
-       sf_init = vcat(b_ini1, t_ini1, phi_ini,eta_ini, d2_ini1, g_ini1, d1_ini1, gammma_ini1, tau_ini1, rho_ini1)  
+             if Wy!=Nothing  # yuv
+              if Wu!=Nothing 
+                  if Wv!=Nothing #yuv
+                       sf_init0 = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, gammma_ini, tau_ini, rho_ini)  
+                      
+                    (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAT, sfdat) 
+  
+                       mfun0 = optimize(rho -> LL_T(SSFOAT, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0,  envar0, ivvar0, 
+                                                              _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
+                                                        sf_init0,         # initial values  
+                                                        NelderMead(),       # different from search run
+                                                        Optim.Options(g_tol = 1.0e-6,
+                                                        iterations  = 2000, # different from search run
+                                                        store_trace = false,
+                                                        show_trace  = false))
+  
+                       sf_init1  = Optim.minimizer(mfun0)
+             
+                       b_ini1 = sf_init1[1:num.nofx]
+                       t_ini1  = sf_init1[num.nofx+1: num.nofx+num.nofq]
+                       phi_ini = get(_dicINI, :eqphi, vec(ivvar \ envar))
+                       eta_ini = get(_dicINI, :eqeta, ones(num.nofeta)*0.1)
+                       d2_ini1 = sf_init1[num.nofx+num.nofq+1: num.nofx+num.nofq+num.nofw]
+                       g_ini1  = sf_init1[num.nofx+num.nofq+num.nofw+1: num.nofx+num.nofq+num.nofw+num.nofv]
+                       d1_ini1  = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+1: num.nofx+num.nofq+num.nofw+num.nofv+num.nofz]
+                       gammma_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+1]
+                       tau_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+2]
+                       rho_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+3]
+                  
+                       sf_init = vcat(b_ini1, t_ini1, phi_ini,eta_ini, d2_ini1, g_ini1, d1_ini1, gammma_ini1, tau_ini1, rho_ini1)  
+  
+                  else # yu
+                       sf_init0 = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, gammma_ini, tau_ini)  
+                       sf_init0 = vec(sf_init0)   
+          
+                    (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAT, sfdat)
+                       mfun0 = optimize(rho -> LL_T(SSFOAT, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                                                              _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
+                                                        sf_init0,         # initial values  
+                                                        NelderMead(),       # different from search run
+                                                        Optim.Options(g_tol = 1.0e-6,
+                                                        iterations  = 2000, # different from search run
+                                                        store_trace = false,
+                                                        show_trace  = false))
+  
+                       sf_init1  = Optim.minimizer(mfun0)
+             
+                       b_ini1  = sf_init1[1:num.nofx]
+                       t_ini1  = sf_init1[num.nofx+1: num.nofx+num.nofq]
+                       phi_ini = get(_dicINI, :eqphi, vec(ivvar \ envar))
+                       eta_ini = get(_dicINI, :eqeta, ones(num.nofeta)*0.1)
+                       d2_ini1 = sf_init1[num.nofx+num.nofq+1: num.nofx+num.nofq+num.nofw]
+                       g_ini1  = sf_init1[num.nofx+num.nofq+num.nofw+1: num.nofx+num.nofq+num.nofw+num.nofv]
+                       d1_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+1: num.nofx+num.nofq+num.nofw+num.nofv+num.nofz]
+                       gammma_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+1]
+                       tau_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+2]
+                       sf_init = vcat(b_ini1, t_ini1, phi_ini,eta_ini, d2_ini1, g_ini1, d1_ini1, gammma_ini1, tau_ini1)  
+  
+                  end    
+              else 
+                  if Wv!=Nothing #yv
+                       sf_init0 = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, gammma_ini, rho_ini)  
+                       sf_init0 = vec(sf_init0)   
+          
+                    (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAT, sfdat)
+                       mfun0 = optimize(rho -> LL_T(SSFOAT, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                                                              _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
+                                                        sf_init0,         # initial values  
+                                                        NelderMead(),       # different from search run
+                                                        Optim.Options(g_tol = 1.0e-6,
+                                                        iterations  = 2000, # different from search run
+                                                        store_trace = false,
+                                                        show_trace  = false))
+  
+                       sf_init1  = Optim.minimizer(mfun0)
+             
+                       b_ini1 = sf_init1[1:num.nofx]
+                       t_ini1  = sf_init1[num.nofx+1: num.nofx+num.nofq]
+                       phi_ini = get(_dicINI, :eqphi, vec(ivvar \ envar))
+                       eta_ini = get(_dicINI, :eqeta, ones(num.nofeta)*0.1)
+                       d2_ini1 = sf_init1[num.nofx+num.nofq+1: num.nofx+num.nofq+num.nofw]
+                       g_ini1  = sf_init1[num.nofx+num.nofq+num.nofw+1: num.nofx+num.nofq+num.nofw+num.nofv]
+                       d1_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+1: num.nofx+num.nofq+num.nofw+num.nofv+num.nofz]
+                       gammma_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+1]
+                       rho_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+2]
+                  
+                       sf_init = vcat(b_ini1, t_ini1, phi_ini,eta_ini, d2_ini1, g_ini1, d1_ini1, gammma_ini1, rho_ini1)  
+                  else #y
+                       sf_init0 = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, gammma_ini)  
+                       sf_init0 = vec(sf_init0)   
+          
+                    (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAT, sfdat)
+                       mfun0 = optimize(rho -> LL_T(SSFOAT, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                                                              _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
+                                                        sf_init0,         # initial values  
+                                                        NelderMead(),       # different from search run
+                                                        Optim.Options(g_tol = 1.0e-6,
+                                                        iterations  = 2000, # different from search run
+                                                        store_trace = false,
+                                                        show_trace  = false))
+  
+                       sf_init1  = Optim.minimizer(mfun0)
+             
+                       b_ini1 = sf_init1[1:num.nofx]
+                       t_ini1  = sf_init1[num.nofx+1: num.nofx+num.nofq]
+                       phi_ini = get(_dicINI, :eqphi, vec(ivvar \ envar))
+                       eta_ini = get(_dicINI, :eqeta, ones(num.nofeta)*0.1)
+                       d2_ini1 = sf_init1[num.nofx+num.nofq+1: num.nofx+num.nofq+num.nofw]
+                       g_ini1  = sf_init1[num.nofx+num.nofq+num.nofw+1: num.nofx+num.nofq+num.nofw+num.nofv]
+                       d1_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+1: num.nofx+num.nofq+num.nofw+num.nofv+num.nofz]
+                       gammma_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+1]
+  
+                  
+                       sf_init = vcat(b_ini1, t_ini1, phi_ini,eta_ini, d2_ini1, g_ini1, d1_ini1, gammma_ini1)  
+                  end
+              end
+          else
+              if Wu!=Nothing 
+                  if Wv!=Nothing #uv
+                       sf_init0 = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, tau_ini, rho_ini) 
+                       sf_init0 = vec(sf_init0)   
+          
+                    (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0, 
+                       eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAT, sfdat)
+                       mfun0 = optimize(rho -> LL_T(SSFOAT, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                                                              _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
+                                                        sf_init0,         # initial values  
+                                                        NelderMead(),       # different from search run
+                                                        Optim.Options(g_tol = 1.0e-6,
+                                                        iterations  = 2000, # different from search run
+                                                        store_trace = false,
+                                                        show_trace  = false))
+  
+                       sf_init1  = Optim.minimizer(mfun0)
+             
+                       b_ini1 = sf_init1[1:num.nofx]
+                       t_ini1  = sf_init1[num.nofx+1: num.nofx+num.nofq]
+                       phi_ini = get(_dicINI, :eqphi, vec(ivvar \ envar))
+                       eta_ini = get(_dicINI, :eqeta, ones(num.nofeta)*0.1)
+                       d2_ini1 = sf_init1[num.nofx+num.nofq+1: num.nofx+num.nofq+num.nofw]
+                       g_ini1  = sf_init1[num.nofx+num.nofq+num.nofw+1: num.nofx+num.nofq+num.nofw+num.nofv]
+                       d1_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+1: num.nofx+num.nofq+num.nofw+num.nofv+num.nofz]
+                       tau_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+1]
+                       rho_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+2]
+                  
+                       sf_init = vcat(b_ini1, t_ini1, phi_ini,eta_ini, d2_ini1, g_ini1, d1_ini1, tau_ini1, rho_ini1)  
+                      
+                  else # u
+                       sf_init0 = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, tau_ini)  
+                       sf_init0 = vec(sf_init0)   
+          
+                    (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAT, sfdat)
+                       mfun0 = optimize(rho -> LL_T(SSFOAT, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                                                              _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
+                                                        sf_init0,         # initial values  
+                                                        NelderMead(),       # different from search run
+                                                        Optim.Options(g_tol = 1.0e-6,
+                                                        iterations  = 2000, # different from search run
+                                                        store_trace = false,
+                                                        show_trace  = false))
+  
+                       sf_init1  = Optim.minimizer(mfun0)
+                         
+                       b_ini1 = sf_init1[1:num.nofx]
+                       t_ini1  = sf_init1[num.nofx+1: num.nofx+num.nofq]
+                       phi_ini = get(_dicINI, :eqeta, ones(num.nofphi)*0.1)  #  get(_dicINI, :eqphi, vec(ivvar \ envar))
+                       eta_ini = get(_dicINI, :eqeta, ones(num.nofeta)*0.1)
+                       d2_ini1 = sf_init1[num.nofx+num.nofq+1: num.nofx+num.nofq+num.nofw]
+                       g_ini1  = sf_init1[num.nofx+num.nofq+num.nofw+1: num.nofx+num.nofq+num.nofw+num.nofv]
+                       d1_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+1: num.nofx+num.nofq+num.nofw+num.nofv+num.nofz]
+                       tau_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+1]
+                  
+                       sf_init = vcat(b_ini1, t_ini1, phi_ini,eta_ini, d2_ini1, g_ini1, d1_ini1, tau_ini1)  
+                  end    
+              else 
+                  if Wv!=Nothing #v
+                      
+                       sf_init0 = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, rho_ini)  
+                       sf_init0 = vec(sf_init0)   
+          
+                    (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAT, sfdat)
+                      
+                       mfun0 = optimize(rho -> LL_T(SSFOAT, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                                                              _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
+                                                        sf_init0,         # initial values  
+                                                        NelderMead(),       # different from search run
+                                                        Optim.Options(g_tol = 1.0e-6,
+                                                        iterations  = 2000, # different from search run
+                                                        store_trace = false,
+                                                        show_trace  = false))
+  
+                       sf_init1  = Optim.minimizer(mfun0)
+             
+                       b_ini1 = sf_init1[1:num.nofx]
+                       t_ini1  = sf_init1[num.nofx+1: num.nofx+num.nofq]
+                       phi_ini = get(_dicINI, :eqphi, vec(ivvar \ envar))
+                       eta_ini = get(_dicINI, :eqeta, ones(num.nofeta)*0.1)
+                       d2_ini1 = sf_init1[num.nofx+num.nofq+1: num.nofx+num.nofq+num.nofw]
+                       g_ini1  = sf_init1[num.nofx+num.nofq+num.nofw+1: num.nofx+num.nofq+num.nofw+num.nofv]
+                       d1_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+1: num.nofx+num.nofq+num.nofw+num.nofv+num.nofz]
+                       rho_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+1]
+                  
+                       sf_init = vcat(b_ini1, t_ini1, phi_ini,eta_ini, d2_ini1, g_ini1, d1_ini1, rho_ini1)  
+                  else  # 
+  
+                     sf_init0 = vcat(b_ini, t_ini, d2_ini, g_ini, d1_ini)  
+                       sf_init0 = vec(sf_init0)   
+                          
+                    (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAT, sfdat)
+                       mfun0 = optimize(rho -> LL_T(SSFOAT, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                                                              _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
+                                                        sf_init0,         # initial values  
+                                                        NelderMead(),       # different from search run
+                                                        Optim.Options(g_tol = 1.0e-6,
+                                                        iterations  = 2000, # different from search run
+                                                        store_trace = false,
+                                                        show_trace  = false))
+  
+                       sf_init1  = Optim.minimizer(mfun0)
+             
+                       b_ini1 = sf_init1[1:num.nofx]
+                       t_ini1  = sf_init1[num.nofx+1: num.nofx+num.nofq]
+                       phi_ini = get(_dicINI, :eqphi, vec(ivvar \ envar))
+                       eta_ini = get(_dicINI, :eqeta, ones(num.nofeta)*0.1)
+                       d2_ini1 = sf_init1[num.nofx+num.nofq+1: num.nofx+num.nofq+num.nofw]
+                       g_ini1  = sf_init1[num.nofx+num.nofq+num.nofw+1: num.nofx+num.nofq+num.nofw+num.nofv]
+                       d1_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+1: num.nofx+num.nofq+num.nofw+num.nofv+num.nofz]
+                  
+                       sf_init = vcat(b_ini1, t_ini1, phi_ini,eta_ini, d2_ini1, g_ini1, d1_ini1 )  
+                  end
+              end
+          end  # Wy!=Nothing  # yuv
       end # tagD[:modelid] == SSFOAH
           
           sf_init = vec(sf_init)   
@@ -637,7 +1117,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
 
    _Hessian = TwiceDifferentiable(rho -> LL_T(tagD[:modelid], 
                          yvar, xvar, qvar, wvar, vvar, zvar, envar, ivvar,
-                          Wy, Wu, Wv, _porc, num, pos, rho,
+                            _porc, num, pos, rho,
                               eigvalu,   rowIDT, _dicM[:misc]),
                    sf_init;               
                   autodiff = :forward); 
@@ -727,12 +1207,41 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
 
 #* ###### Post-estimation process ############### 
     _coevec            = Optim.minimizer(mfun)  # coef. vec.
-    # numerical_hessian  = hessian!(_Hessian, _coevec)  # Hessain 
+  
+  _coevec_adj = []
+  for i in 1:length(eqvec2)
+      # println(typeof(keys(eqvec2)[i] ))
 
+      if keys(eqvec2)[i] ∉ [:coeff_γ, :coeff_τ, :coeff_ρ] 
+      _coevec_adj = vcat(_coevec_adj, _coevec[eqvec2[i]])
+      else
+          if keys(eqvec2)[i] == :coeff_γ
+              ss =  _coevec[eqvec2[i]][1]
+              gamma_adj = eigvalu.rymin/(1+exp(ss))+eigvalu.rymax*exp(ss)/(1+exp(ss))
+              _coevec_adj = vcat(_coevec_adj, gamma_adj)
+          end
+          if keys(eqvec2)[i] == :coeff_τ
+              ss =  _coevec[eqvec2[i]][1]
+              tau_adj = eigvalu.rumin/(1+exp(ss))+eigvalu.rumax*exp(ss)/(1+exp(ss))
+              _coevec_adj = vcat(_coevec_adj, tau_adj)
+          end
+          if keys(eqvec2)[i] == :coeff_ρ
+              ss =  _coevec[eqvec2[i]][1]
+              rho_adj = eigvalu.rvmin/(1+exp(ss))+eigvalu.rvmax*exp(ss)/(1+exp(ss))
+              _coevec_adj = vcat(_coevec_adj, rho_adj)         
+          end
+      end
+  end
+  
+  # numerical_hessian = Calculus.hessian(rho -> LL_T(tagD[:modelid], 
+  #                        yvar, xvar, qvar, wvar, vvar, zvar, envar, ivvar,
+  #                         Wy, Wu, Wv, _porc, num, pos, rho,
+  #                             eigvalu,   rowIDT, _dicM[:misc]), _coevec)
   numerical_hessian = ForwardDiff.hessian(rho -> LL_T(tagD[:modelid], 
-                          yvar, xvar, qvar, wvar, vvar, zvar, envar, ivvar,
-                          Wy, Wu, Wv, _porc, num, pos, rho,
+                         yvar, xvar, qvar, wvar, vvar, zvar, envar, ivvar,
+                           _porc, num, pos, rho,
                               eigvalu,   rowIDT, _dicM[:misc]), _coevec)
+  
   println("############################################################")
 
   
@@ -759,7 +1268,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
 
    if _dicOPT[:ineff_index] 
       @views (_jlms, _bc) = jlmsbc(tagD[:modelid], yvar, xvar,  qvar, wvar, vvar,  zvar, envar, ivvar,
-                                      Wy, Wu, Wv, _porc, num, pos, _coevec,  eigvalu, rowIDT)
+                                       _porc, num, pos, _coevec,  eigvalu, rowIDT)
 
       _jlmsM = mean(_jlms) # sum(_jlms)/length(_jlms)
       _bcM   = mean(_bc)   # sum(_bc)/length(_bc)
@@ -782,10 +1291,14 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
    #* ---- marginal effect on x or wx -------------- 
 
    if _dicOPT[:mareffx] 
+      if Wy!=Nothing 
       totalemat, diremat, indiremat = get_mareffx( pos, _coevec,  var_cov_matrix, eigvalu, indices_list, rowIDT )
-   else      
+      else
       totalemat, diremat, indiremat = nothing, nothing, nothing
-   end        
+      end
+  else      
+      totalemat, diremat, indiremat = nothing, nothing, nothing
+   end      
    #* ---- marginal effect on u -------------- 
 
    # if _dicOPT[:mareffu] 
@@ -798,7 +1311,33 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
    #* ------- Make Table ------------------
 
    stddev  = sqrt.(diag(var_cov_matrix)) # standard error
-   t_stats = _coevec ./ stddev          # t statistics
+
+   stddev_adj = []
+  for i in 1:length(eqvec2)
+      # println(typeof(keys(eqvec2)[i] ))
+
+      if keys(eqvec2)[i] ∉ [:coeff_γ, :coeff_τ, :coeff_ρ] 
+      stddev_adj = vcat(stddev_adj, stddev[eqvec2[i]])
+      else
+          if keys(eqvec2)[i] == :coeff_γ
+              ss =  stddev[eqvec2[i]][1]
+              stddev_gamma_adj =abs(ss*(eigvalu.rymax-eigvalu.rymin)*exp(ss)/(1+exp(ss))^2  ) 
+              stddev_adj = vcat(stddev_adj, stddev_gamma_adj)
+          end
+          if keys(eqvec2)[i] == :coeff_τ
+              ss =  stddev[eqvec2[i]][1]
+              stddev_tau_adj = abs(ss*(eigvalu.rumax-eigvalu.rumin)*exp(ss)/(1+exp(ss))^2  ) 
+              stddev_adj = vcat(stddev_adj, stddev_tau_adj)
+          end
+          if keys(eqvec2)[i] == :coeff_ρ
+              ss =  stddev[eqvec2[i]][1]
+              stddev_rho_adj = abs(ss*(eigvalu.rvmax-eigvalu.rvmin)*exp(ss)/(1+exp(ss))^2  ) 
+              stddev_adj = vcat(stddev_adj, stddev_rho_adj)         
+          end
+      end
+  end
+  
+   t_stats = _coevec_adj ./ stddev_adj          # t statistics
    p_value = zeros(num.nofpara)   # p values
    ci_low  = zeros(num.nofpara) # confidence interval
    ci_upp  = zeros(num.nofpara) 
@@ -806,15 +1345,15 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
 
    for i = 1:num.nofpara 
        @views p_value[i,1] = pvalue(TDist(num.nofobs - num.nofpara), t_stats[i,1]; tail=:both)
-       @views ci_low[i,1] = _coevec[i,1] - tt*stddev[i,1]
-       @views ci_upp[i,1] = _coevec[i,1] + tt*stddev[i,1]
+       @views ci_low[i,1] = _coevec_adj[i,1] - tt*stddev_adj[i,1]
+       @views ci_upp[i,1] = _coevec_adj[i,1] + tt*stddev_adj[i,1]
    end  
 
      #* Build the table columns *#
 
   table = zeros(num.nofpara, 7)  # 7 columns in the table
-  table[:,2] = _coevec   # estiamted coefficients
-  table[:,3] = stddev    # std deviation
+  table[:,2] = _coevec_adj   # estiamted coefficients
+  table[:,3] = stddev_adj    # std deviation
   table[:,4] = t_stats   # t statistic
   table[:,5] = p_value   # p value
   table[:,6] = ci_low
@@ -933,8 +1472,8 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
     _dicRES[:n_observations]  = num.nofobs
     _dicRES[:loglikelihood]   = -Optim.minimum(mfun)
     _dicRES[:table]           = [table][1]
-    _dicRES[:coeff]           = _coevec
-    _dicRES[:std_err]         = stddev
+    _dicRES[:coeff]           = _coevec_adj
+    _dicRES[:std_err]         = stddev_adj
     _dicRES[:var_cov_mat]     = [var_cov_matrix][1]
     _dicRES[:jlms]            = _jlms
     _dicRES[:bc]              = _bc
@@ -966,7 +1505,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
     _dicRES[:transfer]      = _dicM[:transfer]
 
   for i in 1:length(eqvec2)
-      _dicRES[keys(eqvec2)[i]] = _coevec[eqvec2[i]]
+      _dicRES[keys(eqvec2)[i]] = _coevec_adj[eqvec2[i]]
   end
 
     _dicRES[:________________]  = "___________________" #34
@@ -1005,7 +1544,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
       _eqncoe = Dict{Symbol, Vector}()  # nullify and initiate new dictionaries when a new model is specified
 
       for i in 1:length(eqvec2)
-          _eqncoe[keys(eqvec)[i]]  = _coevec[eqvec2[i]] # for sf_predict
+          _eqncoe[keys(eqvec)[i]]  = _coevec_adj[eqvec2[i]] # for sf_predict
       end
 
 #* ############  make returns  ############ *#
@@ -1013,6 +1552,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
     return _ntRES
   # return margeff, margMinfo
 end # sfmodel_fit
+
 
 
 #############################################################
