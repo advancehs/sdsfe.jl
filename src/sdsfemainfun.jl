@@ -1237,18 +1237,19 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
   #                        yvar, xvar, qvar, wvar, vvar, zvar, envar, ivvar,
   #                         Wy, Wu, Wv, _porc, num, pos, rho,
   #                             eigvalu,   rowIDT, _dicM[:misc]), _coevec)
-  numerical_hessian = ForwardDiff.hessian(rho -> LL_T(tagD[:modelid], 
-                         yvar, xvar, qvar, wvar, vvar, zvar, envar, ivvar,
-                           _porc, num, pos, rho,
-                              eigvalu,   rowIDT, _dicM[:misc]), _coevec)
-  
+  # numerical_hessian = ForwardDiff.hessian(rho -> LL_T(tagD[:modelid], 
+  #                        yvar, xvar, qvar, wvar, vvar, zvar, envar, ivvar,
+  #                          _porc, num, pos, rho,
+  #                             eigvalu,   rowIDT, _dicM[:misc]), _coevec)
+  numerical_hessian  = hessian!(_Hessian, _coevec)  # Hessain
+
   println("############################################################")
 
   
   #* ------ Check if the matrix is invertible. ----
 
    var_cov_matrix = try
-                       inv(numerical_hessian)
+                       pinv(numerical_hessian)
                     catch err 
                        redflag = 1
                        # checkCollinear(tagD[:modelid], xvar,  qvar, wvar, vvar,zvar) # check if it is b/c of multi-collinearity in the data         

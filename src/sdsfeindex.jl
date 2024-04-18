@@ -583,6 +583,53 @@ end
 
 
 
+
+
+function jlmsbc(::Type{SSFOAT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z::Matrix,
+    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any}) 
+
+Wy = _dicM[:wy]
+Wu = _dicM[:wu]
+Wv = _dicM[:wv]
+
+if Wy!=Nothing  # yuv
+if Wu!=Nothing 
+if Wv!=Nothing #yuv
+    jlms, bc = jlmsbct_yuv( y, x, Q, w, v, z, Wy, Wu, Wv, PorC, pos, rho,  eigvalu, rowIDT )
+else # yu
+    jlms, bc = jlmsbct_yu( y, x, Q, w, v, z, Wy, Wu, PorC, pos, rho,  eigvalu, rowIDT  )
+end    
+else 
+if Wv!=Nothing #yv
+    jlms, bc = jlmsbct_yv(y, x, Q, w, v, z, Wy, Wv, PorC, pos, rho,  eigvalu, rowIDT )
+else #y
+    jlms, bc = jlmsbct_y(y, x, Q, w, v, z, Wy, PorC, pos, rho,  eigvalu, rowIDT )  
+end
+end
+else
+if Wu!=Nothing 
+if Wv!=Nothing #uv
+    jlms, bc = jlmsbct_uv(y, x, Q, w, v, z, Wu, Wv, PorC, pos, rho,  eigvalu, rowIDT  )
+else # u
+    jlms, bc = jlmsbct_u(y, x, Q, w, v, z, Wu, PorC, pos, rho,  eigvalu, rowIDT  ) 
+end    
+else 
+if Wv!=Nothing #v
+    jlms, bc = jlmsbct_v(y, x, Q, w, v, z, Wv,PorC, pos, rho,  eigvalu, rowIDT )
+else # 
+    jlms, bc = jlmsbct_( y, x, Q, w, v, z, PorC, pos, rho,  eigvalu, rowIDT  )  
+end
+end
+end 
+
+return jlms, bc  
+
+
+end
+
+
+
+
 function  jlmsbcdt_yuv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
       Wy::Matrix, Wu::Matrix, Wv::Matrix,
    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
@@ -1834,6 +1881,53 @@ end # begin
 return jlms, bc  
 
 end
+
+
+
+
+
+function jlmsbc(::Type{SSFOAH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
+    PorC::Int64,  num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+  
+    Wy = _dicM[:wy]
+    Wu = _dicM[:wu]
+    Wv = _dicM[:wv]
+      
+      if Wy!=Nothing  # yuv
+          if Wu!=Nothing 
+              if Wv!=Nothing #yuv
+                  jlms, bc = jlmsbch_yuv( y, x, Q, w, v, z, Wy, Wu, Wv, PorC, pos, rho,  eigvalu, rowIDT )
+              else # yu
+                  jlms, bc = jlmsbch_yu( y, x, Q, w, v, z, Wy, Wu, PorC, pos, rho,  eigvalu, rowIDT  )
+              end    
+          else 
+              if Wv!=Nothing #yv
+                  jlms, bc = jlmsbch_yv(y, x, Q, w, v, z, Wy, Wv, PorC, pos, rho,  eigvalu, rowIDT )
+              else #y
+                  jlms, bc = jlmsbch_y(y, x, Q, w, v, z, Wy, PorC, pos, rho,  eigvalu, rowIDT )  
+              end
+          end
+      else
+          if Wu!=Nothing 
+              if Wv!=Nothing #uv
+                  jlms, bc = jlmsbch_uv(y, x, Q, w, v, z, Wu, Wv, PorC, pos, rho,  eigvalu, rowIDT  )
+              else # u
+                  jlms, bc = jlmsbch_u(y, x, Q, w, v, z, Wu, PorC, pos, rho,  eigvalu, rowIDT  ) 
+              end    
+          else 
+              if Wv!=Nothing #v
+                  jlms, bc = jlmsbch_v(y, x, Q, w, v, z, Wv,PorC, pos, rho,  eigvalu, rowIDT )
+              else # 
+                  jlms, bc = jlmsbch_( y, x, Q, w, v, z, PorC, pos, rho,  eigvalu, rowIDT  )  
+              end
+          end
+      end 
+      
+      return jlms, bc  
+  
+    end
+
+
 
 
 
