@@ -31,7 +31,7 @@ export sfmodel_spec, sfmodel_init, sfmodel_opt,
        # functions for sfmodel_opt
         warmstart_solver, warmstart_maxIT,
         main_solver, main_maxIT, tolerance, verbose, banner,
-        ineff_index, marginal, table_format,
+        ineff_index, marginal, table_format,autodiff_mode,
        # functions for sfmodel_fit
         useData,
         sfmodel_CI,
@@ -47,7 +47,7 @@ export sfmodel_spec, sfmodel_init, sfmodel_opt,
         Trun, truncated, trun, t, Half, half, h, s,
         MoM,
         production, cost, #* not prod, b/c conflict with Base
-        text, html, latex,
+        text, html, latex, forward, finite,
         SSFOAT,SSFOAH, SSFOADT,SSFOADH, #* export for testing purpose
         SSF_OA2019,SSF_OAD2024,
       # Optim's algorithms  
@@ -123,7 +123,9 @@ abstract type TableFormat end
   struct html   <: TableFormat end
   struct latex  <: TableFormat end
 
-
+  abstract type AutoDiffMode end
+  struct forward   <: AutoDiffMode end
+  struct finite   <: AutoDiffMode end
 
 ################################################
 ##    include other files; order important    ##

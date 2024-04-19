@@ -56,4 +56,3 @@ sfmodel_opt(warmstart_solver(NelderMead()),
                     tolerance(1e-6));
 
 res = sfmodel_fit(useData(dat)) 
-

@@ -383,6 +383,7 @@ function sfmodel_opt(arg::Vararg; message::Bool=false) # create a dictionary of 
   _dicOPT[:main_solver]      = :(Newton())
   _dicOPT[:main_maxIT]       =  2000
   _dicOPT[:tolerance]        =  1.0e-8
+  _dicOPT[:autodiff_mode]     = :(forward)
   _dicOPT[:verbose]          =  true
   _dicOPT[:banner]           =  true
   _dicOPT[:ineff_index]      =  true
@@ -1110,6 +1111,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
        sf_maxit = _dicOPT[:main_maxIT] 
        sf_tol   = _dicOPT[:tolerance] 
        sf_table = _dicOPT[:table_format]
+       automode = _dicOPT[:autodiff_mode]
 
 #* ########  Start the Estimation  ##########
 
@@ -1120,7 +1122,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                             _porc, num, pos, rho,
                               eigvalu,   rowIDT, _dicM[:misc]),
                    sf_init;               
-                  autodiff = :forward); 
+                  autodiff = automode); 
   
 
   #* ---- Make placeholders for dictionary recording purposes *#
@@ -1208,30 +1210,30 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
 #* ###### Post-estimation process ############### 
     _coevec            = Optim.minimizer(mfun)  # coef. vec.
   
-  _coevec_adj = []
-  for i in 1:length(eqvec2)
-      # println(typeof(keys(eqvec2)[i] ))
+    _coevec_adj = []
+    for i in 1:length(eqvec2)
+        # println(typeof(keys(eqvec2)[i] ))
 
-      if keys(eqvec2)[i] ∉ [:coeff_γ, :coeff_τ, :coeff_ρ] 
-      _coevec_adj = vcat(_coevec_adj, _coevec[eqvec2[i]])
-      else
-          if keys(eqvec2)[i] == :coeff_γ
-              ss =  _coevec[eqvec2[i]][1]
-              gamma_adj = eigvalu.rymin/(1+exp(ss))+eigvalu.rymax*exp(ss)/(1+exp(ss))
-              _coevec_adj = vcat(_coevec_adj, gamma_adj)
-          end
-          if keys(eqvec2)[i] == :coeff_τ
-              ss =  _coevec[eqvec2[i]][1]
-              tau_adj = eigvalu.rumin/(1+exp(ss))+eigvalu.rumax*exp(ss)/(1+exp(ss))
-              _coevec_adj = vcat(_coevec_adj, tau_adj)
-          end
-          if keys(eqvec2)[i] == :coeff_ρ
-              ss =  _coevec[eqvec2[i]][1]
-              rho_adj = eigvalu.rvmin/(1+exp(ss))+eigvalu.rvmax*exp(ss)/(1+exp(ss))
-              _coevec_adj = vcat(_coevec_adj, rho_adj)         
-          end
-      end
-  end
+        if keys(eqvec2)[i] ∉ [:coeff_γ, :coeff_τ, :coeff_ρ] 
+        _coevec_adj = vcat(_coevec_adj, _coevec[eqvec2[i]])
+        else
+            if keys(eqvec2)[i] == :coeff_γ
+                ss =  _coevec[eqvec2[i]][1]
+                gamma_adj = eigvalu.rymin/(1+exp(ss))+eigvalu.rymax*exp(ss)/(1+exp(ss))
+                _coevec_adj = vcat(_coevec_adj, gamma_adj)
+            end
+            if keys(eqvec2)[i] == :coeff_τ
+                ss =  _coevec[eqvec2[i]][1]
+                tau_adj = eigvalu.rumin/(1+exp(ss))+eigvalu.rumax*exp(ss)/(1+exp(ss))
+                _coevec_adj = vcat(_coevec_adj, tau_adj)
+            end
+            if keys(eqvec2)[i] == :coeff_ρ
+                ss =  _coevec[eqvec2[i]][1]
+                rho_adj = eigvalu.rvmin/(1+exp(ss))+eigvalu.rvmax*exp(ss)/(1+exp(ss))
+                _coevec_adj = vcat(_coevec_adj, rho_adj)         
+            end
+        end
+    end
   
   # numerical_hessian = Calculus.hessian(rho -> LL_T(tagD[:modelid], 
   #                        yvar, xvar, qvar, wvar, vvar, zvar, envar, ivvar,
@@ -1241,20 +1243,42 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
   #                        yvar, xvar, qvar, wvar, vvar, zvar, envar, ivvar,
   #                          _porc, num, pos, rho,
   #                             eigvalu,   rowIDT, _dicM[:misc]), _coevec)
-  numerical_hessian  = hessian!(_Hessian, _coevec)  # Hessain
+
+  # numerical_hessian  = hessian!(_Hessian, _coevec)  # Hessain
+
+    if automode == :forward
+      numerical_hessian  = hessian!(_Hessian, _coevec)  # Hessain
+
+      var_cov_matrix =  try
+                          pinv(numerical_hessian)
+                        catch err 
+                          numerical_hessian = Calculus.hessian(rho -> LL_T(tagD[:modelid], 
+                                              yvar, xvar, qvar, wvar, vvar, zvar, envar, ivvar,
+                                                _porc, num, pos, rho,
+                                                    eigvalu,   rowIDT, _dicM[:misc]), _coevec)
+
+                          var_cov_matrix =  try
+                                              pinv(numerical_hessian)
+                                            catch err 
+                                              redflag = 1
+                                              # checkCollinear(tagD[:modelid], xvar,  qvar, wvar, vvar,zvar) # check if it is b/c of multi-collinearity in the data         
+                                              throw("The Hessian matrix is not invertible, indicating the model does not converge properly. The estimation is abort.")
+                                            end
+                        end
+    else
+
+      numerical_hessian = Calculus.hessian(rho -> LL_T(tagD[:modelid], 
+                            yvar, xvar, qvar, wvar, vvar, zvar, envar, ivvar,
+                              _porc, num, pos, rho,
+                                  eigvalu,   rowIDT, _dicM[:misc]), _coevec)
+    end
 
   println("############################################################")
 
   
   #* ------ Check if the matrix is invertible. ----
 
-   var_cov_matrix = try
-                       pinv(numerical_hessian)
-                    catch err 
-                       redflag = 1
-                       # checkCollinear(tagD[:modelid], xvar,  qvar, wvar, vvar,zvar) # check if it is b/c of multi-collinearity in the data         
-                       throw("The Hessian matrix is not invertible, indicating the model does not converge properly. The estimation is abort.")
-                    end 
+
                     
         #* In some cases the matrix is invertible but the resulting diagonal
         #*    elements are negative. Check.
@@ -1500,6 +1524,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
     _dicRES[:timevar]       = _dicM[:timevar]  
     _dicRES[:idvar]         = _dicM[:idvar] # for bootstrap marginal effect
     _dicRES[:table_format]  = _dicOPT[:table_format]
+    _dicRES[:autodiff_mode]  = _dicOPT[:autodiff_mode]
     _dicRES[:modelid]       = tagD[:modelid]
     _dicRES[:verbose]       = _dicOPT[:verbose]
     _dicRES[:hasDF]         = _dicM[:hasDF]

@@ -1290,6 +1290,15 @@ marginal(arg::Bool)
 end
 
 
+function autodiff_mode(arg=nothing)
+    
+    if !(arg ∈ (forward, finite ))
+        throw("The keyword of `autodiff_mode` in `sfmodel_opt()` is specified incorrectly. Only allow `forward`, or `finite`. Got `$(arg)` instead.")
+   end 
+
+    return (:autodiff_mode, Symbol(arg))
+end
+
  
   #? ------ functions for sfmodel_fit ----------
  
