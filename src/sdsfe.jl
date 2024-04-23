@@ -39,6 +39,8 @@ export sfmodel_spec, sfmodel_init, sfmodel_opt,
         sfmodel_MoMTest,
        # functions for JLMS and BC index
         jlmsbc, jlmsbc_marg,
+       # functions for partial loglikehood
+        prtlloglike,
        # the table for regular and mixed Chi-square test
         sfmodel_MixTable, sfmodel_ChiSquareTable,
        # struct 
@@ -141,6 +143,7 @@ include("sdsfeindex.jl")
 # include("sdsfepredict.jl")
 include("sdsfemarginal.jl")
 include("sdsfemainfun.jl")
+include("sdsfepartialloglike.jl")
 
 
 

@@ -1295,8 +1295,8 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
       @views (_jlms, _bc) = jlmsbc(tagD[:modelid], yvar, xvar,  qvar, wvar, vvar,  zvar, envar, ivvar,
                                        _porc, num, pos, _coevec,  eigvalu, rowIDT)
 
-      _jlmsM = mean(_jlms) # sum(_jlms)/length(_jlms)
-      _bcM   = mean(_bc)   # sum(_bc)/length(_bc)
+      _jlmsM = mean.(eachcol(_jlms)) # sum(_jlms)/length(_jlms)
+      _bcM   = mean.(eachcol(_bc))   # sum(_bc)/length(_bc)
    else
       _jlms  = nothing
       _bc    = nothing
@@ -1383,6 +1383,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
   table[:,5] = p_value   # p value
   table[:,6] = ci_low
   table[:,7] = ci_upp
+
   table      = [" " "Coef." "Std. Err." "z" "P>|z|" "95%CI_l" "95%CI_u"; table]  # add to top of the table
 
      #*  creating a column of function names 
@@ -1398,6 +1399,28 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
   table = hcat(varlist, table)                      # combine the variable names column (hcat, horizontal concatenate; see also vcat)
   table[:,1], table[:,2] = table[:,2], table[:,1]   # swap the first name column and the function column
   table[1,2] = "Var."
+
+  stas = zeros(5, 7)
+  stas = hcat([ "Median Efficiency"; "Num of obs." ;"Log of Likelihood" ; "AIC";  "BIC"], stas )
+  stas[:,2:8] .= "";
+  stas[1,3] = tuple(_bcM...)  
+  stas[2,3] = num.nofobs
+  if tagD[:modelid] in (SSFOADT,SSFOADH)
+    stas[3,3] = prtlloglike(tagD[:modelid], yvar, xvar,  qvar, wvar, vvar,  zvar, envar, ivvar,
+    _porc, num, pos, _coevec,  eigvalu, rowIDT)
+  else
+    stas[3,3] = -Optim.minimum(mfun)
+  end
+  stas[4,3] = (-2)* (-Optim.minimum(mfun))+2*num.nofpara
+  stas[5,3] = (-2)* (-Optim.minimum(mfun))+log(num.nofobs)*num.nofpara
+  table= vcat(table, stas)  
+
+  if tagD[:modelid] in (SSFOADT,SSFOADH)
+    row_indices = setdiff(1:size(table, 1), pos.begphi+1:pos.endphi+1)
+    table_show = table[row_indices, :]
+  else
+    table_show = table
+  end
 
    # * ------ Print Results ----------- *#
 
@@ -1419,7 +1442,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
        print("Log-likelihood value: "); printstyled(round(-1*Optim.minimum(mfun); digits=5); color=:yellow); println()
        println()
    
-       pretty_table(table[2:end,:],    # could print the whole table as is, but this prettier
+       pretty_table(table_show[2:end,:],    # could print the whole table as is, but this prettier
                     header=["", "Var.", "Coef.", "Std.Err.", "z", "P>|z|", 
                             "95%CI_l", "95%CI_u"],
                     formatters = ft_printf("%5.4f", 3:8),
@@ -1468,10 +1491,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
        printstyled("***** Additional Information *********\n"; color=:cyan)
 
 
-       if _dicOPT[:ineff_index] 
-          print("* The sample mean of the JLMS inefficiency index: "); printstyled(round(_jlmsM; digits=5); color=:yellow); println("")
-          print("* The sample mean of the BC efficiency index: "); printstyled(round(_bcM; digits=5); color=:yellow); println("\n")
-       end
+
        if length(margMinfo) >= 1
           print("* The sample mean of inefficiency determinants' marginal effects on E(u): " ); printstyled(margMinfo; color=:yellow); println("")
           println("* Marginal effects of the inefficiency determinants at the observational level are saved in the return. See the follows.\n")
@@ -1497,6 +1517,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
     _dicRES[:n_observations]  = num.nofobs
     _dicRES[:loglikelihood]   = -Optim.minimum(mfun)
     _dicRES[:table]           = [table][1]
+    _dicRES[:table_show]      = [table_show][1]
     _dicRES[:coeff]           = _coevec_adj
     _dicRES[:std_err]         = stddev_adj
     _dicRES[:var_cov_mat]     = [var_cov_matrix][1]
