@@ -201,13 +201,19 @@ function marg_ssfoah(ttt::Int, iii::Int, N::Int,# PorC::Int64,
      taup = coef[pos.begtau]
      tau  = eigvalu.rumin/(1+exp(taup))+eigvalu.rumax*exp(taup)/(1+exp(taup));
      Wu = _dicM[:wu]
-     if length(Wu)==1
-          Mtau = (I(N)-tau*Wu[1])\I(N);
-          hs = Mtau[iii]*h;
+     if Wu!=Nothing 
+
+          if length(Wu)==1
+               Mtau = (I(N)-tau*Wu[1])\I(N);
+               hs = Mtau[iii]*h;
+          else
+               Mtau = (I(N)-tau*Wu[ttt])\I(N);
+               hs = Mtau[iii]*h;
+          end
      else
-          Mtau = (I(N)-tau*Wu[ttt])\I(N);
-          hs = Mtau[iii]*h;
+          hs=h
      end
+
      hsμ  = hs*μ
      hsσᵤ = hs*σᵤ 
       Λ  = hsμ/hsσᵤ 
@@ -294,13 +300,19 @@ function marg_ssfoat(ttt::Int, iii::Int, N::Int,# PorC::Int64,
      taup = coef[pos.begtau]
      tau  = eigvalu.rumin/(1+exp(taup))+eigvalu.rumax*exp(taup)/(1+exp(taup));
      Wu = _dicM[:wu]
-     if length(Wu)==1
-          Mtau = (I(N)-tau*Wu[1])\I(N);
-          hs = Mtau[iii]*h;
+     if Wu!=Nothing 
+
+          if length(Wu)==1
+               Mtau = (I(N)-tau*Wu[1])\I(N);
+               hs = Mtau[iii]*h;
+          else
+               Mtau = (I(N)-tau*Wu[ttt])\I(N);
+               hs = Mtau[iii]*h;
+          end
      else
-          Mtau = (I(N)-tau*Wu[ttt])\I(N);
-          hs = Mtau[iii]*h;
+          hs=h
      end
+
      hsμ  = hs*μ
      hsσᵤ = hs*σᵤ 
       Λ  = hsμ/hsσᵤ 

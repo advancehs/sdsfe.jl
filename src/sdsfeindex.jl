@@ -684,7 +684,7 @@ hi  = exp.(Q*τ)
 σᵥ² = exp(γ)  
 σᵥ = exp(0.5*γ)    
 μ   = δ1
-ϵ = PorC*(y - x * β-eps*eta)
+ϵ = PorC*(y - x * β )
 T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);
@@ -768,7 +768,7 @@ hi  = exp.(Q*τ)
 σᵥ² = exp(γ)  
 σᵥ = exp(0.5*γ)    
 μ   = δ1
-ϵ = PorC*(y - x * β-eps*eta)
+ϵ = PorC*(y - x * β )
 T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);
@@ -851,7 +851,7 @@ hi  = exp.(Q*τ)
 σᵥ² = exp(γ)  
 σᵥ = exp(0.5*γ)    
 μ   = δ1
-ϵ = PorC*(y - x * β-eps*eta)
+ϵ = PorC*(y - x * β )
 T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);
@@ -936,7 +936,7 @@ hi  = exp.(Q*τ)
 σᵥ² = exp(γ)  
 σᵥ = exp(0.5*γ)    
 μ   = δ1
-ϵ = PorC*(y - x * β-eps*eta)
+ϵ = PorC*(y - x * β )
 T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);
@@ -1021,7 +1021,7 @@ hi  = exp.(Q*τ)
 σᵥ² = exp(γ)  
 σᵥ = exp(0.5*γ)    
 μ   = δ1
-ϵ = PorC*(y - x * β-eps*eta)
+ϵ = PorC*(y - x * β )
 T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);
@@ -1108,7 +1108,7 @@ hi  = exp.(Q*τ)
 σᵥ² = exp(γ)  
 σᵥ = exp(0.5*γ)    
 μ   = δ1
-ϵ = PorC*(y - x * β-eps*eta)
+ϵ = PorC*(y - x * β )
 T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);
@@ -1192,7 +1192,7 @@ hi  = exp.(Q*τ)
 σᵥ² = exp(γ)  
 σᵥ = exp(0.5*γ)    
 μ   = δ1
-ϵ = PorC*(y - x * β-eps*eta)
+ϵ = PorC*(y - x * β )
 T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);
@@ -1273,7 +1273,7 @@ hi  = exp.(Q*τ)
 σᵥ² = exp(γ)  
 σᵥ = exp(0.5*γ)    
 μ   = δ1
-ϵ = PorC*(y - x * β-eps*eta)
+ϵ = PorC*(y - x * β )
 T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);
@@ -2067,7 +2067,7 @@ hi  = exp.(Q*τ)
 σᵥ² = exp(γ)  
 σᵥ = exp(0.5*γ)    
 μ   = 0
-ϵ = PorC*(y - x * β-eps*eta)
+ϵ = PorC*(y - x * β )
 T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);
@@ -2152,7 +2152,7 @@ hi  = exp.(Q*τ)
 σᵥ² = exp(γ)  
 σᵥ = exp(0.5*γ)    
 μ   = 0
-ϵ = PorC*(y - x * β-eps*eta)
+ϵ = PorC*(y - x * β )
 T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);
@@ -2235,7 +2235,7 @@ hi  = exp.(Q*τ)
 σᵥ² = exp(γ)  
 σᵥ = exp(0.5*γ)    
 μ   = 0
-ϵ = PorC*(y - x * β-eps*eta)
+ϵ = PorC*(y - x * β )
 T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);
@@ -2320,7 +2320,7 @@ hi  = exp.(Q*τ)
 σᵥ² = exp(γ)  
 σᵥ = exp(0.5*γ)    
 μ   = 0
-ϵ = PorC*(y - x * β-eps*eta)
+ϵ = PorC*(y - x * β )
 T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);
@@ -2405,7 +2405,7 @@ hi  = exp.(Q*τ)
 σᵥ² = exp(γ)  
 σᵥ = exp(0.5*γ)    
 μ   = 0
-ϵ = PorC*(y - x * β-eps*eta)
+ϵ = PorC*(y - x * β )
 T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);
@@ -2492,7 +2492,7 @@ hi  = exp.(Q*τ)
 σᵥ² = exp(γ)  
 σᵥ = exp(0.5*γ)    
 μ   = 0
-ϵ = PorC*(y - x * β-eps*eta)
+ϵ = PorC*(y - x * β )
 T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);
@@ -2576,7 +2576,7 @@ hi  = exp.(Q*τ)
 σᵥ² = exp(γ)  
 σᵥ = exp(0.5*γ)    
 μ   = 0
-ϵ = PorC*(y - x * β-eps*eta)
+ϵ = PorC*(y - x * β )
 T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);
@@ -2657,7 +2657,7 @@ hi  = exp.(Q*τ)
 σᵥ² = exp(γ)  
 σᵥ = exp(0.5*γ)    
 μ   = 0
-ϵ = PorC*(y - x * β-eps*eta)
+ϵ = PorC*(y - x * β )
 T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);

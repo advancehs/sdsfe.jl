@@ -892,7 +892,7 @@ end # @floop begin
    σᵥ² = exp(γ)            # todo: 重新换一下字母 
    σᵥ = exp(0.5*γ)  
    μ   = 0
-   ϵ = PorC*(y - x*β- eps  *eta)
+   ϵ = PorC*(y - x*β)
    T = size(rowIDT,1)
 
 
@@ -1028,7 +1028,7 @@ end # @floop begin
    σᵥ² = exp(γ)            # todo: 重新换一下字母 
    σᵥ = exp(0.5*γ)  
    μ   = 0
-   ϵ = PorC*(y - x*β - eps  *eta)
+   ϵ = PorC*(y - x*β )
    T = size(rowIDT,1)
 
 
@@ -1165,7 +1165,7 @@ end # @floop begin
    σᵥ = exp(0.5*γ)  
    μ   = 0
 
-   ϵ =   PorC*(y - x*β - eps  *eta)
+   ϵ =   PorC*(y - x*β  )
    T = size(rowIDT,1)
 
    if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
@@ -1295,7 +1295,7 @@ end # @floop begin
    σᵥ² = exp(γ)            # todo: 重新换一下字母 
    σᵥ = exp(0.5*γ)  
    μ   = 0
-   ϵ = PorC*(y - x*β- eps  *eta)
+   ϵ = PorC*(y - x*β)
    T = size(rowIDT,1)
 
 
@@ -1429,7 +1429,7 @@ end # @floop begin
    σᵥ² = exp(γ)            # todo: 重新换一下字母 
    σᵥ = exp(0.5*γ)  
    μ   = 0
-   ϵ = PorC*(y - x*β- eps  *eta)
+   ϵ = PorC*(y - x*β)
    T = size(rowIDT,1)
 
    if length(Wu)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
@@ -1564,7 +1564,7 @@ end # @floop begin
    σᵥ² = exp(γ)            # todo: 重新换一下字母 
    σᵥ = exp(0.5*γ)  
    μ   = 0
-   ϵ = PorC*(y - x*β- eps  *eta)
+   ϵ = PorC*(y - x*β)
    T = size(rowIDT,1)
 
    if length(Wu)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
@@ -1694,7 +1694,7 @@ end # @floop begin
    σᵥ² = exp(γ)            # todo: 重新换一下字母 
    σᵥ = exp(0.5*γ)  
    μ   = 0
-   ϵ = PorC*(y - x*β- eps  *eta)
+   ϵ = PorC*(y - x*β)
    T = size(rowIDT,1)
 
    if length(Wv)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
@@ -1822,7 +1822,7 @@ end # @floop begin
    σᵥ² = exp(γ)            # todo: 重新换一下字母 
    σᵥ = exp(0.5*γ)  
    μ   = 0
-   ϵ = PorC*(y - x*β- eps  *eta)
+   ϵ = PorC*(y - x*β)
    T = size(rowIDT,1)
 
 
@@ -2792,7 +2792,7 @@ end # @floop begin
    σᵥ² = exp(γ)            # todo: 重新换一下字母 
    σᵥ = exp(0.5*γ)  
    μ   = δ1
-   ϵ = PorC*(y - x*β - eps  *eta)
+   ϵ = PorC*(y - x*β)
    T = size(rowIDT,1)
 
 
@@ -2928,7 +2928,7 @@ end # @floop begin
    σᵥ² = exp(γ)            # todo: 重新换一下字母 
    σᵥ = exp(0.5*γ)  
    μ   = δ1
-   ϵ = PorC*(y - x*β   - eps  *eta)
+   ϵ = PorC*(y - x*β   )
    T = size(rowIDT,1)
 
 
@@ -3064,7 +3064,7 @@ end # @floop begin
    σᵥ² = exp(γ)            # todo: 重新换一下字母 
    σᵥ = exp(0.5*γ)  
    μ   = δ1
-   ϵ = PorC*(y - x*β  - eps  *eta)
+   ϵ = PorC*(y - x*β  )
    T = size(rowIDT,1)
 
    if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
@@ -3193,7 +3193,7 @@ end # @floop begin
    σᵥ² = exp(γ)            # todo: 重新换一下字母 
    σᵥ = exp(0.5*γ)  
    μ   = δ1
-   ϵ = PorC*(y - x*β  - eps  *eta)
+   ϵ = PorC*(y - x*β  )
    T = size(rowIDT,1)
 
 
@@ -3327,7 +3327,7 @@ end # @floop begin
    σᵥ² = exp(γ)            # todo: 重新换一下字母 
    σᵥ = exp(0.5*γ)  
    μ   = δ1
-   ϵ = PorC*(y - x*β  - eps  *eta)
+   ϵ = PorC*(y - x*β )
    T = size(rowIDT,1)
 
    if length(Wu)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
@@ -3462,7 +3462,7 @@ end # @floop begin
    σᵥ² = exp(γ)            # todo: 重新换一下字母 
    σᵥ = exp(0.5*γ)  
    μ   = δ1
-   ϵ = PorC*(y - x*β   - eps  *eta)
+   ϵ = PorC*(y - x*β   )
    T = size(rowIDT,1)
 
    if length(Wu)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
@@ -3592,7 +3592,7 @@ end # @floop begin
    σᵥ² = exp(γ)            # todo: 重新换一下字母 
    σᵥ = exp(0.5*γ)  
    μ   = δ1
-   ϵ = PorC*(y - x*β  - eps  *eta)
+   ϵ = PorC*(y - x*β  )
    T = size(rowIDT,1)
 
    if length(Wv)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
@@ -3720,7 +3720,7 @@ end # @floop begin
    σᵥ² = exp(γ)            # todo: 重新换一下字母 
    σᵥ = exp(0.5*γ)  
    μ   = δ1
-   ϵ = PorC*(y - x*β  - eps  *eta)
+   ϵ = PorC*(y - x*β  )
    T = size(rowIDT,1)
 
 

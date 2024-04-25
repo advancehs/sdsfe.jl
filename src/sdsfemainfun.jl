@@ -1406,13 +1406,15 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
   stas[1,3] = tuple(_bcM...)  
   stas[2,3] = num.nofobs
   if tagD[:modelid] in (SSFOADT,SSFOADH)
-    stas[3,3] = prtlloglike(tagD[:modelid], yvar, xvar,  qvar, wvar, vvar,  zvar, envar, ivvar,
-    _porc, num, pos, _coevec,  eigvalu, rowIDT)
+    llkkkk = -1* prtlloglike(tagD[:modelid], yvar, xvar,  qvar, wvar, vvar,  zvar, envar, ivvar, _porc, num, pos, _coevec,  eigvalu, rowIDT)
+    stas[3,3] = llkkkk
+    stas[4,3] = (-2)* (llkkkk)+2*num.nofpara
+    stas[5,3] = (-2)* (llkkkk)+log(num.nofobs)*num.nofpara
   else
     stas[3,3] = -Optim.minimum(mfun)
+    stas[4,3] = (-2)* (-Optim.minimum(mfun))+2*num.nofpara
+    stas[5,3] = (-2)* (-Optim.minimum(mfun))+log(num.nofobs)*num.nofpara
   end
-  stas[4,3] = (-2)* (-Optim.minimum(mfun))+2*num.nofpara
-  stas[5,3] = (-2)* (-Optim.minimum(mfun))+log(num.nofobs)*num.nofpara
   table= vcat(table, stas)  
 
   if tagD[:modelid] in (SSFOADT,SSFOADH)
