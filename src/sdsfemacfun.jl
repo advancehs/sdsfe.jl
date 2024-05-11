@@ -822,7 +822,7 @@ function sfpanel(arg::Vararg)
      
     (length(arg)==1) || throw("`sfpanel()` in sfmodel_spec should have one single string.")
     
-    if !(arg[1] ∈ (SSF_OA2019,SSF_OAD2024))
+    if !(arg[1] ∈ (SSF_OA2019,SSF_OAD2024,SSF_KU2020))
          throw("The keyword of `sfpanel` in sfmodel_spec is specified incorrectly.")
     end 
     

@@ -191,6 +191,12 @@ function sfmodel_spec(arg::Vararg; message::Bool=false)
         elseif (_dicM[:panel] == [:SSF_OA2019]) && (s=="H") 
           tagD = Dict{Symbol, Type{SSFOAH}}()
           tagD[:modelid] = SSFOAH 
+        elseif (_dicM[:panel] == [:SSF_KU2020]) && (s=="T") 
+          tagD = Dict{Symbol, Type{SSFKUT}}()
+          tagD[:modelid] = SSFKUT
+        elseif (_dicM[:panel] == [:SSF_KU2020]) && (s=="H") 
+          tagD = Dict{Symbol, Type{SSFKUH}}()
+          tagD[:modelid] = SSFKUH 
         elseif (_dicM[:panel] == [:SSF_OAD2024]) && (s=="T") 
           tagD = Dict{Symbol, Type{SSFOADT}}()
           tagD[:modelid] = SSFOADT
@@ -524,13 +530,14 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
     r0 = 0.3
     ry = (r0 - eigvalu.rymin) / (eigvalu.rymax - eigvalu.rymin)
     pgammaini = log(ry / (1 - ry))
-
-    ru = (r0 - eigvalu.rumin) / (eigvalu.rumax - eigvalu.rumin)
-    ptauini = log(ru / (1 - ru))
-
-    rv = (r0 - eigvalu.rvmin) / (eigvalu.rvmax - eigvalu.rvmin)
-    prhoini = log(rv / (1 - rv))
-
+    if Wu!=Nothing 
+      ru = (r0 - eigvalu.rumin) / (eigvalu.rumax - eigvalu.rumin)
+      ptauini = log(ru / (1 - ru))
+    end
+    if Wv!=Nothing 
+      rv = (r0 - eigvalu.rvmin) / (eigvalu.rvmax - eigvalu.rvmin)
+      prhoini = log(rv / (1 - rv))
+    end
     #* --- Create the dictionary -----------
 
    if (:all_init in keys(_dicINI))
@@ -543,38 +550,41 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
        g_ini  = get(_dicINI, :eqv, log.(ones(num.nofv) * 0.1))
        d1_ini = get(_dicINI, :eqz, ones(num.nofz) * 0.1)
        gammma_ini = get(_dicINI, :eqgamma, pgammaini)
-       tau_ini = get(_dicINI, :eqz, ptauini)
-       rho_ini = get(_dicINI, :eqz, prhoini)
-
+       if Wu!=Nothing 
+        tau_ini = get(_dicINI, :eqz, ptauini)
+       end
+       if Wv!=Nothing 
+        rho_ini = get(_dicINI, :eqz, prhoini)
+       end
        #*  Make it Array{Float64,1}; otherwise Array{Float64,2}. ---#     
        #*       Could also use sf_init[:,1]. *#
       if tagD[:modelid] == SSFOAH
           if Wy!=Nothing  # yuv
               if Wu!=Nothing 
                   if Wv!=Nothing #yuv
-                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, gammma_ini, tau_ini, rho_ini)  
+                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, gammma_ini, tau_ini, rho_ini)  
                   else # yu
-                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, gammma_ini, tau_ini)  
+                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, gammma_ini, tau_ini)  
                   end    
               else 
                   if Wv!=Nothing #yv
-                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, gammma_ini, rho_ini)  
+                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, gammma_ini, rho_ini)  
                   else #y
-                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, gammma_ini)  
+                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, gammma_ini)  
                   end
               end
           else
               if Wu!=Nothing 
                   if Wv!=Nothing #uv
-                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, tau_ini, rho_ini)  
+                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, tau_ini, rho_ini)  
                   else # u
-                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, tau_ini)  
+                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, tau_ini)  
                   end    
               else 
                   if Wv!=Nothing #v
-                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, rho_ini)  
+                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, rho_ini)  
                   else # 
-                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini)  
+                       sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini)  
                   end
               end
           end            
@@ -607,7 +617,17 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                        sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini)  
                   end
               end
-          end            
+          end    
+      elseif tagD[:modelid] == SSFKUT
+        phi_ini = get(_dicINI, :eqphi, vec(ivvar \ envar))
+        eta_ini = get(_dicINI, :eqeta, ones(num.nofeta)*0.1)
+        sf_init = vcat(b_ini, t_ini, phi_ini, eta_ini, d2_ini,  g_ini, d1_ini, gammma_ini)  
+
+      elseif tagD[:modelid] == SSFKUH
+        phi_ini = get(_dicINI, :eqphi, vec(ivvar \ envar))
+        eta_ini = get(_dicINI, :eqeta, ones(num.nofeta)*0.1)
+        sf_init = vcat(b_ini, t_ini, phi_ini, eta_ini, d2_ini,  g_ini, gammma_ini)  
+    
       elseif tagD[:modelid] == SSFOADH
           if Wy!=Nothing  # yuv
               if Wu!=Nothing 
@@ -1271,6 +1291,13 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                             yvar, xvar, qvar, wvar, vvar, zvar, envar, ivvar,
                               _porc, num, pos, rho,
                                   eigvalu,   rowIDT, _dicM[:misc]), _coevec)
+      var_cov_matrix =  try
+                          pinv(numerical_hessian)
+                        catch err 
+                          redflag = 1
+                          # checkCollinear(tagD[:modelid], xvar,  qvar, wvar, vvar,zvar) # check if it is b/c of multi-collinearity in the data         
+                          throw("The Hessian matrix is not invertible, indicating the model does not converge properly. The estimation is abort.")
+                        end
     end
 
   println("############################################################")
@@ -1334,7 +1361,11 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
 
   
    #* ------- Make Table ------------------
-
+   for i in 1:size(var_cov_matrix, 1)
+    if var_cov_matrix[i, i] < 0
+        var_cov_matrix[i, i] = Inf
+    end
+    end
    stddev  = sqrt.(diag(var_cov_matrix)) # standard error
 
    stddev_adj = []
@@ -1405,7 +1436,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
   stas[:,2:8] .= "";
   stas[1,3] = tuple(_bcM...)  
   stas[2,3] = num.nofobs
-  if tagD[:modelid] in (SSFOADT,SSFOADH)
+  if tagD[:modelid] in (SSFOADT,SSFOADH,SSFOADH,SSFOADT)
     llkkkk = -1* prtlloglike(tagD[:modelid], yvar, xvar,  qvar, wvar, vvar,  zvar, envar, ivvar, _porc, num, pos, _coevec,  eigvalu, rowIDT)
     stas[3,3] = llkkkk
     stas[4,3] = (-2)* (llkkkk)+2*num.nofpara
@@ -1417,7 +1448,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
   end
   table= vcat(table, stas)  
 
-  if tagD[:modelid] in (SSFOADT,SSFOADH)
+  if tagD[:modelid] in (SSFOADT,SSFOADH,SSFKUH,SSFKUT)
     row_indices = setdiff(1:size(table, 1), pos.begphi+1:pos.endphi+1)
     table_show = table[row_indices, :]
   else

@@ -1181,7 +1181,7 @@ end # @floop begin
     @inbounds  for ttt=1:T  
             @views ind = rowIDT[ttt,1];
             @views his = Mtau*hi[ind];
-            @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind];
+            @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind] - PorC.*(eps[ind,:]*eta) ;
             @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
             @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
             @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -1213,7 +1213,7 @@ elseif length(Wy)>1
     
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] ;
+    @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] - PorC.*(eps[ind,:]*eta) ;
     @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -1311,7 +1311,7 @@ end # @floop begin
     @inbounds  for ttt=1:T  
             @views ind = rowIDT[ttt,1];
             @views his = Mtau*hi[ind];
-            @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind] ;
+            @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind]  - PorC.*(eps[ind,:]*eta) ;
             @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
             @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
             @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -1343,7 +1343,7 @@ elseif length(Wy)>1
     
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] ;
+    @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] - PorC.*(eps[ind,:]*eta)  ;
     @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -1578,7 +1578,7 @@ end # @floop begin
     @inbounds  for ttt=1:T  
             @views ind = rowIDT[ttt,1];
             @views his = Mtau*hi[ind];
-            @views ϵs  = ϵ[ind];
+            @views ϵs  = ϵ[ind] - PorC.*(eps[ind,:]*eta) ;
             @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
             @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
             @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -1609,7 +1609,7 @@ elseif length(Wu)>1
     
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind];
+    @views ϵs  = ϵ[ind] - PorC.*(eps[ind,:]*eta) ;
     @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -1836,7 +1836,7 @@ end # @floop begin
     @inbounds  for ttt=1:T  
             @views ind = rowIDT[ttt,1];
             @views his = Mtau*hi[ind];
-            @views ϵs  = ϵ[ind] ;
+            @views ϵs  = ϵ[ind]  - PorC.*(eps[ind,:]*eta) ;
             @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
             @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
             @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -3079,7 +3079,7 @@ end # @floop begin
     @inbounds  for ttt=1:T  
             @views ind = rowIDT[ttt,1];
             @views his = Mtau*hi[ind];
-            @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind];
+            @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind] - PorC.*(eps[ind,:]*eta) ;
             @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
             @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
             @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -3111,7 +3111,7 @@ elseif length(Wy)>1
     
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] ;
+    @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] - PorC.*(eps[ind,:]*eta)  ;
     @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -3209,7 +3209,7 @@ end # @floop begin
     @inbounds  for ttt=1:T  
             @views ind = rowIDT[ttt,1];
             @views his = Mtau*hi[ind];
-            @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind] ;
+            @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind]  - PorC.*(eps[ind,:]*eta) ;
             @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
             @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
             @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -3241,7 +3241,7 @@ elseif length(Wy)>1
     
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] ;
+    @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind]  - PorC.*(eps[ind,:]*eta) ;
     @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -3476,7 +3476,7 @@ end # @floop begin
     @inbounds  for ttt=1:T  
             @views ind = rowIDT[ttt,1];
             @views his = Mtau*hi[ind];
-            @views ϵs  = ϵ[ind];
+            @views ϵs  = ϵ[ind] - PorC.*(eps[ind,:]*eta) ;
             @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
             @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
             @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -3507,7 +3507,7 @@ elseif length(Wu)>1
     
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind];
+    @views ϵs  = ϵ[ind] - PorC.*(eps[ind,:]*eta) ;
     @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -3734,7 +3734,7 @@ end # @floop begin
     @inbounds  for ttt=1:T  
             @views ind = rowIDT[ttt,1];
             @views his = Mtau*hi[ind];
-            @views ϵs  = ϵ[ind] ;
+            @views ϵs  = ϵ[ind]  - PorC.*(eps[ind,:]*eta) ;
             @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
             @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
             @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -3883,6 +3883,599 @@ else
 end 
 return llt
 end
+
+
+
+# function LL_T(::Type{SSFKUH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, 
+#     EN::Matrix,IV::Matrix, PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
+
+#   Wy = _dicM[:wy]
+
+#   β  = rho[1:po.endx]
+#   τ  = rho[po.begq:po.endq]
+#   phi = rho[po.begphi:po.endphi]
+# ## calculate lkx
+#   nofiv = num.nofphi/num.nofeta
+#   eps = zeros(eltype(EN),num.nofobs,num.nofeta);
+
+#   # %%%%%%%%%%%%%%
+#   # @inbounds  for ii=1:num.nofeta
+#   #      eps[:,ii]=EN[:,ii]-IV*phi[((Int(ii)-1)*Int(nofiv)+1):(Int(ii)*Int(nofiv))];
+#   #  end
+#    @views phi = reshape(phi, :, num.nofeta)
+#    @views eps = EN- IV*phi
+
+#    @views LL = ((eps .- mean(eps, dims=1))' * (eps .- mean(eps, dims=1)) )/ num.nofobs
+#    @views logdetll = log(det(LL))
+#    @views invll = LL\I(num.nofeta)
+#    likx = zero(eltype(y));
+
+
+# try
+# @floop begin
+# @inbounds for iitt =1:num.nofobs
+#         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+#            if simple_check(tempx)
+#                likx += -1e9
+#            else
+#                likx += tempx
+#            end # simple_check(tempx)
+
+#    end # iitt =1:num.nofobs
+# end # @floop begin
+# ## calculate lky
+
+#   eta = rho[po.begeta:po.endeta]
+#   δ2 = rho[po.begw]  
+#   γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
+# #   δ1 = rho[po.begz]
+#   gammap = rho[po.beggamma]
+#   gamma  = (eigvalu.rymin)/(1+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1+exp(gammap));
+
+#   hi  = exp.(Q*τ)
+#   σᵤ²= exp(δ2) 
+#   σᵤ= exp(0.5*δ2) 
+#   σᵥ² = exp(γ)            # todo: 重新换一下字母 
+#   σᵥ = exp(0.5*γ)  
+#   μ   = 0
+#   ϵ = PorC*(y - x*β)
+#   T = size(rowIDT,1)
+
+
+#   if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
+
+#    lik = zero(eltype(y));
+#    @views N = rowIDT[1,2];
+#    lndetIrhoW_sum = zero(eltype(y));
+
+#    @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));   
+#    @views lndetIrhoW_sum =N*lndetIrhoW
+   
+#    @floop begin
+#     @inbounds for ttt=1:T
+#         @views ind = rowIDT[ttt,1];     ###rowIDT 
+
+#         @inbounds for (ind_indx, ii) in enumerate(ind)
+
+#         @views KK = -0.5*log(2 * π)-0.5*log(σᵥ²);
+#         @views his = hi[ii];
+#         @views wyy = PorC.*gamma*Wy[1]'*y[ind]
+#         @views ϵs  = ϵ[ii]-wyy[ind_indx] - PorC.*(eps[ii,:]'*eta)  ;
+#         @views sigs2 = 1 / (his'*(1/σᵥ²)*his + 1 /σᵤ²) ;
+#         @views mus = (μ/σᵤ² - ϵs'*(1/σᵥ²)*his)*sigs2 ;
+#         @views es2 = -0.5*ϵs'*ϵs ;
+#         @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
+#                         0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
+#                         0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+#                 if simple_check(temp)
+#                     # print("a")
+#                     lik += -1e9
+#                 else
+#                     lik += temp
+#                 end # simple_check(temp)      
+#             end # for ii=1:num.nofobs
+#         end # for ttt=1:T
+#     end # begin
+
+
+# elseif length(Wy)>1
+
+# lik = zero(eltype(y));
+# @views N = rowIDT[1,2];
+# lndetIrhoW_sum = zero(eltype(y));
+
+# @floop begin
+# @inbounds for ttt=1:T
+#    @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
+#    @views lndetIrhoW_sum +=lndetIrhoW
+#    @views ind = rowIDT[ttt,1];     ###rowIDT    
+
+# #    10×3 DataFrame
+# #    Row │ obs    id     t     
+# #        │ Int64  Int64  Int64 
+# #   ─────┼─────────────────────
+# #      1 │     1      1      1
+# #      2 │     2      2      1
+# #      3 │     3      3      1
+# #      4 │     4      1      2
+# #      5 │     5      2      2
+# #      6 │     6      1      3
+# #      7 │     7      1      4
+# #      8 │     8      2      4
+# #      9 │     9      3      4
+# #     10 │    10      4      4
+
+# #    4×2 Matrix{Any}:
+# #  [1, 2, 3]      3
+# #  [4, 5]         2
+# #  [6]            1
+# #  [7, 8, 9, 10]  4
+
+
+
+# @inbounds for (ind_indx, ii) in enumerate(ind)
+#     @views KK = -0.5*log(2 * π)-0.5*log(σᵥ²);
+#    @views his = hi[ii];
+#    @views wyy = PorC.*gamma*Wy[1]'*y[ind]
+#    @views ϵs  = ϵ[ii]-wyy[ind_indx] - PorC.*(eps[ii,:]'*eta)  ;
+#    @views sigs2 = 1 / (his'*(1/σᵥ²)*his + 1 /σᵤ²) ;
+#    @views mus = (μ/σᵤ² - ϵs'*(1/σᵥ²)*his)*sigs2 ;
+#    @views es2 = -0.5*ϵs'*ϵs ;
+#    @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
+#                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
+#                    0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+#            if simple_check(temp)
+#                # print("a")
+#                lik += -1e9
+#            else
+#                lik += temp
+#            end # simple_check(temp)      
+#        end # for ii=1:num.nofobs
+# end # begin
+# end # for ttt=1:T
+
+# end # length(Wy)==1 
+#    return -lik-lndetIrhoW_sum-likx
+# catch e
+# 处理异常的代码
+# println("操作失败，发生错误：$e")
+#    return 1e100
+# end
+
+# end
+
+
+# function LL_T(::Type{SSFKUH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, 
+#     EN::Matrix,IV::Matrix, PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
+
+#   Wy = _dicM[:wy]
+
+#   β  = rho[1:po.endx]
+#   τ  = rho[po.begq:po.endq]
+#   phi = rho[po.begphi:po.endphi]
+# ## calculate lkx
+#   nofiv = num.nofphi/num.nofeta
+#   eps = zeros(eltype(EN),num.nofobs,num.nofeta);
+
+#   # %%%%%%%%%%%%%%
+#   # @inbounds  for ii=1:num.nofeta
+#   #      eps[:,ii]=EN[:,ii]-IV*phi[((Int(ii)-1)*Int(nofiv)+1):(Int(ii)*Int(nofiv))];
+#   #  end
+#    @views phi = reshape(phi, :, num.nofeta)
+#    @views eps = EN- IV*phi
+
+#    @views LL = ((eps .- mean(eps, dims=1))' * (eps .- mean(eps, dims=1)) )/ num.nofobs
+#    @views logdetll = log(det(LL))
+#    @views invll = LL\I(num.nofeta)
+#    likx = zero(eltype(y));
+
+
+#    try
+#     @floop begin
+#     @inbounds for iitt =1:num.nofobs
+#              tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+#                 if simple_check(tempx)
+#                     likx += -1e9
+#                 else
+#                     likx += tempx
+#                 end # simple_check(tempx)
+    
+#         end # iitt =1:num.nofobs
+#     end # @floop begin
+#     ## calculate lky
+    
+#        eta = rho[po.begeta:po.endeta]
+#        δ2 = rho[po.begw]  
+#        γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
+#        # δ1 = rho[po.begz]
+#        gammap = rho[po.beggamma]
+#        gamma  = (eigvalu.rymin)/(1+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1+exp(gammap));
+    
+#        hi  = exp.(Q*τ)
+#        σᵤ²= exp(δ2) 
+#        σᵤ= exp(0.5*δ2) 
+#        σᵥ² = exp(γ)            # todo: 重新换一下字母 
+#        σᵥ = exp(0.5*γ)  
+#        μ   = 0
+#        ϵ = PorC*(y - x*β)
+#        T = size(rowIDT,1)
+    
+    
+#        if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
+    
+#         lik = zero(eltype(y));
+#         @views N = rowIDT[1,2];
+#         @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));   
+#         @views Mtau = 1;
+#         @views invPi = 1/σᵥ²*I(N);
+#         @views lndetPi = N*log(σᵥ²);
+#             @floop begin
+#         @inbounds  for ttt=1:T  
+#                 @views ind = rowIDT[ttt,1];
+#                 @views his = Mtau*hi[ind];
+#                 @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind]  - PorC.*(eps[ind,:]*eta) ;
+#                 @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+#                 @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
+#                 @views es2 = -0.5*ϵs'*invPi*ϵs ;
+#                 @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
+    
+#                 @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
+#                                 0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
+#                                 0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+#                         if simple_check(temp)
+#                             lik += -1e9
+#                         else
+#                             lik += temp
+#                         end # simple_check(temp)
+#                     end # for ttt=1:T
+#             end # begin
+    
+#     elseif length(Wy)>1
+    
+#         lik = zero(eltype(y));
+#         @views N = rowIDT[1,2];
+#     @floop begin
+    
+#     @inbounds for ttt=1:T
+    
+#         @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));      
+#         @views Mtau = 1;
+#         @views invPi = 1/σᵥ²*I(N);
+#         @views lndetPi = N*log(σᵥ²);
+        
+#         @views ind = rowIDT[ttt,1];
+#         @views his = Mtau*hi[ind];
+#         @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] - PorC.*(eps[ind,:]*eta)  ;
+#         @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+#         @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
+#         @views es2 = -0.5*ϵs'*invPi*ϵs ;
+#         @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
+                    
+#         @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
+#                         0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
+#                         0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+            
+#             if simple_check(temp)
+#                 # print("a")
+#                 lik += -1e9
+#             else
+#                 lik += temp
+#             end # simple_check(temp)
+#         end # for ttt=1:T
+#     end # begin
+    
+#     end # length(Wy)==1 
+#         return -lik-likx
+#     catch e
+#     # 处理异常的代码
+#     println("操作失败，发生错误：$e")
+#         return 1e100
+#     end
+#     end
+    
+    
+
+function LL_T(::Type{SSFKUH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, 
+    EN::Matrix,IV::Matrix, PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
+
+  Wy = _dicM[:wy]
+
+  β  = rho[1:po.endx]
+  τ  = rho[po.begq:po.endq]
+  phi = rho[po.begphi:po.endphi]
+## calculate lkx
+  nofiv = num.nofphi/num.nofeta
+  eps = zeros(eltype(EN),num.nofobs,num.nofeta);
+
+  # %%%%%%%%%%%%%%
+  # @inbounds  for ii=1:num.nofeta
+  #      eps[:,ii]=EN[:,ii]-IV*phi[((Int(ii)-1)*Int(nofiv)+1):(Int(ii)*Int(nofiv))];
+  #  end
+   @views phi = reshape(phi, :, num.nofeta)
+   @views eps = EN- IV*phi
+
+   @views LL = ((eps .- mean(eps, dims=1))' * (eps .- mean(eps, dims=1)) )/ num.nofobs
+   @views logdetll = log(det(LL))
+   @views invll = LL\I(num.nofeta)
+   likx = zero(eltype(y));
+
+
+#    try
+    @floop begin
+    @inbounds for iitt =1:num.nofobs
+             tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+                if simple_check(tempx)
+                    likx += -1e9
+                else
+                    likx += tempx
+                end # simple_check(tempx)
+    
+        end # iitt =1:num.nofobs
+    end # @floop begin
+    ## calculate lky
+    
+       eta = rho[po.begeta:po.endeta]
+       δ2 = rho[po.begw]  
+       γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
+       # δ1 = rho[po.begz]
+       gammap = rho[po.beggamma]
+       gamma  = (eigvalu.rymin)/(1+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1+exp(gammap));
+    
+       hi  = exp.(Q*τ)
+       σᵤ²= exp(δ2) 
+       σᵤ= exp(0.5*δ2) 
+       σᵥ² = exp(γ)            # todo: 重新换一下字母 
+       σᵥ = exp(0.5*γ)  
+       μ   = 0
+       ϵ = PorC*(y - x*β)
+       T = size(rowIDT,1)
+    
+
+    if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
+
+        lik = zero(eltype(y));
+        @views N = rowIDT[1,2];
+        Wyt = kron(I(T), Wy[1])
+
+        @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));  
+        @views lndetIrhoWt = lndetIrhoW*T
+        @views invPi = 1/σᵥ²;
+        @views lndetPi = log(σᵥ²);
+   
+        @views his = hi;
+        @views ϵs  = ϵ-PorC.*gamma.*Wyt*y  - PorC.*(eps*eta) ;
+        @views sigs2 = 1 ./ (his.^2 .*invPi .+ 1 /σᵤ²) ;
+        @views mus = (μ/σᵤ² .- ϵs .* his .* invPi) .* sigs2 ;
+        @views es2 = -0.5 .* ϵs.^2 .*invPi;
+        @views KK = -0.5*log(2 * π)-0.5*lndetPi;
+        @views temp_1 = KK .+  es2 .+ 0.5 .* (((mus .^ 2) ./ sigs2) .- (μ^2 / σᵤ²) ) .+
+                        0.5 .* log.(sigs2) .+ log.(normcdf.(mus ./ sqrt.(sigs2))) .-
+                        0.5 * log(σᵤ²) .- log(normcdf(μ / σᵤ))
+                # print(size(temp_1))
+
+                # 计算总和
+        lik = sum(temp_1)
+
+        # 检查 lik 是否为 NaN, 非实数, 或 Inf
+        if isnan(lik) || !isreal(lik) || isinf(lik)
+            # 找到 Inf 和 NaN 的索引
+            idx1 = findall(isinf, temp_1)
+            idx2 = findall(isnan, temp_1)
+            idx = vcat(idx1, idx2)
+            
+            # 将 Inf 和 NaN 替换为 1e9
+            a = temp_1
+            a[idx] .= -1e9
+            
+            # 重新计算总和
+            lik = sum(a)
+        end # if isnan(lik) || !isreal(lik) || isinf(lik)
+
+    elseif length(Wy)>1
+        lik = zero(eltype(y));
+        @views N = rowIDT[1,2];
+        Wyt = kron(I(T), Wy[1])
+
+        @floop begin
+        @inbounds for ttt=1:T
+            @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));    
+            @views lndetIrhoWt += lndetIrhoW
+        end # for ttt=1:T
+        end # begin
+        
+        @views invPi = 1/σᵥ²;
+        @views lndetPi = log(σᵥ²);
+        @views his = hi;
+        @views ϵs  = ϵ-PorC.*gamma.*Wyt*y  - PorC.*(eps*eta) ;
+        @views sigs2 = 1 ./ (his.^2 .*invPi .+ 1 /σᵤ²) ;
+        @views mus = (μ/σᵤ² .- ϵs .* his .* invPi) .* sigs2 ;
+        @views es2 = -0.5 .* ϵs.^2 .*invPi;
+        @views KK = -0.5*log(2 * π)-0.5*lndetPi;
+        @views temp_1 = KK .+  es2 .+ 0.5 .* (((mus .^ 2) ./ sigs2) .- (μ^2 / σᵤ²) ) .+
+                        0.5 .* log.(sigs2) .+ log.(normcdf.(mus ./ sqrt.(sigs2))) .-
+                        0.5 * log(σᵤ²) .- log(normcdf(μ / σᵤ))
+                # print(size(temp_1))
+
+        # 计算总和
+        lik = sum(temp_1)
+
+        # 检查 lik 是否为 NaN, 非实数, 或 Inf
+        if isnan(lik) || !isreal(lik) || isinf(lik)
+            # 找到 Inf 和 NaN 的索引
+            idx1 = findall(isinf, temp_1)
+            idx2 = findall(isnan, temp_1)
+            idx = vcat(idx1, idx2)
+            
+            # 将 Inf 和 NaN 替换为 1e9
+            a = temp_1
+            a[idx] .= -1e9
+            
+            # 重新计算总和
+            lik = sum(a)
+        end # if isnan(lik) || !isreal(lik) || isinf(lik)
+
+    end # if length(Wy)==1 
+        return -lik-likx-lndetIrhoWt
+    # catch e
+    # # 处理异常的代码
+    # println("操作失败，发生错误：$e")
+    #     return 1e100
+    end
+    # end
+    
+    
+
+
+function LL_T(::Type{SSFKUT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, 
+    EN::Matrix,IV::Matrix, PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
+
+    Wy = _dicM[:wy]
+
+    β  = rho[1:po.endx]
+    τ  = rho[po.begq:po.endq]
+    phi = rho[po.begphi:po.endphi]
+## calculate lkx
+    nofiv = num.nofphi/num.nofeta
+    eps = zeros(eltype(EN),num.nofobs,num.nofeta);
+
+    # %%%%%%%%%%%%%%
+    # @inbounds  for ii=1:num.nofeta
+    #      eps[:,ii]=EN[:,ii]-IV*phi[((Int(ii)-1)*Int(nofiv)+1):(Int(ii)*Int(nofiv))];
+    #  end
+    @views phi = reshape(phi, :, num.nofeta)
+    @views eps = EN- IV*phi
+
+    @views LL = ((eps .- mean(eps, dims=1))' * (eps .- mean(eps, dims=1)) )/ num.nofobs
+    @views logdetll = log(det(LL))
+    @views invll = LL\I(num.nofeta)
+    likx = zero(eltype(y));
+
+
+#    try
+    @floop begin
+    @inbounds for iitt =1:num.nofobs
+                tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+                if simple_check(tempx)
+                    likx += -1e9
+                else
+                    likx += tempx
+                end # simple_check(tempx)
+    
+        end # iitt =1:num.nofobs
+    end # @floop begin
+    ## calculate lky
+    
+        eta = rho[po.begeta:po.endeta]
+        δ2 = rho[po.begw]  
+        γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
+        δ1 = rho[po.begz]
+        gammap = rho[po.beggamma]
+        gamma  = (eigvalu.rymin)/(1+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1+exp(gammap));
+    
+        hi  = exp.(Q*τ)
+        σᵤ²= exp(δ2) 
+        σᵤ= exp(0.5*δ2) 
+        σᵥ² = exp(γ)            # todo: 重新换一下字母 
+        σᵥ = exp(0.5*γ)  
+        μ   = δ1
+        ϵ = PorC*(y - x*β)
+        T = size(rowIDT,1)
+    
+
+    if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
+
+        lik = zero(eltype(y));
+        @views N = rowIDT[1,2];
+        Wyt = kron(I(T), Wy[1])
+
+        @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));  
+        @views lndetIrhoWt = lndetIrhoW*T
+        @views invPi = 1/σᵥ²;
+        @views lndetPi = log(σᵥ²);
+    
+        @views his = hi;
+        @views ϵs  = ϵ-PorC.*gamma.*Wyt*y  - PorC.*(eps*eta) ;
+        @views sigs2 = 1 ./ (his.^2 .*invPi .+ 1 /σᵤ²) ;
+        @views mus = (μ/σᵤ² .- ϵs .* his .* invPi) .* sigs2 ;
+        @views es2 = -0.5 .* ϵs.^2 .*invPi;
+        @views KK = -0.5*log(2 * π)-0.5*lndetPi;
+        @views temp_1 = KK .+  es2 .+ 0.5 .* (((mus .^ 2) ./ sigs2) .- (μ^2 / σᵤ²) ) .+
+                        0.5 .* log.(sigs2) .+ log.(normcdf.(mus ./ sqrt.(sigs2))) .-
+                        0.5 * log(σᵤ²) .- log(normcdf(μ / σᵤ))
+                # print(size(temp_1))
+
+                # 计算总和
+        lik = sum(temp_1)
+
+        # 检查 lik 是否为 NaN, 非实数, 或 Inf
+        if isnan(lik) || !isreal(lik) || isinf(lik)
+            # 找到 Inf 和 NaN 的索引
+            idx1 = findall(isinf, temp_1)
+            idx2 = findall(isnan, temp_1)
+            idx = vcat(idx1, idx2)
+            
+            # 将 Inf 和 NaN 替换为 1e9
+            a = temp_1
+            a[idx] .= -1e9
+            
+            # 重新计算总和
+            lik = sum(a)
+        end # if isnan(lik) || !isreal(lik) || isinf(lik)
+
+    elseif length(Wy)>1
+        lik = zero(eltype(y));
+        @views N = rowIDT[1,2];
+        Wyt = kron(I(T), Wy[1])
+
+        @floop begin
+        @inbounds for ttt=1:T
+            @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));    
+            @views lndetIrhoWt += lndetIrhoW
+        end # for ttt=1:T
+        end # begin
+        
+        @views invPi = 1/σᵥ²;
+        @views lndetPi = log(σᵥ²);
+        @views his = hi;
+        @views ϵs  = ϵ-PorC.*gamma.*Wyt*y  - PorC.*(eps*eta) ;
+        @views sigs2 = 1 ./ (his.^2 .*invPi .+ 1 /σᵤ²) ;
+        @views mus = (μ/σᵤ² .- ϵs .* his .* invPi) .* sigs2 ;
+        @views es2 = -0.5 .* ϵs.^2 .*invPi;
+        @views KK = -0.5*log(2 * π)-0.5*lndetPi;
+        @views temp_1 = KK .+  es2 .+ 0.5 .* (((mus .^ 2) ./ sigs2) .- (μ^2 / σᵤ²) ) .+
+                        0.5 .* log.(sigs2) .+ log.(normcdf.(mus ./ sqrt.(sigs2))) .-
+                        0.5 * log(σᵤ²) .- log(normcdf(μ / σᵤ))
+                # print(size(temp_1))
+
+        # 计算总和
+        lik = sum(temp_1)
+
+        # 检查 lik 是否为 NaN, 非实数, 或 Inf
+        if isnan(lik) || !isreal(lik) || isinf(lik)
+            # 找到 Inf 和 NaN 的索引
+            idx1 = findall(isinf, temp_1)
+            idx2 = findall(isnan, temp_1)
+            idx = vcat(idx1, idx2)
+            
+            # 将 Inf 和 NaN 替换为 1e9
+            a = temp_1
+            a[idx] .= -1e9
+            
+            # 重新计算总和
+            lik = sum(a)
+        end # if isnan(lik) || !isreal(lik) || isinf(lik)
+
+    end # if length(Wy)==1 
+        return -lik-likx-lndetIrhoWt
+    # catch e
+    # # 处理异常的代码
+    # println("操作失败，发生错误：$e")
+    #     return 1e100
+    end
+    # end
+    
+
+
 
 
 

@@ -787,7 +787,7 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
 @inbounds for ttt=1:T 
 @views ind = rowIDT[ttt,1];
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind] ;
+@views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind] - PorC.*(eps[ind,:]*eta) ;
 @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views bc[ind] = Mgamma*hi[ind] .*( mus[ttt] + sqrt(sigs2[ttt])* normpdf(mus[ttt]/sqrt(sigs2[ttt]))./normcdf(mus[ttt]/sqrt(sigs2[ttt]))   ) ;  
@@ -803,7 +803,7 @@ elseif length(Wy)>1
 @views Mgamma = (I(N)-gamma*Wy[ttt])\I(N)
 
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] ;
+@views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind]  - PorC.*(eps[ind,:]*eta);
 @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views bc[ind] = Mgamma*hi[ind] .*( mus[ttt] + sqrt(sigs2[ttt])* normpdf(mus[ttt]/sqrt(sigs2[ttt]))./normcdf(mus[ttt]/sqrt(sigs2[ttt]))   ) ;  
@@ -955,7 +955,7 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
 @inbounds for ttt=1:T 
 @views ind = rowIDT[ttt,1];
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind]  ;
+@views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind]  - PorC.*(eps[ind,:]*eta) ;
 @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views bc[ind] = Mgamma*hi[ind] .*( mus[ttt] + sqrt(sigs2[ttt])* normpdf(mus[ttt]/sqrt(sigs2[ttt]))./normcdf(mus[ttt]/sqrt(sigs2[ttt]))   ) ;  
@@ -971,7 +971,7 @@ elseif length(Wy)>1
 @views Mgamma = (I(N)-gamma*Wy[ttt])\I(N)
 
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] ;
+@views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] - PorC.*(eps[ind,:]*eta) ;
 @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views bc[ind] = Mgamma*hi[ind] .*( mus[ttt] + sqrt(sigs2[ttt])* normpdf(mus[ttt]/sqrt(sigs2[ttt]))./normcdf(mus[ttt]/sqrt(sigs2[ttt]))   ) ;  
@@ -1126,7 +1126,7 @@ if length(Wu)==1  # 可以传入单个cell的w，则默认cell的长度为时间
 @inbounds for ttt=1:T 
 @views ind = rowIDT[ttt,1];
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind];
+@views ϵ[ind] = ϵ[ind] - PorC.*(eps[ind,:]*eta);
 @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views bc[ind] = hi[ind] .*( mus[ttt] + sqrt(sigs2[ttt])* normpdf(mus[ttt]/sqrt(sigs2[ttt]))./normcdf(mus[ttt]/sqrt(sigs2[ttt]))   ) ;  
@@ -1141,7 +1141,7 @@ elseif length(Wu)>1
 @views invPi = 1/σᵥ²*(I(N));
 
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind];
+@views ϵ[ind] = ϵ[ind] - PorC.*(eps[ind,:]*eta);
 @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views bc[ind] = hi[ind] .*( mus[ttt] + sqrt(sigs2[ttt])* normpdf(mus[ttt]/sqrt(sigs2[ttt]))./normcdf(mus[ttt]/sqrt(sigs2[ttt]))   ) ;  
@@ -1290,7 +1290,7 @@ jlms = zeros(eltype(y),size(hi,1),1);
 @inbounds for ttt=1:T 
 @views ind = rowIDT[ttt,1];
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind] ;
+@views ϵ[ind] = ϵ[ind] - PorC.*(eps[ind,:]*eta) ;
 @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views bc[ind] = hi[ind] .*( mus[ttt] + sqrt(sigs2[ttt])* normpdf(mus[ttt]/sqrt(sigs2[ttt]))./normcdf(mus[ttt]/sqrt(sigs2[ttt]))   ) ;  
@@ -2171,7 +2171,7 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
 @inbounds for ttt=1:T 
 @views ind = rowIDT[ttt,1];
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind] ;
+@views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind]  - PorC.*(eps[ind,:]*eta);
 @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views bc[ind] = Mgamma* hi[ind] .*( mus[ttt] + sqrt(sigs2[ttt])* normpdf(mus[ttt]/sqrt(sigs2[ttt]))./normcdf(mus[ttt]/sqrt(sigs2[ttt]))   ) ;  
@@ -2187,7 +2187,7 @@ elseif length(Wy)>1
 @views Mgamma = (I(N)-gamma*Wy[ttt])\I(N)
 
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] ;
+@views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind]  - PorC.*(eps[ind,:]*eta);
 @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views bc[ind] = Mgamma*hi[ind] .*( mus[ttt] + sqrt(sigs2[ttt])* normpdf(mus[ttt]/sqrt(sigs2[ttt]))./normcdf(mus[ttt]/sqrt(sigs2[ttt]))   ) ;  
@@ -2339,7 +2339,7 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
 @inbounds for ttt=1:T 
 @views ind = rowIDT[ttt,1];
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind]  ;
+@views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind]  - PorC.*(eps[ind,:]*eta) ;
 @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views bc[ind] = Mgamma*hi[ind] .*( mus[ttt] + sqrt(sigs2[ttt])* normpdf(mus[ttt]/sqrt(sigs2[ttt]))./normcdf(mus[ttt]/sqrt(sigs2[ttt]))   ) ;  
@@ -2354,8 +2354,9 @@ elseif length(Wy)>1
 @views invPi = 1/σᵥ²*(I(N));
 @views Mgamma = (I(N)-gamma*Wy[ttt])\I(N)
 
+@views ind = rowIDT[ttt,1];
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] ;
+@views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] - PorC.*(eps[ind,:]*eta) ;
 @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views bc[ind] = hi[ind] .*( mus[ttt] + sqrt(sigs2[ttt])* normpdf(mus[ttt]/sqrt(sigs2[ttt]))./normcdf(mus[ttt]/sqrt(sigs2[ttt]))   ) ;  
@@ -2510,7 +2511,7 @@ if length(Wu)==1  # 可以传入单个cell的w，则默认cell的长度为时间
 @inbounds for ttt=1:T 
 @views ind = rowIDT[ttt,1];
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind];
+@views ϵ[ind] = ϵ[ind] - PorC.*(eps[ind,:]*eta);
 @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views bc[ind] = hi[ind] .*( mus[ttt] + sqrt(sigs2[ttt])* normpdf(mus[ttt]/sqrt(sigs2[ttt]))./normcdf(mus[ttt]/sqrt(sigs2[ttt]))   ) ;  
@@ -2525,7 +2526,7 @@ elseif length(Wu)>1
 @views invPi = 1/σᵥ²*(I(N));
 
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind];
+@views ϵ[ind] = ϵ[ind] - PorC.*(eps[ind,:]*eta);
 @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views bc[ind] = hi[ind] .*( mus[ttt] + sqrt(sigs2[ttt])* normpdf(mus[ttt]/sqrt(sigs2[ttt]))./normcdf(mus[ttt]/sqrt(sigs2[ttt]))   ) ;  
@@ -2674,7 +2675,7 @@ jlms = zeros(eltype(y),size(hi,1),1);
 @inbounds for ttt=1:T 
 @views ind = rowIDT[ttt,1];
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind] ;
+@views ϵ[ind] = ϵ[ind]  - PorC.*(eps[ind,:]*eta);
 @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views bc[ind] = hi[ind] .*( mus[ttt] + sqrt(sigs2[ttt])* normpdf(mus[ttt]/sqrt(sigs2[ttt]))./normcdf(mus[ttt]/sqrt(sigs2[ttt]))   ) ;  
@@ -2737,3 +2738,181 @@ function jlmsbc(::Type{SSFOADH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, 
  end
  
 
+
+
+
+
+ function jlmsbc(::Type{SSFKUH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
+    PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+ 
+   Wy = _dicM[:wy]
+  
+   gammap = rho[pos.beggamma]
+   gamma  = eigvalu.rymin/(1+exp(gammap))+eigvalu.rymax*exp(gammap)/(1+exp(gammap));
+    dire_ratio,indire_ratio = IrhoWratio(gamma, rowIDT)
+     
+    β  = rho[1:pos.endx]
+    τ  = rho[pos.begq:pos.endq]
+    phi = rho[pos.begphi:pos.endphi]
+    
+    nofiv=num.nofphi/num.nofeta
+    phi = reshape(phi,:,num.nofeta)
+    eps = EN-IV*phi
+    eta = rho[pos.begeta:pos.endeta]
+    
+    δ2 = rho[pos.begw]  
+    γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
+    # δ1 = rho[pos.begz]
+    gammap = rho[pos.beggamma]
+    gamma  = eigvalu.rymin/(1+exp(gammap))+eigvalu.rymax*exp(gammap)/(1+exp(gammap));
+    
+    hi  = exp.(Q*τ)
+    σᵤ²= exp(δ2) 
+    σᵤ= exp(0.5*δ2) 
+    σᵥ² = exp(γ)  
+    σᵥ = exp(0.5*γ)    
+    μ   = 0
+    ϵ = PorC*(y - x * β )
+    T = size(rowIDT,1)
+    nobs = num.nofobs
+    sigs2 = zeros(eltype(y),T,1);
+    mus = zeros(eltype(y),T,1);
+    bc = zeros(eltype(y),nobs,1);
+    jlms = zeros(eltype(y),nobs,1);
+    
+    if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
+    
+        @views N = rowIDT[1,2];
+        @views Mtau = 1;
+        @views invPi = 1/σᵥ²*(I(N));
+        @views Mgamma = (I(N)-gamma*Wy[1])\I(N)
+        
+        @floop begin
+        @inbounds for ttt=1:T 
+            @views ind = rowIDT[ttt,1];
+            @views hi[ind]= Mtau*hi[ind];
+            @views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind]  - PorC.*(eps[ind,:]*eta) ;
+            @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+            @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
+            @views bc[ind] = Mgamma*hi[ind] .*( mus[ttt] + sqrt(sigs2[ttt])* normpdf(mus[ttt]/sqrt(sigs2[ttt]))./normcdf(mus[ttt]/sqrt(sigs2[ttt]))   ) ;  
+            @views jlms[ind] = Mgamma*hi[ind] .* ( mus[ttt] + normcdf(mus[ttt]/sqrt(sigs2[ttt])) * sqrt(sigs2[ttt]) / normcdf(mus[ttt]/sqrt(sigs2[ttt])) )  
+        end # for ttt=1:T
+        end # begin
+    
+    elseif length(Wy)>1
+        @floop begin
+        @inbounds for ttt=1:T  
+            @views N = rowIDT[1,2];
+            @views Mtau = 1;
+            @views invPi = 1/σᵥ²*(I(N));
+            @views Mgamma = (I(N)-gamma*Wy[ttt])\I(N)
+            
+            @views ind = rowIDT[ttt,1];
+            @views hi[ind]= Mtau*hi[ind];
+            @views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] - PorC.*(eps[ind,:]*eta) ;
+            @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+            @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
+            @views bc[ind] = Mgamma*hi[ind] .*( mus[ttt] + sqrt(sigs2[ttt])* normpdf(mus[ttt]/sqrt(sigs2[ttt]))./normcdf(mus[ttt]/sqrt(sigs2[ttt]))   ) ;  
+            @views jlms[ind] = Mgamma*hi[ind] .* ( mus[ttt] + normcdf(mus[ttt]/sqrt(sigs2[ttt])) * sqrt(sigs2[ttt]) / normcdf(mus[ttt]/sqrt(sigs2[ttt])) )  
+        end # for ttt=1:T
+        end # begin
+    end  #    if length(Wy)==1 
+
+    @views bc_ = exp.(-bc);
+    @views jlms_ = exp.(-jlms);
+
+    jlms_df = DataFrame(hcat(dire_ratio*jlms_,indire_ratio*jlms_), [:dire_jlms, :indire_jlms])
+    bc_df = DataFrame(hcat(dire_ratio*bc_,indire_ratio*bc_), [:dire_bc, :indire_bc])
+     
+     return jlms_df, bc_df  
+ end
+ 
+
+
+ 
+
+ function jlmsbc(::Type{SSFKUT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
+    PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+ 
+   Wy = _dicM[:wy]
+  
+   gammap = rho[pos.beggamma]
+   gamma  = eigvalu.rymin/(1+exp(gammap))+eigvalu.rymax*exp(gammap)/(1+exp(gammap));
+    dire_ratio,indire_ratio = IrhoWratio(gamma, rowIDT)
+     
+    β  = rho[1:pos.endx]
+    τ  = rho[pos.begq:pos.endq]
+    phi = rho[pos.begphi:pos.endphi]
+    
+    nofiv=num.nofphi/num.nofeta
+    phi = reshape(phi,:,num.nofeta)
+    eps = EN-IV*phi
+    eta = rho[pos.begeta:pos.endeta]
+    
+    δ2 = rho[pos.begw]  
+    γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
+    δ1 = rho[pos.begz]
+    gammap = rho[pos.beggamma]
+    gamma  = eigvalu.rymin/(1+exp(gammap))+eigvalu.rymax*exp(gammap)/(1+exp(gammap));
+    
+    hi  = exp.(Q*τ)
+    σᵤ²= exp(δ2) 
+    σᵤ= exp(0.5*δ2) 
+    σᵥ² = exp(γ)  
+    σᵥ = exp(0.5*γ)    
+    μ   = δ1
+    ϵ = PorC*(y - x * β )
+    T = size(rowIDT,1)
+    nobs = num.nofobs
+    sigs2 = zeros(eltype(y),T,1);
+    mus = zeros(eltype(y),T,1);
+    bc = zeros(eltype(y),nobs,1);
+    jlms = zeros(eltype(y),nobs,1);
+    
+    if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
+    
+        @views N = rowIDT[1,2];
+        @views Mtau = 1;
+        @views invPi = 1/σᵥ²*(I(N));
+        @views Mgamma = (I(N)-gamma*Wy[1])\I(N)
+        
+        @floop begin
+        @inbounds for ttt=1:T 
+            @views ind = rowIDT[ttt,1];
+            @views hi[ind]= Mtau*hi[ind];
+            @views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind]  - PorC.*(eps[ind,:]*eta) ;
+            @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+            @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
+            @views bc[ind] = Mgamma*hi[ind] .*( mus[ttt] + sqrt(sigs2[ttt])* normpdf(mus[ttt]/sqrt(sigs2[ttt]))./normcdf(mus[ttt]/sqrt(sigs2[ttt]))   ) ;  
+            @views jlms[ind] = Mgamma*hi[ind] .* ( mus[ttt] + normcdf(mus[ttt]/sqrt(sigs2[ttt])) * sqrt(sigs2[ttt]) / normcdf(mus[ttt]/sqrt(sigs2[ttt])) )  
+        end # for ttt=1:T
+        end # begin
+    
+    elseif length(Wy)>1
+        @floop begin
+        @inbounds for ttt=1:T  
+            @views N = rowIDT[1,2];
+            @views Mtau = 1;
+            @views invPi = 1/σᵥ²*(I(N));
+            @views Mgamma = (I(N)-gamma*Wy[ttt])\I(N)
+            
+            @views ind = rowIDT[ttt,1];
+            @views hi[ind]= Mtau*hi[ind];
+            @views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] - PorC.*(eps[ind,:]*eta) ;
+            @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+            @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
+            @views bc[ind] = Mgamma*hi[ind] .*( mus[ttt] + sqrt(sigs2[ttt])* normpdf(mus[ttt]/sqrt(sigs2[ttt]))./normcdf(mus[ttt]/sqrt(sigs2[ttt]))   ) ;  
+            @views jlms[ind] = Mgamma*hi[ind] .* ( mus[ttt] + normcdf(mus[ttt]/sqrt(sigs2[ttt])) * sqrt(sigs2[ttt]) / normcdf(mus[ttt]/sqrt(sigs2[ttt])) )  
+        end # for ttt=1:T
+        end # begin
+    end  #    if length(Wy)==1 
+
+    @views bc_ = exp.(-bc);
+    @views jlms_ = exp.(-jlms);
+
+    jlms_df = DataFrame(hcat(dire_ratio*jlms_,indire_ratio*jlms_), [:dire_jlms, :indire_jlms])
+    bc_df = DataFrame(hcat(dire_ratio*bc_,indire_ratio*bc_), [:dire_bc, :indire_bc])
+     
+     return jlms_df, bc_df  
+ end
+ 
