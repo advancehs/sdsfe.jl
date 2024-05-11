@@ -4200,7 +4200,7 @@ function LL_T(::Type{SSFKUH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, 
    likx = zero(eltype(y));
 
 
-#    try
+   try
     @floop begin
     @inbounds for iitt =1:num.nofobs
              tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
@@ -4253,23 +4253,10 @@ function LL_T(::Type{SSFKUH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, 
                         0.5 * log(σᵤ²) .- log(normcdf(μ / σᵤ))
                 # print(size(temp_1))
 
-                # 计算总和
-        lik = sum(temp_1)
-
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
-        if isnan(lik) || !isreal(lik) || isinf(lik)
-            # 找到 Inf 和 NaN 的索引
-            idx1 = findall(isinf, temp_1)
-            idx2 = findall(isnan, temp_1)
-            idx = vcat(idx1, idx2)
-            
-            # 将 Inf 和 NaN 替换为 1e9
-            a = temp_1
-            a[idx] .= -1e9
-            
-            # 重新计算总和
-            lik = sum(a)
-        end # if isnan(lik) || !isreal(lik) || isinf(lik)
+        @views temp_1 = map(x -> x ≠ x ? -1e9 : isinf(x) ? -1e9 : x, temp_1)
+        # 计算总和
+        @views lik = sum(temp_1)
 
     elseif length(Wy)>1
         lik = zero(eltype(y));
@@ -4296,32 +4283,19 @@ function LL_T(::Type{SSFKUH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, 
                         0.5 * log(σᵤ²) .- log(normcdf(μ / σᵤ))
                 # print(size(temp_1))
 
-        # 计算总和
-        lik = sum(temp_1)
-
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
-        if isnan(lik) || !isreal(lik) || isinf(lik)
-            # 找到 Inf 和 NaN 的索引
-            idx1 = findall(isinf, temp_1)
-            idx2 = findall(isnan, temp_1)
-            idx = vcat(idx1, idx2)
-            
-            # 将 Inf 和 NaN 替换为 1e9
-            a = temp_1
-            a[idx] .= -1e9
-            
-            # 重新计算总和
-            lik = sum(a)
-        end # if isnan(lik) || !isreal(lik) || isinf(lik)
+        @views temp_1 = map(x -> x ≠ x ? -1e9 : isinf(x) ? -1e9 : x, temp_1)
+        # 计算总和
+        @views lik = sum(temp_1)
 
     end # if length(Wy)==1 
         return -lik-likx-lndetIrhoWt
-    # catch e
-    # # 处理异常的代码
-    # println("操作失败，发生错误：$e")
-    #     return 1e100
+    catch e
+    # 处理异常的代码
+    println("操作失败，发生错误：$e")
+        return 1e100
     end
-    # end
+    end
     
     
 
@@ -4404,23 +4378,11 @@ function LL_T(::Type{SSFKUT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, 
                         0.5 * log(σᵤ²) .- log(normcdf(μ / σᵤ))
                 # print(size(temp_1))
 
-                # 计算总和
-        lik = sum(temp_1)
-
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
-        if isnan(lik) || !isreal(lik) || isinf(lik)
-            # 找到 Inf 和 NaN 的索引
-            idx1 = findall(isinf, temp_1)
-            idx2 = findall(isnan, temp_1)
-            idx = vcat(idx1, idx2)
-            
-            # 将 Inf 和 NaN 替换为 1e9
-            a = temp_1
-            a[idx] .= -1e9
-            
-            # 重新计算总和
-            lik = sum(a)
-        end # if isnan(lik) || !isreal(lik) || isinf(lik)
+        @views temp_1 = map(x -> x ≠ x ? -1e9  : isinf(x) ? -1e9  : x, temp_1)
+        # 计算总和
+        @views lik = sum(temp_1)
+
 
     elseif length(Wy)>1
         lik = zero(eltype(y));
@@ -4447,23 +4409,10 @@ function LL_T(::Type{SSFKUT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, 
                         0.5 * log(σᵤ²) .- log(normcdf(μ / σᵤ))
                 # print(size(temp_1))
 
-        # 计算总和
-        lik = sum(temp_1)
-
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
-        if isnan(lik) || !isreal(lik) || isinf(lik)
-            # 找到 Inf 和 NaN 的索引
-            idx1 = findall(isinf, temp_1)
-            idx2 = findall(isnan, temp_1)
-            idx = vcat(idx1, idx2)
-            
-            # 将 Inf 和 NaN 替换为 1e9
-            a = temp_1
-            a[idx] .= -1e9
-            
-            # 重新计算总和
-            lik = sum(a)
-        end # if isnan(lik) || !isreal(lik) || isinf(lik)
+        @views temp_1 = map(x -> x ≠ x ? -1e9  : isinf(x) ? -1e9  : x, temp_1)
+        # 计算总和
+        @views lik = sum(temp_1)
 
     end # if length(Wy)==1 
         return -lik-likx-lndetIrhoWt
@@ -4471,8 +4420,8 @@ function LL_T(::Type{SSFKUT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, 
     # # 处理异常的代码
     # println("操作失败，发生错误：$e")
     #     return 1e100
-    end
     # end
+    end
     
 
 

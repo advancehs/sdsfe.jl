@@ -63,7 +63,8 @@ sfmodel_spec(sfpanel(SSF_KU2020),sftype(prod), sfdist(trun), wy(Wx), #wx(Wx),
 
 sfmodel_opt(warmstart_solver(NelderMead()),   
                     warmstart_maxIT(400),
-                    main_solver(Newton(linesearch=LineSearches.BackTracking())), 
+                    # main_solver(Newton(linesearch=LineSearches.BackTracking())), 
+                    main_solver(BFGS(linesearch=LineSearches.BackTracking())), 
                     main_maxIT(2000), 
                     tolerance(1e-6),autodiff_mode(forward));
 
