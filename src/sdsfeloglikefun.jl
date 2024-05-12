@@ -1932,8 +1932,8 @@ function ssdoat_yuv( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,
 
    ϵ = PorC*(y - x * β)
    T = size(rowIDT,1)
-   # print(T)
-try
+
+   try
    if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
     lik = zero(eltype(y));
@@ -1952,7 +1952,7 @@ try
         @inbounds for ttt=1:T  
                 @views ind = rowIDT[ttt,1];
                 @views his = Mtau*hi[ind];
-                @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind] ;
+                @views ϵs  = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] ;
                 @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
                 @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                 @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -1987,7 +1987,7 @@ elseif length(Wy)>1
         
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] ;
+    @views ϵs  = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] ;
     @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -2067,7 +2067,7 @@ try
         @inbounds for ttt=1:T  
                 @views ind = rowIDT[ttt,1];
                 @views his = Mtau*hi[ind];
-                @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind] ;
+                @views ϵs  = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] ;
                 @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
                 @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                 @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -2101,7 +2101,7 @@ elseif length(Wy)>1
         
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] ;
+    @views ϵs  = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] ;
     @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -2178,7 +2178,7 @@ try
         @inbounds for ttt=1:T  
                 @views ind = rowIDT[ttt,1];
                 @views his = Mtau*hi[ind];
-                @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind] ;
+                @views ϵs  = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] ;
                 @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
                 @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                 @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -2209,7 +2209,7 @@ elseif length(Wy)>1
         
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] ;
+    @views ϵs  = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] ;
     @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -2278,7 +2278,7 @@ try
         @inbounds for ttt=1:T  
                 @views ind = rowIDT[ttt,1];
                 @views his = Mtau*hi[ind];
-                @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind] ;
+                @views ϵs  = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] ;
                 @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
                 @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                 @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -2310,7 +2310,7 @@ elseif length(Wy)>1
                 
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] ;
+    @views ϵs  = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] ;
     @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -2811,7 +2811,7 @@ end # @floop begin
     @inbounds  for ttt=1:T  
                     @views ind = rowIDT[ttt,1];
                     @views his = Mtau*hi[ind];
-                    @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind] - PorC.* Mrho*(eps[ind,:]*eta) ;
+                    @views ϵs  = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
                     @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
                     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                     @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -2845,7 +2845,7 @@ elseif length(Wy)>1
     
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] - PorC.* Mrho*(eps[ind,:]*eta) ;
+    @views ϵs  = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
     @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -2946,7 +2946,7 @@ end # @floop begin
     @inbounds  for ttt=1:T  
                     @views ind = rowIDT[ttt,1];
                     @views his = Mtau*hi[ind];
-                    @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind] - PorC.* Mrho*(eps[ind,:]*eta) ;
+                    @views ϵs  = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
                     @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
                     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                     @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -2980,7 +2980,7 @@ elseif length(Wy)>1
     
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] - PorC.* Mrho*(eps[ind,:]*eta) ;
+    @views ϵs  = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
     @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -3079,7 +3079,7 @@ end # @floop begin
     @inbounds  for ttt=1:T  
             @views ind = rowIDT[ttt,1];
             @views his = Mtau*hi[ind];
-            @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind] - PorC.*(eps[ind,:]*eta) ;
+            @views ϵs  = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] - PorC*(eps[ind,:]*eta) ;
             @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
             @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
             @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -3111,7 +3111,7 @@ elseif length(Wy)>1
     
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] - PorC.*(eps[ind,:]*eta)  ;
+    @views ϵs  = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] - PorC*(eps[ind,:]*eta)  ;
     @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -3209,7 +3209,7 @@ end # @floop begin
     @inbounds  for ttt=1:T  
             @views ind = rowIDT[ttt,1];
             @views his = Mtau*hi[ind];
-            @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind]  - PorC.*(eps[ind,:]*eta) ;
+            @views ϵs  = ϵ[ind]-PorC*gamma*Wy[1]*y[ind]  - PorC*(eps[ind,:]*eta) ;
             @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
             @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
             @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -3241,7 +3241,7 @@ elseif length(Wy)>1
     
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind]  - PorC.*(eps[ind,:]*eta) ;
+    @views ϵs  = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind]  - PorC*(eps[ind,:]*eta) ;
     @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -3343,7 +3343,7 @@ end # @floop begin
     @inbounds  for ttt=1:T  
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind] - PorC.* Mrho*(eps[ind,:]*eta) ;
+    @views ϵs  = ϵ[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
     @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -3376,7 +3376,7 @@ elseif length(Wu)>1
     
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind]- PorC.* Mrho*(eps[ind,:]*eta) ;
+    @views ϵs  = ϵ[ind]- PorC* Mrho*(eps[ind,:]*eta) ;
     @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -3476,7 +3476,7 @@ end # @floop begin
     @inbounds  for ttt=1:T  
             @views ind = rowIDT[ttt,1];
             @views his = Mtau*hi[ind];
-            @views ϵs  = ϵ[ind] - PorC.*(eps[ind,:]*eta) ;
+            @views ϵs  = ϵ[ind] - PorC*(eps[ind,:]*eta) ;
             @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
             @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
             @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -3507,7 +3507,7 @@ elseif length(Wu)>1
     
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind] - PorC.*(eps[ind,:]*eta) ;
+    @views ϵs  = ϵ[ind] - PorC*(eps[ind,:]*eta) ;
     @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -3608,7 +3608,7 @@ end # @floop begin
     @inbounds  for ttt=1:T  
             @views ind = rowIDT[ttt,1];
             @views his = Mtau*hi[ind];
-            @views ϵs  = ϵ[ind] - PorC.* Mrho*(eps[ind,:]*eta) ;
+            @views ϵs  = ϵ[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
             @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
             @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
             @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -3641,7 +3641,7 @@ elseif length(Wv)>1
     
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind] - PorC.* Mrho*(eps[ind,:]*eta) ;
+    @views ϵs  = ϵ[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
     @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -3734,7 +3734,7 @@ end # @floop begin
     @inbounds  for ttt=1:T  
             @views ind = rowIDT[ttt,1];
             @views his = Mtau*hi[ind];
-            @views ϵs  = ϵ[ind]  - PorC.*(eps[ind,:]*eta) ;
+            @views ϵs  = ϵ[ind]  - PorC*(eps[ind,:]*eta) ;
             @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
             @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
             @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -4322,12 +4322,12 @@ function ssdkuhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
     likx = zero(eltype(y));
 
 
-   # try
+   try
     @floop begin
     @inbounds for iitt =1:num.nofobs
                 tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
                 if simple_check(tempx)
-                    likx += -1e9
+                    likx += -1e99
                 else
                     likx += tempx
                 end # simple_check(tempx)
@@ -4375,7 +4375,7 @@ function ssdkuhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
                 # print(size(temp_1))
 
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
-        @views temp_1 = map(x -> x ≠ x ? -1e9  : isinf(x) ? -1e9  : x, temp_1)
+        @views temp_1 = map(x -> x ≠ x ? -1e99  : isinf(x) ? -1e99  : x, temp_1)
         # 计算总和
         @views lik = sum(temp_1)
 
@@ -4405,17 +4405,17 @@ function ssdkuhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
                 # print(size(temp_1))
 
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
-        @views temp_1 = map(x -> x ≠ x ? -1e9  : isinf(x) ? -1e9  : x, temp_1)
+        @views temp_1 = map(x -> x ≠ x ? -1e99  : isinf(x) ? -1e99  : x, temp_1)
         # 计算总和
         @views lik = sum(temp_1)
 
     end # if length(Wy)==1 
         return -lik-likx-lndetIrhoWt
-    # catch e
-    # # 处理异常的代码
-    # println("操作失败，发生错误：$e")
-    #     return 1e100
-    # end
+    catch e
+    # 处理异常的代码
+    println("操作失败，发生错误：$e")
+        return 1e100
+    end
 end
 
 
@@ -4463,7 +4463,7 @@ function ssdkuh( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
                 # print(size(temp_1))
 
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
-        @views temp_1 = map(x -> x ≠ x ? -1e9  : isinf(x) ? -1e9  : x, temp_1)
+        @views temp_1 = map(x -> x ≠ x ? -1e99  : isinf(x) ? -1e99  : x, temp_1)
         # 计算总和
         @views lik = sum(temp_1)
         @views lll =  lik.+lndetIrhoWt
@@ -4494,7 +4494,7 @@ function ssdkuh( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
                 # print(size(temp_1))
 
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
-        @views temp_1 = map(x -> x ≠ x ? -1e9  : isinf(x) ? -1e9  : x, temp_1)
+        @views temp_1 = map(x -> x ≠ x ? -1e99  : isinf(x) ? -1e99  : x, temp_1)
         # 计算总和
         @views lik = sum(temp_1)
         @views lll =  lik.+lndetIrhoWt
@@ -4606,7 +4606,7 @@ function ssdkute( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
                         0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
  
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
-        @views temp_1 = map(x -> x ≠ x ? -1e9  : isinf(x) ? -1e9  : x, temp_1)
+        @views temp_1 = map(x -> x ≠ x ? -1e99  : isinf(x) ? -1e99  : x, temp_1)
         # 计算总和
         @views lik = sum(temp_1)
         @views lll =  lik.+likx.+lndetIrhoWt
@@ -4695,7 +4695,7 @@ function ssdkut( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
                 # print(size(temp_1))
 
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
-        @views temp_1 = map(x -> x ≠ x ? -1e9  : isinf(x) ? -1e9  : x, temp_1)
+        @views temp_1 = map(x -> x ≠ x ? -1e99  : isinf(x) ? -1e99  : x, temp_1)
         # 计算总和
         @views lik = sum(temp_1)
         @views lll = lik.+lndetIrhoWt
@@ -4725,7 +4725,7 @@ function ssdkut( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
                         0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
 
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
-        @views temp_1 = map(x -> x ≠ x ? -1e9  : isinf(x) ? -1e9  : x, temp_1)
+        @views temp_1 = map(x -> x ≠ x ? -1e99  : isinf(x) ? -1e99  : x, temp_1)
         # 计算总和
         @views lik = sum(temp_1)
 
