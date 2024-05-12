@@ -4322,7 +4322,7 @@ function ssdkuhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
     likx = zero(eltype(y));
 
 
-   try
+   # try
     @floop begin
     @inbounds for iitt =1:num.nofobs
                 tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
@@ -4364,14 +4364,14 @@ function ssdkuhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
         @views invPi = 1/σᵥ²;
         @views lndetPi = log(σᵥ²);
     
-        @views ϵ  = ϵ-PorC.*gamma.*Wyt*y  - PorC.*(eps*eta) ;
-        @views sigs2 = 1 ./ (hi.^2 .*invPi .+ 1 /σᵤ²) ;
-        @views mus = (μ/σᵤ² .- ϵ .* hi .* invPi) .* sigs2 ;
-        @views es2 = -0.5 .* ϵ.^2 .*invPi;
+        @views ϵ  =  ϵ-PorC*gamma*Wyt*y  - PorC*(eps*eta) ;
+        @views sigs2 = @. 1 / (hi^2 *invPi + 1 /σᵤ²) ;
+        @views mus = @. (μ/σᵤ² - ϵ * hi * invPi) * sigs2 ;
+        @views es2 =@. -0.5 * ϵ^2 *invPi;
         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
-        @views temp_1 = KK .+  es2 .+ 0.5 .* (((mus .^ 2) ./ sigs2) .- (μ^2 / σᵤ²) ) .+
-                        0.5 .* log.(sigs2) .+ log.(normcdf.(mus ./ sqrt.(sigs2))) .-
-                        0.5 * log(σᵤ²) .- log(normcdf(μ / σᵤ))
+        @views temp_1 =@. KK +  es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
+                        0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
+                        0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                 # print(size(temp_1))
 
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
@@ -4394,14 +4394,14 @@ function ssdkuhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
         
         @views invPi = 1/σᵥ²;
         @views lndetPi = log(σᵥ²);
-        @views ϵ  = ϵ-PorC.*gamma.*Wyt*y  - PorC.*(eps*eta) ;
-        @views sigs2 = 1 ./ (hi.^2 .*invPi .+ 1 /σᵤ²) ;
-        @views mus = (μ/σᵤ² .- ϵ .* hi .* invPi) .* sigs2 ;
-        @views es2 = -0.5 .* ϵ.^2 .*invPi;
+        @views ϵ  =  ϵ-PorC*gamma*Wyt*y  - PorC*(eps*eta) ;
+        @views sigs2 = @. 1 / (hi^2 *invPi + 1 /σᵤ²) ;
+        @views mus = @. (μ/σᵤ² - ϵ * hi * invPi) * sigs2 ;
+        @views es2 =@. -0.5 * ϵ^2 *invPi;
         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
-        @views temp_1 = KK .+  es2 .+ 0.5 .* (((mus .^ 2) ./ sigs2) .- (μ^2 / σᵤ²) ) .+
-                        0.5 .* log.(sigs2) .+ log.(normcdf.(mus ./ sqrt.(sigs2))) .-
-                        0.5 * log(σᵤ²) .- log(normcdf(μ / σᵤ))
+        @views temp_1 =@. KK +  es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
+                        0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
+                        0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                 # print(size(temp_1))
 
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
@@ -4411,11 +4411,11 @@ function ssdkuhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
 
     end # if length(Wy)==1 
         return -lik-likx-lndetIrhoWt
-    catch e
-    # 处理异常的代码
-    println("操作失败，发生错误：$e")
-        return 1e100
-    end
+    # catch e
+    # # 处理异常的代码
+    # println("操作失败，发生错误：$e")
+    #     return 1e100
+    # end
 end
 
 
@@ -4452,14 +4452,14 @@ function ssdkuh( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
         @views invPi = 1/σᵥ²;
         @views lndetPi = log(σᵥ²);
     
-        @views ϵ  = ϵ-PorC.*gamma.*Wyt*y   ;
-        @views sigs2 = 1 ./ (hi.^2 .*invPi .+ 1 /σᵤ²) ;
-        @views mus = (μ/σᵤ² .- ϵ .* hi .* invPi) .* sigs2 ;
-        @views es2 = -0.5 .* ϵ.^2 .*invPi;
+        @views ϵ  = ϵ-PorC*gamma*Wyt*y   ;
+        @views sigs2 = @. 1 / (hi^2 *invPi + 1 /σᵤ²) ;
+        @views mus = @. (μ/σᵤ² - ϵ * hi * invPi) * sigs2 ;
+        @views es2 =@.  -0.5 * ϵ^2 *invPi;
         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
-        @views temp_1 = KK .+  es2 .+ 0.5 .* (((mus .^ 2) ./ sigs2) .- (μ^2 / σᵤ²) ) .+
-                        0.5 .* log.(sigs2) .+ log.(normcdf.(mus ./ sqrt.(sigs2))) .-
-                        0.5 * log(σᵤ²) .- log(normcdf(μ / σᵤ))
+        @views temp_1 =@. KK +  es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
+                        0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
+                        0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                 # print(size(temp_1))
 
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
@@ -4483,14 +4483,14 @@ function ssdkuh( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
         
         @views invPi = 1/σᵥ²;
         @views lndetPi = log(σᵥ²);
-        @views ϵ  = ϵ-PorC.*gamma.*Wyt*y   ;
-        @views sigs2 = 1 ./ (hi.^2 .*invPi .+ 1 /σᵤ²) ;
-        @views mus = (μ/σᵤ² .- ϵ .* hi .* invPi) .* sigs2 ;
-        @views es2 = -0.5 .* ϵ.^2 .*invPi;
+        @views ϵ  = ϵ-PorC*gamma*Wyt*y   ;
+        @views sigs2 =@. 1 / (hi^2 *invPi + 1 /σᵤ²) ;
+        @views mus = @. (μ/σᵤ² - ϵ * hi * invPi) * sigs2 ;
+        @views es2 = @. -0.5 * ϵ^2 *invPi;
         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
-        @views temp_1 = KK .+  es2 .+ 0.5 .* (((mus .^ 2) ./ sigs2) .- (μ^2 / σᵤ²) ) .+
-                        0.5 .* log.(sigs2) .+ log.(normcdf.(mus ./ sqrt.(sigs2))) .-
-                        0.5 * log(σᵤ²) .- log(normcdf(μ / σᵤ))
+        @views temp_1 =@. KK +  es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
+                        0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
+                        0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                 # print(size(temp_1))
 
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
@@ -4596,16 +4596,15 @@ function ssdkute( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
         @views invPi = 1/σᵥ²;
         @views lndetPi = log(σᵥ²);
     
-        @views ϵ  = ϵ-PorC.*gamma.*Wyt*y  - PorC.*(eps*eta) ;
-        @views sigs2 = 1 ./ (hi.^2 .*invPi .+ 1 /σᵤ²) ;
-        @views mus = (μ/σᵤ² .- ϵ .* hi .* invPi) .* sigs2 ;
-        @views es2 = -0.5 .* ϵ.^2 .*invPi;
+        @views ϵ  =  ϵ-PorC*gamma*Wyt*y  - PorC*(eps*eta) ;
+        @views sigs2 = @.  1 / (hi^2 *invPi + 1 /σᵤ²) ;
+        @views mus =@. (μ/σᵤ² - ϵ * hi * invPi) * sigs2 ;
+        @views es2 =@. -0.5 * ϵ^2 *invPi;
         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
-        @views temp_1 = KK .+  es2 .+ 0.5 .* (((mus .^ 2) ./ sigs2) .- (μ^2 / σᵤ²) ) .+
-                        0.5 .* log.(sigs2) .+ log.(normcdf.(mus ./ sqrt.(sigs2))) .-
-                        0.5 * log(σᵤ²) .- log(normcdf(μ / σᵤ))
-                # print(size(temp_1))
-
+        @views temp_1 =@. KK +  es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
+                        0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
+                        0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+ 
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
         @views temp_1 = map(x -> x ≠ x ? -1e9  : isinf(x) ? -1e9  : x, temp_1)
         # 计算总和
@@ -4626,15 +4625,14 @@ function ssdkute( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
         
         @views invPi = 1/σᵥ²;
         @views lndetPi = log(σᵥ²);
-        @views ϵ  = ϵ-PorC.*gamma.*Wyt*y  - PorC.*(eps*eta) ;
-        @views sigs2 = 1 ./ (hi.^2 .*invPi .+ 1 /σᵤ²) ;
-        @views mus = (μ/σᵤ² .- ϵ .* hi .* invPi) .* sigs2 ;
-        @views es2 = -0.5 .* ϵ .^2 .*invPi;
+        @views ϵ  =  ϵ-PorC*gamma*Wyt*y  - PorC*(eps*eta) ;
+        @views sigs2 = @.  1 / (hi^2 *invPi + 1 /σᵤ²) ;
+        @views mus =@. (μ/σᵤ² - ϵ * hi * invPi) * sigs2 ;
+        @views es2 =@. -0.5 * ϵ^2 *invPi;
         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
-        @views temp_1 = KK .+  es2 .+ 0.5 .* (((mus .^ 2) ./ sigs2) .- (μ^2 / σᵤ²) ) .+
-                        0.5 .* log.(sigs2) .+ log.(normcdf.(mus ./ sqrt.(sigs2))) .-
-                        0.5 * log(σᵤ²) .- log(normcdf(μ / σᵤ))
-                # print(size(temp_1))
+        @views temp_1 =@. KK +  es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
+                        0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
+                        0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
 
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
         @views temp_1 = map(x -> x ≠ x ? -1e99  : isinf(x) ? -1e99  : x, temp_1)
@@ -4685,16 +4683,15 @@ function ssdkut( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
         @views lndetIrhoWt = lndetIrhoW*T
         @views invPi = 1/σᵥ²;
         @views lndetPi = log(σᵥ²);
-        # println(eps)
-        # println(eta)
-        @views ϵ  = ϵ.-PorC.*gamma.*Wyt*y   ;
-        @views sigs2 = 1 ./ (hi.^2 .*invPi .+ 1 /σᵤ²) ;
-        @views mus = (μ/σᵤ² .- ϵ .* hi .* invPi) .* sigs2 ;
-        @views es2 = -0.5 .* ϵ .^2 .*invPi;
+
+        @views ϵ  =  ϵ-PorC*gamma*Wyt*y   ;
+        @views sigs2 =@. 1 / (hi^2 *invPi + 1 /σᵤ²) ;
+        @views mus =@. (μ/σᵤ² - ϵ * hi * invPi) * sigs2 ;
+        @views es2 =@. -0.5 * ϵ ^2 *invPi;
         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
-        @views temp_1 = KK .+  es2 .+ 0.5 .* (((mus .^ 2) ./ sigs2) .- (μ^2 / σᵤ²) ) .+
-                        0.5 .* log.(sigs2) .+ log.(normcdf.(mus ./ sqrt.(sigs2))) .-
-                        0.5 * log(σᵤ²) .- log(normcdf(μ / σᵤ))
+        @views temp_1 =@. KK +  es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
+                        0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
+                        0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                 # print(size(temp_1))
 
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
@@ -4718,15 +4715,14 @@ function ssdkut( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
         
         @views invPi = 1/σᵥ²;
         @views lndetPi = log(σᵥ²);
-        @views ϵ  = ϵ-PorC.*gamma.*Wyt*y   ;
-        @views sigs2 = 1 ./ (hi.^2 .*invPi .+ 1 /σᵤ²) ;
-        @views mus = (μ/σᵤ² .- ϵ .* hi .* invPi) .* sigs2 ;
-        @views es2 = -0.5 .* ϵ.^2 .*invPi;
+        @views ϵ  =  ϵ-PorC*gamma*Wyt*y   ;
+        @views sigs2 =@. 1 / (hi^2 *invPi + 1 /σᵤ²) ;
+        @views mus =@. (μ/σᵤ² - ϵ * hi * invPi) * sigs2 ;
+        @views es2 =@. -0.5 * ϵ ^2 *invPi;
         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
-        @views temp_1 = KK .+  es2 .+ 0.5 .* (((mus .^ 2) ./ sigs2) .- (μ^2 / σᵤ²) ) .+
-                        0.5 .* log.(sigs2) .+ log.(normcdf.(mus ./ sqrt.(sigs2))) .-
-                        0.5 * log(σᵤ²) .- log(normcdf(μ / σᵤ))
-                # print(size(temp_1))
+        @views temp_1 =@. KK +  es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
+                        0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
+                        0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
 
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
         @views temp_1 = map(x -> x ≠ x ? -1e9  : isinf(x) ? -1e9  : x, temp_1)
