@@ -796,3 +796,157 @@ function get_marg(::Type{SSFKUT},
      return  margeff, margMean
 end  
 
+
+
+function marg_ssfkueh(ttt::Int, iii::Int, N::Int,# PorC::Int64, 
+     pos::NamedTuple, eigvalu::NamedTuple,coef::Array{Float64, 1},
+      Qmarg, Wmarg)
+
+     h = exp(Qmarg'*coef[pos.begq : pos.endq])
+     σᵤ = exp(0.5 * Wmarg'*coef[pos.begw : pos.endw]) # σᵤ
+     μ = 0
+     
+     hs = 1*h;
+    
+     hsμ  = hs*μ
+     hsσᵤ = hs*σᵤ 
+      Λ  = hsμ/hsσᵤ 
+    
+     uncondU = hsσᵤ* (Λ + normpdf(Λ) / normcdf(Λ)) # kx1
+   
+end   
+
+
+ 
+function get_marg(::Type{SSFKUEH}, 
+     pos::NamedTuple, num::NamedTuple, coef::Array{Float64, 1}, 
+     Q::Matrix, W::Matrix, z, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+
+        #* Note that Y and X are within-transformed by `getvar`, 
+        #* but Q, W, V are still in the original level.
+
+     mm_q = Array{Float64}(undef, num.nofq, num.nofobs)                  
+     mm_w = Array{Float64}(undef, num.nofw, num.nofobs)    
+     # mm_z = Array{Float64}(undef, num.nofz, num.nofobs)  
+
+     T = size(rowIDT,1)
+
+     @inbounds for ttt=1:T
+          ind = rowIDT[ttt,1];
+          for iii in ind
+               @views N = rowIDT[1,2];
+
+
+               @views marg = ForwardDiff.gradient(marg -> marg_ssfkueh(ttt, iii,N, pos,eigvalu, coef, 
+                                                  marg[1 : num.nofq],
+                                                  marg[num.nofq+1 : num.nofq+num.nofw],
+                                                   ),
+                              vcat(  Q[iii,:], W[iii,:] ) );                            
+
+               mm_q[:,iii] = marg[1 : num.nofq]
+               mm_w[:,iii] = marg[num.nofq+1 : num.nofq+num.nofw]
+               # mm_z[:,iii] = marg[num.nofq+num.nofw+1 : end]
+          end # iii in ind
+     end  #  ttt=1:T
+
+     margeff = DataFrame(mm_q', _dicM[:hscale])
+     mm_w = DataFrame(mm_w', _dicM[:σᵤ²])
+     # mm_z = DataFrame(mm_z', _dicM[:μ]) # the base set
+
+     #* purge off the constant var's marginal effect from the DataFrame
+     margeff = nonConsDataFrame(margeff, Q)
+     mm_w = nonConsDataFrame(mm_w, W)
+     # mm_z = nonConsDataFrame(mm_z, Z)
+
+     #* if same var in different equations, add up the marg eff
+     margeff = addDataFrame(margeff, mm_w)
+     # margeff = addDataFrame(margeff, mm_z)
+
+      #* prepare info for printing
+      margMean = (; zip(Symbol.(names(margeff)) , round.(mean.(eachcol(margeff)); digits=5))...)
+
+      #* modify variable names to indicate marginal effects
+      newname = Symbol.(fill("marg_", (size(margeff,2), 1)) .* names(margeff))
+      margeff = rename!(margeff, vec(newname))
+
+     return  margeff, margMean
+end  
+
+
+
+function marg_ssfkuet(ttt::Int, iii::Int, N::Int,# PorC::Int64, 
+     pos::NamedTuple, eigvalu::NamedTuple,coef::Array{Float64, 1},
+      Qmarg, Wmarg,Zmarg)
+
+     h = exp(Qmarg'*coef[pos.begq : pos.endq])
+     σᵤ = exp(0.5 * Wmarg'*coef[pos.begw : pos.endw]) # σᵤ
+     μ = Zmarg'*coef[pos.begz : pos.endz]  # mu, a scalar
+     
+
+     hs = 1*h;
+    
+     hsμ  = hs*μ
+     hsσᵤ = hs*σᵤ 
+      Λ  = hsμ/hsσᵤ 
+    
+     uncondU = hsσᵤ* (Λ + normpdf(Λ) / normcdf(Λ)) # kx1
+   
+end   
+
+
+#? -- panel FE Orea and Al, truncated normal, , get marginal effect ----
+ 
+function get_marg(::Type{SSFKUET}, 
+     pos::NamedTuple, num::NamedTuple, coef::Array{Float64, 1}, 
+     Q::Matrix, W::Matrix,Z::Matrix, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+
+        #* Note that Y and X are within-transformed by `getvar`, 
+        #* but Q, W, V are still in the original level.
+
+     mm_q = Array{Float64}(undef, num.nofq, num.nofobs)                  
+     mm_w = Array{Float64}(undef, num.nofw, num.nofobs)    
+     mm_z = Array{Float64}(undef, num.nofz, num.nofobs)  
+
+     T = size(rowIDT,1)
+
+     @inbounds for ttt=1:T
+          ind = rowIDT[ttt,1];
+          for iii in ind
+               @views N = rowIDT[1,2];
+
+
+               @views marg = ForwardDiff.gradient(marg -> marg_ssfkuet(ttt, iii,N, pos,eigvalu, coef, 
+                                                  marg[1 : num.nofq],
+                                                  marg[num.nofq+1 : num.nofq+num.nofw],
+                                                  marg[num.nofq+num.nofw+1 : num.nofq+num.nofw+num.nofz] ),
+                              vcat(  Q[iii,:], W[iii,:],Z[iii,:]) );                            
+
+               mm_q[:,iii] = marg[1 : num.nofq]
+               mm_w[:,iii] = marg[num.nofq+1 : num.nofq+num.nofw]
+               mm_z[:,iii] = marg[num.nofq+num.nofw+1 : end]
+          end # iii in ind
+     end  #  ttt=1:T
+
+     margeff = DataFrame(mm_q', _dicM[:hscale])
+     mm_w = DataFrame(mm_w', _dicM[:σᵤ²])
+     mm_z = DataFrame(mm_z', _dicM[:μ]) # the base set
+
+     #* purge off the constant var's marginal effect from the DataFrame
+     margeff = nonConsDataFrame(margeff, Q)
+     mm_w = nonConsDataFrame(mm_w, W)
+     mm_z = nonConsDataFrame(mm_z, Z)
+
+     #* if same var in different equations, add up the marg eff
+     margeff = addDataFrame(margeff, mm_w)
+     margeff = addDataFrame(margeff, mm_z)
+
+      #* prepare info for printing
+      margMean = (; zip(Symbol.(names(margeff)) , round.(mean.(eachcol(margeff)); digits=5))...)
+
+      #* modify variable names to indicate marginal effects
+      newname = Symbol.(fill("marg_", (size(margeff,2), 1)) .* names(margeff))
+      margeff = rename!(margeff, vec(newname))
+
+     return  margeff, margMean
+end  
+

@@ -50,8 +50,8 @@ export sfmodel_spec, sfmodel_init, sfmodel_opt,
         MoM,
         production, cost, #* not prod, b/c conflict with Base
         text, html, latex, forward, finite,
-        SSFOAT,SSFOAH, SSFOADT,SSFOADH,SSFKUT,SSFKUH,          #* export for testing purpose
-        SSF_OA2019,SSF_OAD2024,SSF_KU2020,
+        SSFOAT,SSFOAH, SSFOADT,SSFOADH,SSFKUT,SSFKUH,SSFKUET,SSFKUEH,          #* export for testing purpose
+        SSF_OA2019,SSF_OAD2024,SSF_KU2020,SSF_KUE2020,
       # Optim's algorithms  
         NelderMead, SimulatedAnnealing, SAMIN, ParticleSwarm,
         ConjugateGradient, GradientDescent, BFGS, LBFGS,
@@ -85,7 +85,7 @@ using ForneyLab
 using MAT
 using LineSearches
 using Calculus 
-
+using BlockDiagonals            # for diagnol matrix
 
 #############################
 ##   Define Model Types    ##
@@ -109,6 +109,8 @@ abstract type Sfmodeltype end
   struct SSFOADH   <: Sfmodeltype end # panel true random effect model, truncated normal
   struct SSFKUH    <: Sfmodeltype end # panel true random effect model, half normal
   struct SSFKUT   <: Sfmodeltype end # panel true random effect model, truncated normal
+  struct SSFKUEH    <: Sfmodeltype end # panel true random effect model, half normal
+  struct SSFKUET   <: Sfmodeltype end # panel true random effect model, truncated normal
 
 abstract type PorC end
   struct production <: PorC end
@@ -118,6 +120,7 @@ abstract type PanelModel end
   struct SSF_OA2019 <: PanelModel end
   struct SSF_OAD2024 <: PanelModel end
   struct SSF_KU2020 <: PanelModel end
+  struct SSF_KUE2020 <: PanelModel end
 
 
 

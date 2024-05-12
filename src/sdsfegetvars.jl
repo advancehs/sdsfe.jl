@@ -1423,7 +1423,6 @@ function getvar(::Type{SSFOADH}, dat::DataFrame)
 ivar = dat[:, _dicM[:idvar]] 
 dat = sort(dat,  [_dicM[:timevar][1], _dicM[:idvar][1]])
 tvar = dat[:, _dicM[:timevar]]
-  global rowIDT
 rowIDT = get_rowIDofT(vec(Matrix(tvar)))   # rowIDT (Nx2): col_1 is panel's row info; col_2 is panel's number of id in each year
 
 yvar = dat[:, _dicM[:depvar]]   # still a DataFrame
@@ -1879,13 +1878,12 @@ end
 
 
 
-function getvar(::Type{SSFKUH}, dat::DataFrame)
+function getvar(::Type{SSFKUEH}, dat::DataFrame)
 
-  
+
     ivar = dat[:, _dicM[:idvar]] 
     dat = sort(dat,  [_dicM[:timevar][1], _dicM[:idvar][1]])
     tvar = dat[:, _dicM[:timevar]]
-      global rowIDT
     rowIDT = get_rowIDofT(vec(Matrix(tvar)))   # rowIDT (Nx2): col_1 is panel's row info; col_2 is panel's number of id in each year
     
     yvar = dat[:, _dicM[:depvar]]   # still a DataFrame
@@ -2088,23 +2086,217 @@ lnσᵥ²   = begv + 1,
       
     eigvalu = (rymin=rymin, rymax=rymax)
       indices_list = find_all_indices_ordered(vcat(_dicM[:frontier],_dicM[:frontierWx]))
-    
+  
     return modelinfo1, modelinfo2, posvec, nofvar, eqvec, eqvec2, yvar, xvar, 
       qvar, wvar, vvar, zvar, envar, ivvar, eigvalu, indices_list,rowIDT, varlist
       
     end
     
+
+function getvar(::Type{SSFKUH}, dat::DataFrame)
+
+    
+      ivar = dat[:, _dicM[:idvar]] 
+      dat = sort(dat,  [_dicM[:timevar][1], _dicM[:idvar][1]])
+      tvar = dat[:, _dicM[:timevar]]
+      rowIDT = get_rowIDofT(vec(Matrix(tvar)))   # rowIDT (Nx2): col_1 is panel's row info; col_2 is panel's number of id in each year
+      
+      yvar = dat[:, _dicM[:depvar]]   # still a DataFrame
+      xvar = dat[:, _dicM[:frontier]]  ## 如果有wx，则要在这里合并一下，x和wx
+      if _dicM[:wx]!=Nothing  # yuvx
+          Wxvar = dat[:, _dicM[:frontierWx]]   
+      end
+      qvar = dat[:, _dicM[:hscale]]  
+      wvar = dat[:, _dicM[:σᵤ²]]
+      vvar = dat[:, _dicM[:σᵥ²]]
+      # zvar = dat[:, _dicM[:μ]]
+      
+      Wy = _dicM[:wy]
+      Wx = _dicM[:wx] 
+      
+      #* --- model info printout --------- 
+      modelinfo1 = "spatial stochastic frontier analysis in Kutlu (2020 EJoR), normal and truncated-normal"
+      modelinfo2 = begin
+        """
+        * In the case of type(cost), "- uᵢₜ" below is changed to "+ uᵢₜ".
+      
+        $(_dicM[:depvar][1]) = frontier( $(_dicM[:frontier])) + ̃vᵢₜ - ̃uᵢₜ,
+        
+        where vᵢₜ ∼ N(0, σᵥ²),
+                    σᵥ² = exp(log_σᵥ²) 
+                        = exp($(_dicM[:σᵥ²]));
+              uᵢₜ ∼ hscaleᵢₜ * uᵢ,
+                    hscaleᵢₜ = exp($(_dicM[:hscale])),
+              uᵢ ∼ N⁺(μ, σᵤ²),
+                  μ = $(_dicM[:μ])
+                  σᵤ² = exp(log_σᵤ²) 
+                      = exp($(_dicM[:σᵤ²]));
+        """
+      end
+        
+      if  Wx!=Nothing   # yuvx
+          wxvar = zeros(size(dat, 1), length(_dicM[:frontierWx]) )
+          T=length(unique(vec(Matrix(tvar))));
+          for ttt in 1:T
+              if length(Wx) == 1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
+              
+                  xx = Matrix(dat[!, _dicM[:frontierWx]])
+                  @views wxvar[rowIDT[ttt,1], :] .= Wx[1] * xx[rowIDT[ttt,1], :]
+              elseif length(wx) > 1
+        
+                  xx = Matrix(dat[!, _dicM[:frontierWx]])
+                  @views wxvar[rowIDT[ttt,1], :] .= Wx[1] * xx[rowIDT[ttt,1], :]
+                  
+              end	
+          end
+      end
+      
+      #* --- retrieve and generate important parameters -----
+      
+      #*   number of obs and number of variables
+      nofx = nofq = nofw = nofv = nofz= nofgamma  = 0  # to make a complete list
+      
+      nofobs  = nrow(dat)  
+      if  Wx!=Nothing   # yuvx
+      nofx    = size(xvar,2) + size(wxvar,2)  # nofx: number of x + wx vars
+        else
+      nofx    = size(xvar,2) 
+        end
+      nofq    = size(qvar,2)  # h  
+      nofw    = size(wvar,2)  # sigma_u_2
+      nofv    = size(vvar,2)  # sigma_v_2
+      # nofz    = size(zvar,2)  # mu
+      nofgamma    = 1 # wy
+    
+      
+      nofpara = nofx + nofq + nofw + nofv  +nofgamma+nofz
+      
+      
+      nofvar = (nofobs=nofobs, nofx=nofx, nofq=nofq,nofw=nofw, nofv=nofv, nofz=nofz, 
+              nofgamma=nofgamma,  nofpara=nofpara, nofmarg = nofq+nofw+nofz)
+      
+      #* positions of the variables/parameters
+      begx=endx=begq=endq=begw=endw=begv=endv=begz=endz=beggamma=endgamma =0
+      
+      begx = 1
+      endx = nofx
+      begq = endx + 1
+      endq = begq + nofq-1
+      begw = endq + 1
+      endw = begw + nofw-1
+      begv = endw + 1
+      endv = begv + nofv-1
+      # begz = endv + 1
+      # endz = begz + nofz-1
+      beggamma = endv + 1
+      endgamma = beggamma + nofgamma-1
+        
+      
+      posvec = (begx=begx, endx=endx, begq=begq, endq=endq,
+                begw=begw, endw=endw,begv=begv, endv=endv, begz=begz, endz=endz, 
+                beggamma=beggamma, endgamma=endgamma)
+      
+      #* create equation names and mark positions for making tables
+      eqvec = (frontier = begx + 1, 
+      lnh  = begq + 1,
+  lnσᵤ²   = begw + 1,
+  lnσᵥ²   = begv + 1,
+      ρ   = beggamma + 1)
+  
+      
+  
+      
+      #* create equation names and mark positions 
+      eqvec2 = (coeff_frontier = (begx:endx), 
+      coeff_log_hscale = (begq:endq),
+          coeff_log_σᵤ² = (begw:endw),
+          coeff_log_σᵥ² = (begv:endv),
+                coeff_γ = (beggamma:endgamma), )        
+  
+    
+      
+      #* retrieve variable names for making tables
+      if  Wx!=Nothing   # yuvx
+      xnames  = vcat(names(xvar),   ["W*" * s for s in names(Wxvar)]   )
+      else
+      xnames  = names(xvar)
+      end
+      
+      
+      qnames  = names(qvar)
+      wnames  = names(wvar)
+      vnames  = names(vvar)
+      # znames  = names(zvar)
+      if  Wy!=Nothing    
+      gammanames  = "ρ"
+      end
+  
+      varlist = vcat(" ", xnames, qnames , wnames, vnames, gammanames)
+  
+      
+      
+      #* Converting the dataframe to matrix in order to do computation
+      yvar  = convert(Array{Float64}, Matrix(yvar))
+      if  Wx!=Nothing   # yuvx
+      xvar  = convert(Array{Float64}, hcat(Matrix(xvar),wxvar))
+        else
+          xvar  = convert(Array{Float64}, Matrix(xvar))
+        end
+      qvar  = convert(Array{Float64}, Matrix(qvar))
+      wvar  = convert(Array{Float64}, Matrix(wvar))
+      vvar  = convert(Array{Float64}, Matrix(vvar))
+      # zvar  = convert(Array{Float64}, Matrix(zvar))
+      tvar  = convert(Array{Float64}, Matrix(tvar))
+      ivar  = convert(Array{Float64}, Matrix(ivar))
+      
+      ivvar  = ()
+      envar  = ()
+      zvar = ()
+      
+      #* various functions can and cannot contain a constant, check! ---- *#
+      # checkConst(xvar, :frontier, @requireConst(0))
+      # checkConst(qvar, :hscale,   @requireConst(0)) 
+      # checkConst(wvar, :σᵤ²,      @requireConst(1))
+      # checkConst(vvar, :σᵥ²,      @requireConst(1))
+      # checkConst(zvar, :μ,        @requireConst(1))
+      
+      
+      # 获得空间矩阵的特征值
+      rymin=rymax=0
+      if  Wy!=Nothing   # yuvx
+          dylams = eigen(Wy[1])
+          rymin = 1 / minimum(real(dylams.values))
+          rymax = 1
+          if length(Wy) > 1
+              for k = 2:length(Wy)
+                  dylams = eigen(Wy[k])
+                  if rymin < 1 / minimum(real(dylams.values))
+                      rymin = 1 / minimum(real(dylams.values))
+                  end
+              end
+          end
+        end
+    
+        
+      eigvalu = (rymin=rymin, rymax=rymax)
+        indices_list = find_all_indices_ordered(vcat(_dicM[:frontier],_dicM[:frontierWx]))
+    
+      return modelinfo1, modelinfo2, posvec, nofvar, eqvec, eqvec2, yvar, xvar, 
+        qvar, wvar, vvar, zvar, envar, ivvar, eigvalu, indices_list,rowIDT, varlist
+        
+end
+        
+        
     
 
 
 
-    function getvar(::Type{SSFKUT}, dat::DataFrame)
+function getvar(::Type{SSFKUET}, dat::DataFrame)
 
-  
+
       ivar = dat[:, _dicM[:idvar]] 
       dat = sort(dat,  [_dicM[:timevar][1], _dicM[:idvar][1]])
       tvar = dat[:, _dicM[:timevar]]
-        global rowIDT
       rowIDT = get_rowIDofT(vec(Matrix(tvar)))   # rowIDT (Nx2): col_1 is panel's row info; col_2 is panel's number of id in each year
       
       yvar = dat[:, _dicM[:depvar]]   # still a DataFrame
@@ -2308,14 +2500,205 @@ lnσᵥ²   = begv + 1,
         
       eigvalu = (rymin=rymin, rymax=rymax)
         indices_list = find_all_indices_ordered(vcat(_dicM[:frontier],_dicM[:frontierWx]))
+
+  return modelinfo1, modelinfo2, posvec, nofvar, eqvec, eqvec2, yvar, xvar, 
+  qvar, wvar, vvar, zvar, envar, ivvar, eigvalu, indices_list,rowIDT, varlist
+
+end
       
-      return modelinfo1, modelinfo2, posvec, nofvar, eqvec, eqvec2, yvar, xvar, 
-        qvar, wvar, vvar, zvar, envar, ivvar, eigvalu, indices_list,rowIDT, varlist
-        
-      end
       
-      
+ 
+
+function getvar(::Type{SSFKUT}, dat::DataFrame)
+
+ivar = dat[:, _dicM[:idvar]] 
+dat = sort(dat,  [_dicM[:timevar][1], _dicM[:idvar][1]])
+
+tvar = dat[:, _dicM[:timevar]]
+
+rowIDT = get_rowIDofT(vec(Matrix(tvar)))   # rowIDT (Nx2): col_1 is panel's row info; col_2 is panel's number of id in each year
+
+yvar = dat[:, _dicM[:depvar]]   # still a DataFrame
+xvar = dat[:, _dicM[:frontier]]  ## 如果有wx，则要在这里合并一下，x和wx
+if _dicM[:wx]!=Nothing  # yuvx
+   Wxvar = dat[:, _dicM[:frontierWx]]   
+end
+qvar = dat[:, _dicM[:hscale]]  
+wvar = dat[:, _dicM[:σᵤ²]]
+vvar = dat[:, _dicM[:σᵥ²]]
+zvar = dat[:, _dicM[:μ]]
+
+Wy = _dicM[:wy]
+Wx = _dicM[:wx]
+
+
+#* --- model info printout --------- 
+modelinfo1 = "spatial stochastic frontier analysis in Orea and Al (2019 JoE), normal and truncated-normal"
+modelinfo2 = begin
+ """
+ * In the case of type(cost), "- uᵢₜ" below is changed to "+ uᵢₜ".
+
+ $(_dicM[:depvar][1]) = frontier( $(_dicM[:frontier])) + ̃vᵢₜ - ̃uᵢₜ,
+ 
+ where vᵢₜ ∼ N(0, σᵥ²),
+             σᵥ² = exp(log_σᵥ²) 
+                 = exp($(_dicM[:σᵥ²]));
+       uᵢₜ ∼ hscaleᵢₜ * uᵢ,
+             hscaleᵢₜ = exp($(_dicM[:hscale])),
+       uᵢ ∼ N⁺(μ, σᵤ²),
+            μ = $(_dicM[:μ])
+            σᵤ² = exp(log_σᵤ²) 
+                = exp($(_dicM[:σᵤ²]));
+ """
+end
   
+if  Wx!=Nothing   # yuvx
+    wxvar = zeros(size(dat, 1), length(_dicM[:frontierWx]) )
+    T=length(unique(vec(Matrix(tvar))));
+    for ttt in 1:T
+        if length(Wx) == 1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
+       
+            xx = Matrix(dat[!, _dicM[:frontierWx]])
+            @views wxvar[rowIDT[ttt,1], :] .= Wx[1] * xx[rowIDT[ttt,1], :]
+        elseif length(wx) > 1
+  
+            xx = Matrix(dat[!, _dicM[:frontierWx]])
+            @views wxvar[rowIDT[ttt,1], :] .= Wx[1] * xx[rowIDT[ttt,1], :]
+           
+        end	
+    end
+end
+
+#* --- retrieve and generate important parameters -----
+
+#*   number of obs and number of variables
+nofx =  nofq = nofw = nofv = nofz = nofgamma = noftau = nofrho=0  # to make a complete list
+
+nofobs  = nrow(dat)  
+if  Wx!=Nothing   # yuvx
+nofx    = size(xvar,2) + size(wxvar,2)  # nofx: number of x + wx vars
+  else
+nofx    = size(xvar,2) 
+  end
+
+nofq    = size(qvar,2)  # h
+nofw    = size(wvar,2)  # sigma_u_2
+nofv    = size(vvar,2)  # sigma_v_2
+nofz    = size(zvar,2)  # mu
+nofgamma    = 1 # wy
+
+
+nofpara = nofx + nofq + nofw + nofv  +nofgamma+nofz
+
+nofvar = (nofobs=nofobs, nofx=nofx, nofq=nofq,nofw=nofw, nofv=nofv, nofz=nofz, 
+        nofgamma=nofgamma,nofpara=nofpara, nofmarg = nofq+nofw+nofz)
+
+#* positions of the variables/parameters
+begx=endx=begq=endq=begw=endw=begv=endv=begz=endz=beggamma=endgamma =0
+
+begx = 1
+endx = nofx
+begq = endx + 1
+endq = begq + nofq-1
+begw = endq + 1
+endw = begw + nofw-1
+begv = endw + 1
+endv = begv + nofv-1
+begz = endv + 1
+endz = begz + nofz-1
+beggamma = endz + 1
+endgamma = beggamma + nofgamma-1
+
+posvec = (begx=begx, endx=endx, begq=begq, endq=endq, begw=begw, endw=endw,begv=begv, endv=endv, begz=begz, endz=endz, 
+          beggamma=beggamma, endgamma=endgamma )
+
+#* create equation names and mark positions for making tables
+eqvec = (frontier = begx + 1, 
+lnh = begq + 1,
+lnσᵤ² = begw + 1,
+lnσᵥ² = begv + 1,
+    μ = begz + 1,
+    ρ = beggamma + 1 )
+
+#* create equation names and mark positions 
+
+eqvec2 = (coeff_frontier = (begx:endx), 
+coeff_log_hscale = (begq:endq),
+   coeff_log_σᵤ² = (begw:endw),
+   coeff_log_σᵥ² = (begv:endv),
+     coeff_μ = (begz:endz),
+         coeff_γ = (beggamma:endgamma), )              
+          
+#* retrieve variable names for making tables
+if  Wx!=Nothing   # yuvx
+  xnames  = vcat(names(xvar),   ["W*" * s for s in names(Wxvar)]   )
+  else
+xnames  = names(xvar)
+  end
+  
+
+qnames  = names(qvar)
+wnames  = names(wvar)
+vnames  = names(vvar)
+znames  = names(zvar)
+gammanames  = "ρ"
+
+
+varlist = vcat(" ", xnames, qnames, wnames, vnames, znames, gammanames)
+
+
+
+#* Converting the dataframe to matrix in order to do computation
+yvar  = convert(Array{Float64}, Matrix(yvar))
+if  Wx!=Nothing   # yuvx
+xvar  = convert(Array{Float64}, hcat(Matrix(xvar),wxvar))
+  else
+    xvar  = convert(Array{Float64}, Matrix(xvar))
+  end
+qvar  = convert(Array{Float64}, Matrix(qvar))
+wvar  = convert(Array{Float64}, Matrix(wvar))
+vvar  = convert(Array{Float64}, Matrix(vvar))
+zvar  = convert(Array{Float64}, Matrix(zvar))
+tvar  = convert(Array{Float64}, Matrix(tvar))
+ivar  = convert(Array{Float64}, Matrix(ivar))
+envar = ()
+ivvar = ()
+
+
+#* various functions can and cannot contain a constant, check! ---- *#
+# checkConst(xvar, :frontier, @requireConst(0))
+# checkConst(qvar, :hscale,   @requireConst(0)) 
+# checkConst(wvar, :σᵤ²,      @requireConst(1))
+# checkConst(vvar, :σᵥ²,      @requireConst(1))
+# checkConst(zvar, :μ,        @requireConst(1))
+
+
+# 获得空间矩阵的特征值
+rymin=rymax=0
+dylams = eigen(Wy[1])
+rymin = 1 / minimum(real(dylams.values))
+rymax = 1
+if length(Wy) > 1
+    for k = 2:length(Wy)
+        dylams = eigen(Wy[k])
+        if rymin < 1 / minimum(real(dylams.values))
+            rymin = 1 / minimum(real(dylams.values))
+        end
+    end
+end
+  
+
+
+eigvalu = (rymin=rymin, rymax=rymax)
+indices_list = find_all_indices_ordered(vcat(_dicM[:frontier],_dicM[:frontierWx]))
+
+
+return modelinfo1, modelinfo2, posvec, nofvar, eqvec, eqvec2, yvar, xvar, 
+qvar, wvar, vvar, zvar, envar, ivvar, eigvalu, indices_list,rowIDT, varlist
+
+end
+    
+     
   
   
 

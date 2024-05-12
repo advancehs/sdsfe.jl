@@ -197,6 +197,12 @@ function sfmodel_spec(arg::Vararg; message::Bool=false)
         elseif (_dicM[:panel] == [:SSF_KU2020]) && (s=="H") 
           tagD = Dict{Symbol, Type{SSFKUH}}()
           tagD[:modelid] = SSFKUH 
+        elseif (_dicM[:panel] == [:SSF_KUE2020]) && (s=="T") 
+          tagD = Dict{Symbol, Type{SSFKUET}}()
+          tagD[:modelid] = SSFKUET
+        elseif (_dicM[:panel] == [:SSF_KUE2020]) && (s=="H") 
+          tagD = Dict{Symbol, Type{SSFKUEH}}()
+          tagD[:modelid] = SSFKUEH 
         elseif (_dicM[:panel] == [:SSF_OAD2024]) && (s=="T") 
           tagD = Dict{Symbol, Type{SSFOADT}}()
           tagD[:modelid] = SSFOADT
@@ -524,7 +530,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
      Wu = _dicM[:wu];
      Wv = _dicM[:wv];
   
-   β0     = xvar \ yvar;  # OLS estiamte, uses a pivoted QR factorization;
+    β0 = xvar \ yvar;  # OLS estiamte, uses a pivoted QR factorization;
 
     #* 根据空间权重矩阵的特征值计算初始值
     r0 = 0.3
@@ -618,16 +624,67 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                   end
               end
           end    
-      elseif tagD[:modelid] == SSFKUT
-        phi_ini = get(_dicINI, :eqphi, vec(ivvar \ envar))
-        eta_ini = get(_dicINI, :eqeta, ones(num.nofeta)*0.1)
-        sf_init = vcat(b_ini, t_ini, phi_ini, eta_ini, d2_ini,  g_ini, d1_ini, gammma_ini)  
+      elseif tagD[:modelid] == SSFKUEH
+          sf_init0 = vcat(b_ini, t_ini, d2_ini,  g_ini, gammma_ini)  
+          sf_init0 = vec(sf_init0)   
+       (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+          eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFKUH, sfdat)
+          mfun0 = optimize(rho -> ssdkuh(yvar0, xvar0, qvar0,  Wy, _porc, num0, pos0, rho,  eigvalu0, rowIDT0 ) ,
+                                           sf_init0,         # initial values  
+                                           NelderMead(),       # different from search run
+                                           Optim.Options(g_tol = 1.0e-6,
+                                           iterations  = 2000, # different from search run
+                                           store_trace = false,
+                                           show_trace  = false))
 
+          sf_init1  = Optim.minimizer(mfun0)
+
+          b_ini1 = sf_init1[1:num.nofx]
+          t_ini1  = sf_init1[num.nofx+1: num.nofx+num.nofq]
+          phi_ini = get(_dicINI, :eqphi, vec(ivvar \ envar))
+          eta_ini = get(_dicINI, :eqeta, ones(num.nofeta)*0.1)
+          d2_ini1 = sf_init1[num.nofx+num.nofq+1: num.nofx+num.nofq+num.nofw]
+          g_ini1  = sf_init1[num.nofx+num.nofq+num.nofw+1: num.nofx+num.nofq+num.nofw+num.nofv]
+          gammma_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+1]
+
+          sf_init = vcat(b_ini1, t_ini1, phi_ini,eta_ini, d2_ini1, g_ini1, gammma_ini1)  
+          
       elseif tagD[:modelid] == SSFKUH
-        phi_ini = get(_dicINI, :eqphi, vec(ivvar \ envar))
-        eta_ini = get(_dicINI, :eqeta, ones(num.nofeta)*0.1)
-        sf_init = vcat(b_ini, t_ini, phi_ini, eta_ini, d2_ini,  g_ini, gammma_ini)  
-    
+        if (haskey(_dicM, :envar)) 
+          error("You can not specify @envar with model SSFKUH!")
+        end
+          sf_init = vcat(b_ini, t_ini, d2_ini,  g_ini, gammma_ini)  
+      elseif tagD[:modelid] == SSFKUET
+          sf_init0 = vcat(b_ini, t_ini, d2_ini,  g_ini, d1_ini, gammma_ini)  
+          sf_init0 = vec(sf_init0)   
+
+       (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+          eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFKUT, sfdat)
+          mfun0 = optimize(rho -> ssdkut(yvar0, xvar0, qvar0, Wy, _porc, num0, pos0, rho,  eigvalu0, rowIDT0 ) ,
+                                           sf_init0,         # initial values  
+                                           NelderMead(),       # different from search run
+                                           Optim.Options(g_tol = 1.0e-6,
+                                           iterations  = 2000, # different from search run
+                                           store_trace = false,
+                                           show_trace  = false))
+          sf_init1  = Optim.minimizer(mfun0)
+             
+          b_ini1 = sf_init1[1:num.nofx]
+          t_ini1  = sf_init1[num.nofx+1: num.nofx+num.nofq]
+          phi_ini = get(_dicINI, :eqphi, vec(ivvar \ envar))
+          eta_ini = get(_dicINI, :eqeta, ones(num.nofeta)*0.1)
+          d2_ini1 = sf_init1[num.nofx+num.nofq+1: num.nofx+num.nofq+num.nofw]
+          g_ini1  = sf_init1[num.nofx+num.nofq+num.nofw+1: num.nofx+num.nofq+num.nofw+num.nofv]
+          d1_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+1: num.nofx+num.nofq+num.nofw+num.nofv+num.nofz]
+          gammma_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+1]
+
+          sf_init = vcat(b_ini1, t_ini1, phi_ini,eta_ini, d2_ini1, g_ini1, d1_ini1, gammma_ini1)  
+
+      elseif tagD[:modelid] == SSFKUT
+        if (haskey(_dicM, :envar)) 
+          error("You can not specify @envar with model SSFKUT!")
+        end
+          sf_init = vcat(b_ini, t_ini, d2_ini, d1_ini, g_ini, gammma_ini)  
       elseif tagD[:modelid] == SSFOADH
           if Wy!=Nothing  # yuv
               if Wu!=Nothing 
@@ -1448,9 +1505,11 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
   end
   table= vcat(table, stas)  
 
-  if tagD[:modelid] in (SSFOADT,SSFOADH,SSFKUH,SSFKUT)
+  if tagD[:modelid] in (SSFOADT,SSFOADH,SSFKUEH,SSFKUET)
+
     row_indices = setdiff(1:size(table, 1), pos.begphi+1:pos.endphi+1)
     table_show = table[row_indices, :]
+
   else
     table_show = table
   end
