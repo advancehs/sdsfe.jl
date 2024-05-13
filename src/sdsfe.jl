@@ -50,8 +50,9 @@ export sfmodel_spec, sfmodel_init, sfmodel_opt,
         MoM,
         production, cost, #* not prod, b/c conflict with Base
         text, html, latex, forward, finite,
-        SSFOAT,SSFOAH, SSFOADT,SSFOADH,SSFKUT,SSFKUH,SSFKUET,SSFKUEH,          #* export for testing purpose
-        SSF_OA2019,SSF_OAD2024,SSF_KU2020,SSF_KUE2020,
+        SSFOAT,SSFOAH, SSFOADT,SSFOADH,
+        SSFKUT,SSFKUH,SSFKUET,SSFKUEH, SSFKKT,SSFKKH,SSFKKET,SSFKKEH,        #* export for testing purpose
+        SSF_OA2019,SSF_OAD2024,SSF_KU2020,SSF_KUE2020,SSF_KK2017,SSF_KKE2017,
       # Optim's algorithms  
         NelderMead, SimulatedAnnealing, SAMIN, ParticleSwarm,
         ConjugateGradient, GradientDescent, BFGS, LBFGS,
@@ -111,6 +112,10 @@ abstract type Sfmodeltype end
   struct SSFKUT   <: Sfmodeltype end # panel true random effect model, truncated normal
   struct SSFKUEH    <: Sfmodeltype end # panel true random effect model, half normal
   struct SSFKUET   <: Sfmodeltype end # panel true random effect model, truncated normal
+  struct SSFKKH    <: Sfmodeltype end # panel true random effect model, half normal
+  struct SSFKKT   <: Sfmodeltype end # panel true random effect model, truncated normal
+  struct SSFKKEH    <: Sfmodeltype end # panel true random effect model, half normal
+  struct SSFKKET   <: Sfmodeltype end # panel true random effect model, truncated normal
 
 abstract type PorC end
   struct production <: PorC end
@@ -121,6 +126,8 @@ abstract type PanelModel end
   struct SSF_OAD2024 <: PanelModel end
   struct SSF_KU2020 <: PanelModel end
   struct SSF_KUE2020 <: PanelModel end
+  struct SSF_KK2017 <: PanelModel end
+  struct SSF_KKE2017 <: PanelModel end
 
 
 
