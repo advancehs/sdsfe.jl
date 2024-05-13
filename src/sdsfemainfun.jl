@@ -650,7 +650,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                                            sf_init0,         # initial values  
                                            NelderMead(),       # different from search run
                                            Optim.Options(g_tol = 1.0e-6,
-                                           iterations  = 2000, # different from search run
+                                           iterations  = 1000, # different from search run
                                            store_trace = false,
                                            show_trace  = false))
 
@@ -681,7 +681,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                                            sf_init0,         # initial values  
                                            NelderMead(),       # different from search run
                                            Optim.Options(g_tol = 1.0e-6,
-                                           iterations  = 2000, # different from search run
+                                           iterations  = 1000, # different from search run
                                            store_trace = false,
                                            show_trace  = false))
           sf_init1  = Optim.minimizer(mfun0)
@@ -779,7 +779,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 2000, # different from search run
+                                                        iterations  = 1000, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -808,7 +808,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 2000, # different from search run
+                                                        iterations  = 1000, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -837,7 +837,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 2000, # different from search run
+                                                        iterations  = 1000, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -864,7 +864,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 2000, # different from search run
+                                                        iterations  = 1000, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -895,7 +895,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 2000, # different from search run
+                                                        iterations  = 1000, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -923,7 +923,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 2000, # different from search run
+                                                        iterations  = 1000, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -953,7 +953,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 2000, # different from search run
+                                                        iterations  = 1000, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -980,7 +980,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 2000, # different from search run
+                                                        iterations  = 1000, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -1012,7 +1012,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 2000, # different from search run
+                                                        iterations  = 1000, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -1042,7 +1042,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 2000, # different from search run
+                                                        iterations  = 1000, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -1072,7 +1072,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 2000, # different from search run
+                                                        iterations  = 1000, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -1100,7 +1100,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 2000, # different from search run
+                                                        iterations  = 1000, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -1132,7 +1132,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 2000, # different from search run
+                                                        iterations  = 1000, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -1161,7 +1161,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 2000, # different from search run
+                                                        iterations  = 1000, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -1192,7 +1192,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 2000, # different from search run
+                                                        iterations  = 1000, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -1220,7 +1220,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 2000, # different from search run
+                                                        iterations  = 1000, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
