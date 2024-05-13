@@ -1833,9 +1833,11 @@ end
 
 
 
-function LL_T(::Type{SSFOAH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,en,iv,Wy,Wu,Wv,
+function LL_T(::Type{SSFOAH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,en,iv,
     PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
-
+ Wy = _dicM[:wy]
+ Wu = _dicM[:wu]
+ Wv = _dicM[:wv]
 
 if Wy!=Nothing  # yuv
    if Wu!=Nothing 
@@ -1874,7 +1876,7 @@ end
 function ssdoat_yuv( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,
     Wy::Matrix, Wu::Matrix, Wv::Matrix,PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any} )
     
-    β  = rho[1:po.endx]
+β  = rho[1:po.endx]
    τ  = rho[po.begq:po.endq]
    δ2 = rho[po.begw]  
    γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
@@ -2816,7 +2818,8 @@ elseif length(Wy)>1
     end # for ttt=1:T
 end # begin
 
-end # length(Wy)==1 
+end # length(Wy)==1
+# println("aaa",likx,"aaasss",lik) 
     return -lik-likx
 catch e
 # 处理异常的代码
@@ -3700,9 +3703,11 @@ end
 
 
 
-function LL_T(::Type{SSFOAT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,en,iv,Wy,Wu,Wv,
+function LL_T(::Type{SSFOAT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,en,iv,
     PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
-
+ Wy = _dicM[:wy]
+ Wu = _dicM[:wu]
+ Wv = _dicM[:wv]
 
 if Wy!=Nothing  # yuv
    if Wu!=Nothing 
@@ -3741,9 +3746,11 @@ end
 
 
 function LL_T(::Type{SSFOADT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, 
-    EN::Matrix,IV::Matrix, Wy,Wu,Wv, PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
+    EN::Matrix,IV::Matrix, PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
 
-
+  Wy = _dicM[:wy]
+  Wu = _dicM[:wu]
+  Wv = _dicM[:wv]
 
 if Wy!=Nothing  # yuv
     if Wu!=Nothing 
@@ -3780,10 +3787,12 @@ end
 
 
 
-function LL_T(::Type{SSFOADH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,
-    EN::Matrix,IV::Matrix,  Wy,Wu,Wv, PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
+function LL_T(::Type{SSFOADH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, 
+    EN::Matrix,IV::Matrix, PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
 
-
+  Wy = _dicM[:wy]
+  Wu = _dicM[:wu]
+  Wv = _dicM[:wv]
 
 if Wy!=Nothing  # yuv
     if Wu!=Nothing 
@@ -3819,10 +3828,10 @@ end
 
 
 
-# function LL_T(::Type{SSFKUH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,
-#     EN::Matrix,IV::Matrix,  Wy,Wu,Wv,PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
+# function LL_T(::Type{SSFKUH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, 
+#     EN::Matrix,IV::Matrix, PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
 
-
+#   Wy = _dicM[:wy]
 
 #   β  = rho[1:po.endx]
 #   τ  = rho[po.begq:po.endq]
@@ -3977,8 +3986,9 @@ end
 
 
 # function LL_T(::Type{SSFKUH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, 
-#     EN::Matrix,IV::Matrix, Wy,Wu,Wv,PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
+#     EN::Matrix,IV::Matrix, PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
 
+#   Wy = _dicM[:wy]
 
 #   β  = rho[1:po.endx]
 #   τ  = rho[po.begq:po.endq]
@@ -4103,9 +4113,9 @@ end
     
 
 # function LL_T(::Type{SSFKUH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, 
-#     EN::Matrix,IV::Matrix, Wy,Wu,Wv, PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
+#     EN::Matrix,IV::Matrix, PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
 
- 
+#   Wy = _dicM[:wy]
 
 #   β  = rho[1:po.endx]
 #   τ  = rho[po.begq:po.endq]
@@ -4437,18 +4447,20 @@ function ssdkuh( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
 end
 
 
-function LL_T(::Type{SSFKUEH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,IV, Wy,Wu,Wv,
+function LL_T(::Type{SSFKUEH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,IV, 
     PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
 
+    Wy = _dicM[:wy]
 
     llt = ssdkuhe(y, x, Q, EN, IV, Wy, PorC, num, po, rho,  eigvalu, rowIDT )  
 
     return llt
 end
     
-function LL_T(::Type{SSFKUH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,IV, Wy,Wu,Wv,
+function LL_T(::Type{SSFKUH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,IV, 
     PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
 
+    Wy = _dicM[:wy]
 
     llt = ssdkuh(y, x, Q,  Wy, PorC, num, po, rho,  eigvalu, rowIDT ) 
 
@@ -4668,17 +4680,19 @@ function ssdkut( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
 end
 
 
-function LL_T(::Type{SSFKUET}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,IV, Wy,Wu,Wv,
+function LL_T(::Type{SSFKUET}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,IV, 
     PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
 
+    Wy = _dicM[:wy]
     llt = ssdkute(y, x, Q, EN, IV, Wy, PorC, num, po, rho,  eigvalu, rowIDT )  
 
     return llt
 end
     
-function LL_T(::Type{SSFKUT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,IV, Wy,Wu,Wv,
+function LL_T(::Type{SSFKUT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,IV, 
     PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
 
+    Wy = _dicM[:wy]
 
     llt = ssdkut(y, x, Q,  Wy, PorC, num, po, rho,  eigvalu, rowIDT )  
     return llt
@@ -4837,7 +4851,7 @@ end
     
 
 
-function LL_T(::Type{SSFKKEH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,IV, Wy,Wu,Wv,
+function LL_T(::Type{SSFKKEH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,IV, 
     PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
 
     llt = ssdkkhe(y, x, Q, EN, IV, PorC, num, po, rho,  eigvalu, rowIDT )  
@@ -4845,7 +4859,7 @@ function LL_T(::Type{SSFKKEH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w,
     return llt
 end
     
-function LL_T(::Type{SSFKKH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,IV,Wy,Wu,Wv, 
+function LL_T(::Type{SSFKKH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,IV, 
     PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
 
     llt = ssdkkh(y, x, Q, PorC, num, po, rho,  eigvalu, rowIDT ) 
@@ -5000,7 +5014,7 @@ function ssdkkt( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
 end
     
 
-function LL_T(::Type{SSFKKET}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,IV, Wy,Wu,Wv,
+function LL_T(::Type{SSFKKET}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,IV, 
     PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
 
     llt = ssdkkte(y, x, Q, EN, IV, PorC, num, po, rho,  eigvalu, rowIDT )  
@@ -5008,7 +5022,7 @@ function LL_T(::Type{SSFKKET}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w,
     return llt
 end
     
-function LL_T(::Type{SSFKKT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,IV, Wy,Wu,Wv,
+function LL_T(::Type{SSFKKT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,IV, 
     PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
 
     llt = ssdkkt(y, x, Q, PorC, num, po, rho,  eigvalu, rowIDT )  
