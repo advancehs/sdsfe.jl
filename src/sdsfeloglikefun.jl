@@ -24,13 +24,13 @@ function ssdoah_yuv( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,
    δ2 = rho[po.begw]  
    γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
    gammap = rho[po.beggamma]
-   gamma  = eigvalu.rymin/(1+exp(gammap))+eigvalu.rymax*exp(gammap)/(1+exp(gammap));
+   gamma  = eigvalu.rymin/(1.0+exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0+exp(gammap));
 
    taup = rho[po.begtau]
-   tau  = eigvalu.rumin/(1+exp(taup))+eigvalu.rumax*exp(taup)/(1+exp(taup));
+   tau  = eigvalu.rumin/(1.0+exp(taup))+eigvalu.rumax*exp(taup)/(1.0+exp(taup));
 
    rhomyp = rho[po.begrho]
-   rhomy  = eigvalu.rvmin/(1+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1+exp(rhomyp));
+   rhomy  = eigvalu.rvmin/(1.0+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1.0+exp(rhomyp));
 
    hi  = exp.(Q*τ)
    σᵤ²= exp(δ2) 
@@ -38,7 +38,7 @@ function ssdoah_yuv( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,
    σᵥ² = exp(γ)  
    σᵥ = exp(0.5*γ)  
 
-   μ   = 0 # δ1
+   μ   = 0.0 # δ1
 
    ϵ = PorC*(y - x * β)
    T = size(rowIDT,1)
@@ -62,8 +62,8 @@ try
         @inbounds for ttt=1:T  
                 @views ind = rowIDT[ttt,1];
                 @views his = Mtau*hi[ind];
-                @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind] ;
-                @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+                @views ϵs  = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] ;
+                @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
                 @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                 @views es2 = -0.5*ϵs'*invPi*ϵs ;
                 @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -97,8 +97,8 @@ elseif length(Wy)>1
         
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] ;
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views ϵs  = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -136,13 +136,13 @@ function ssdoah_yv( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,
    δ2 = rho[po.begw]  
    γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
    gammap = rho[po.beggamma]
-   gamma  = eigvalu.rymin/(1+exp(gammap))+eigvalu.rymax*exp(gammap)/(1+exp(gammap));
+   gamma  = eigvalu.rymin/(1.0+exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0+exp(gammap));
 
    # taup = rho[po.begtau]
-   # tau  = eigvalu.rumin/(1+exp(taup))+eigvalu.rumax*exp(taup)/(1+exp(taup));
+   # tau  = eigvalu.rumin/(1.0+exp(taup))+eigvalu.rumax*exp(taup)/(1.0+exp(taup));
 
    rhomyp = rho[po.begrho]
-   rhomy  = eigvalu.rvmin/(1+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1+exp(rhomyp));
+   rhomy  = eigvalu.rvmin/(1.0+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1.0+exp(rhomyp));
 
    hi  = exp.(Q*τ)
    σᵤ²= exp(δ2) 
@@ -150,7 +150,7 @@ function ssdoah_yv( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,
    σᵥ² = exp(γ)  
    σᵥ = exp(0.5*γ)  
 
-   μ   = 0 # δ1
+   μ   = 0.0 # δ1
 
    ϵ = PorC*(y - x * β)
    T = size(rowIDT,1)
@@ -162,7 +162,6 @@ try
     @views N = rowIDT[1,2];
     @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));   
 
-    @views Mtau = 1;
     @views Mrho = (I(N)-rhomy*Wv[1]) \I(N);
     @views Pi = σᵥ²*(Mrho*Mrho');
     @views detPi = det(Pi)
@@ -173,9 +172,9 @@ try
         @floop begin
         @inbounds for ttt=1:T  
                 @views ind = rowIDT[ttt,1];
-                @views his = Mtau*hi[ind];
-                @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind] ;
-                @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+                @views his = hi[ind];
+                @views ϵs  = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] ;
+                @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
                 @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                 @views es2 = -0.5*ϵs'*invPi*ϵs ;
                 @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -198,7 +197,6 @@ elseif length(Wy)>1
 @inbounds for ttt=1:T
 
     @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
-    @views Mtau = 1;
     @views Mrho =  (I(N)-rhomy*Wv[ttt])\I(N);
             
     @views Pi = σᵥ²*(Mrho*Mrho');
@@ -207,9 +205,9 @@ elseif length(Wy)>1
     @views invPi = (I(N)-rhomy*(Wv[ttt])')*(I(N)-rhomy*Wv[ttt])/σᵥ²;
         
     @views ind = rowIDT[ttt,1];
-    @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] ;
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views his = hi[ind];
+    @views ϵs  = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -249,13 +247,13 @@ function ssdoah_yu( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,
    δ2 = rho[po.begw]  
    γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
    gammap = rho[po.beggamma]
-   gamma  = eigvalu.rymin/(1+exp(gammap))+eigvalu.rymax*exp(gammap)/(1+exp(gammap));
+   gamma  = eigvalu.rymin/(1.0+exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0+exp(gammap));
 
    taup = rho[po.begtau]
-   tau  = eigvalu.rumin/(1+exp(taup))+eigvalu.rumax*exp(taup)/(1+exp(taup));
+   tau  = eigvalu.rumin/(1.0+exp(taup))+eigvalu.rumax*exp(taup)/(1.0+exp(taup));
 
    # rhomyp = rho[po.begrho]
-   # rhomy  = eigvalu.rvmin/(1+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1+exp(rhomyp));
+   # rhomy  = eigvalu.rvmin/(1.0+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1.0+exp(rhomyp));
 
    hi  = exp.(Q*τ)
    σᵤ²= exp(δ2) 
@@ -263,7 +261,7 @@ function ssdoah_yu( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,
    σᵥ² = exp(γ)  
    σᵥ = exp(0.5*γ)  
 
-   μ   = 0 # δ1
+   μ   = 0.0 # δ1
 
    ϵ = PorC*(y - x * β)
    T = size(rowIDT,1)
@@ -275,15 +273,15 @@ try
     @views N = rowIDT[1,2];
     @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));   
     @views Mtau = (I(N)-tau*Wu[1]) \I(N);
-    @views invPi = 1/σᵥ²*I(N);
+    @views invPi = 1.0/σᵥ²*I(N);
     @views lndetPi = N*log(σᵥ²);
 
         @floop begin
         @inbounds for ttt=1:T  
                 @views ind = rowIDT[ttt,1];
                 @views his = Mtau*hi[ind];
-                @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind] ;
-                @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+                @views ϵs  = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] ;
+                @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
                 @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                 @views es2 = -0.5*ϵs'*invPi*ϵs ;
                 @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -313,8 +311,8 @@ elseif length(Wy)>1
         
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] ;
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views ϵs  = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -354,14 +352,14 @@ function ssdoah_y( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,
    δ2 = rho[po.begw]  
    γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
    gammap = rho[po.beggamma]
-   gamma  = eigvalu.rymin/(1+exp(gammap))+eigvalu.rymax*exp(gammap)/(1+exp(gammap));
+   gamma  = eigvalu.rymin/(1.0+exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0+exp(gammap));
 
    hi  = exp.(Q*τ)
    σᵤ²= exp(δ2) 
    σᵤ= exp(0.5*δ2) 
    σᵥ² = exp(γ)  
    σᵥ = exp(0.5*γ)  
-   μ   = 0 # δ1
+   μ   = 0.0 # δ1
    ϵ = PorC*(y - x * β)
    T = size(rowIDT,1)
    # print(T)
@@ -371,16 +369,15 @@ try
     lik = zero(eltype(y));
     @views N = rowIDT[1,2];
     @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));   
-    @views Mtau = 1;
     @views invPi = I(N)/σᵥ²;
     @views lndetPi = N*log(σᵥ²);
 
         @floop begin
         @inbounds for ttt=1:T  
                 @views ind = rowIDT[ttt,1];
-                @views his = Mtau*hi[ind];
-                @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind] ;
-                @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+                @views his = hi[ind];
+                @views ϵs  = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] ;
+                @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
                 @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                 @views es2 = -0.5*ϵs'*invPi*ϵs ;
                 @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -405,14 +402,13 @@ elseif length(Wy)>1
 @inbounds for ttt=1:T
 
     @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
-    @views Mtau = 1;
     @views invPi = I(N)/σᵥ²;
     @views lndetPi = N*log(σᵥ²);
                 
     @views ind = rowIDT[ttt,1];
-    @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] ;
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views his = hi[ind];
+    @views ϵs  = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -454,17 +450,17 @@ function ssdoah_uv( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,
    γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
 
    taup = rho[po.begtau]
-   tau  = eigvalu.rumin/(1+exp(taup))+eigvalu.rumax*exp(taup)/(1+exp(taup));
+   tau  = eigvalu.rumin/(1.0+exp(taup))+eigvalu.rumax*exp(taup)/(1.0+exp(taup));
 
    rhomyp = rho[po.begrho]
-   rhomy  = eigvalu.rvmin/(1+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1+exp(rhomyp));
+   rhomy  = eigvalu.rvmin/(1.0+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1.0+exp(rhomyp));
 
    hi  = exp.(Q*τ)
    σᵤ²= exp(δ2) 
    σᵤ= exp(0.5*δ2) 
    σᵥ² = exp(γ)  
    σᵥ = exp(0.5*γ)  
-   μ   = 0 # δ1
+   μ   = 0.0 # δ1
    ϵ = PorC*(y - x * β)
    T = size(rowIDT,1)
    # print(T)
@@ -487,7 +483,7 @@ try
                 @views ind = rowIDT[ttt,1];
                 @views his = Mtau*hi[ind];
                 @views ϵs  = ϵ[ind] ;
-                @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+                @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
                 @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                 @views es2 = -0.5*ϵs'*invPi*ϵs ;
                 @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -521,7 +517,7 @@ elseif length(Wu)>1
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
     @views ϵs  = ϵ[ind];
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -574,7 +570,7 @@ function ssdoah_u( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,
    σᵥ² = exp(γ)  
    σᵥ = exp(0.5*γ)  
 
-   μ   = 0 # δ1
+   μ   = 0.0 # δ1
 
    ϵ = PorC*(y - x * β)
    T = size(rowIDT,1)
@@ -594,7 +590,7 @@ try
                 @views ind = rowIDT[ttt,1];
                 @views his = Mtau*hi[ind];
                 @views ϵs  = ϵ[ind];
-                @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+                @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
                 @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                 @views es2 = -0.5*ϵs'*invPi*ϵs ;
                 @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -627,7 +623,7 @@ elseif length(Wu)>1
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
     @views ϵs  = ϵ[ind] ;
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -672,7 +668,7 @@ function ssdoah_v( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,
 
 
    rhomyp = rho[po.begrho]
-   rhomy  = eigvalu.rvmin/(1+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1+exp(rhomyp));
+   rhomy  = eigvalu.rvmin/(1.0+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1.0+exp(rhomyp));
 
    hi  = exp.(Q*τ)
    σᵤ²= exp(δ2) 
@@ -680,7 +676,7 @@ function ssdoah_v( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,
    σᵥ² = exp(γ)  
    σᵥ = exp(0.5*γ)  
 
-   μ   = 0 # δ1
+   μ   = 0.0 # δ1
 
    ϵ = PorC*(y - x * β)
    T = size(rowIDT,1)
@@ -691,7 +687,6 @@ try
     lik = zero(eltype(y));
     @views N = rowIDT[1,2];
 
-    @views Mtau = 1;
     @views Mrho =   (I(N)-rhomy*Wv[1]) \I(N);
     @views Pi = σᵥ²*(Mrho*Mrho');
     @views detPi = det(Pi)
@@ -701,9 +696,9 @@ try
         @floop begin
         @inbounds for ttt=1:T  
                 @views ind = rowIDT[ttt,1];
-                @views his = Mtau*hi[ind];
+                @views his = hi[ind];
                 @views ϵs  = ϵ[ind] ;
-                @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+                @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
                 @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                 @views es2 = -0.5*ϵs'*invPi*ϵs ;
                 @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -726,7 +721,6 @@ elseif length(Wv)>1
     @views N = rowIDT[1,2];
 @inbounds for ttt=1:T
 
-    @views Mtau = 1;
     @views Mrho =  (I(N)-rhomy*Wv[ttt])\I(N);
             
     @views Pi = σᵥ²*(Mrho*Mrho');
@@ -735,9 +729,9 @@ elseif length(Wv)>1
     @views invPi = (I(N)-rhomy*(Wv[ttt])')*(I(N)-rhomy*Wv[ttt])/σᵥ²;
         
     @views ind = rowIDT[ttt,1];
-    @views his = Mtau*hi[ind];
+    @views his = hi[ind];
     @views ϵs  = ϵ[ind] ;
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -783,7 +777,7 @@ function ssdoah_( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,
    σᵥ² = exp(γ)  
    σᵥ = exp(0.5*γ)  
 
-   μ   = 0 # δ1
+   μ   = 0.0 # δ1
 
    ϵ = PorC*(y - x * β)
    T = size(rowIDT,1)
@@ -793,16 +787,15 @@ try
     lik = zero(eltype(y));
     @views N = rowIDT[1,2];
 
-    @views Mtau = 1;
     @views invPi = I(N)/σᵥ²;
     @views lndetPi = N*log(σᵥ²);
 
         @floop begin
         @inbounds for ttt=1:T  
                 @views ind = rowIDT[ttt,1];
-                @views his = Mtau*hi[ind];
+                @views his = hi[ind];
                 @views ϵs  = ϵ[ind] ;
-                @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+                @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
                 @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                 @views es2 = -0.5*ϵs'*invPi*ϵs ;
                 @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -871,20 +864,20 @@ end # @floop begin
    γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
    # δ1 = rho[po.begz]
    gammap = rho[po.beggamma]
-   gamma  = (eigvalu.rymin)/(1+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1+exp(gammap));
+   gamma  = (eigvalu.rymin)/(1.0+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1.0+exp(gammap));
 
    taup = rho[po.begtau]
-   tau  = (eigvalu.rumin)/(1+exp(taup))+(eigvalu.rumax)*exp(taup)/(1+exp(taup));
+   tau  = (eigvalu.rumin)/(1.0+exp(taup))+(eigvalu.rumax)*exp(taup)/(1.0+exp(taup));
 
    rhomyp = rho[po.begrho]
-   rhomy  = (eigvalu.rvmin)/(1+exp(rhomyp))+(eigvalu.rvmax)*exp(rhomyp)/(1+exp(rhomyp));
+   rhomy  = (eigvalu.rvmin)/(1.0+exp(rhomyp))+(eigvalu.rvmax)*exp(rhomyp)/(1.0+exp(rhomyp));
 
    hi  = exp.(Q*τ)
    σᵤ²= exp(δ2) 
    σᵤ= exp(0.5*δ2) 
    σᵥ² = exp(γ)            # todo: 重新换一下字母 
    σᵥ = exp(0.5*γ)  
-   μ   = 0
+   μ   = 0.0
    ϵ = PorC*(y - x*β)
    T = size(rowIDT,1)
 
@@ -904,8 +897,8 @@ end # @floop begin
     @inbounds  for ttt=1:T  
                     @views ind = rowIDT[ttt,1];
                     @views his = Mtau*hi[ind];
-                    @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
-                    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+                    @views ϵs  = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
+                    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
                     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                     @views es2 = -0.5*ϵs'*invPi*ϵs ;
                     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -938,8 +931,8 @@ elseif length(Wy)>1
     
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views ϵs  = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -1009,17 +1002,17 @@ end # @floop begin
    γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
    # δ1 = rho[po.begz]
    gammap = rho[po.beggamma]
-   gamma  = (eigvalu.rymin)/(1+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1+exp(gammap));
+   gamma  = (eigvalu.rymin)/(1.0+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1.0+exp(gammap));
 
    rhomyp = rho[po.begrho]
-   rhomy  = (eigvalu.rvmin)/(1+exp(rhomyp))+(eigvalu.rvmax)*exp(rhomyp)/(1+exp(rhomyp));
+   rhomy  = (eigvalu.rvmin)/(1.0+exp(rhomyp))+(eigvalu.rvmax)*exp(rhomyp)/(1.0+exp(rhomyp));
 
    hi  = exp.(Q*τ)
    σᵤ²= exp(δ2) 
    σᵤ= exp(0.5*δ2) 
    σᵥ² = exp(γ)            # todo: 重新换一下字母 
    σᵥ = exp(0.5*γ)  
-   μ   = 0
+   μ   = 0.0
    ϵ = PorC*(y - x*β )
    T = size(rowIDT,1)
 
@@ -1029,7 +1022,6 @@ end # @floop begin
     lik = zero(eltype(y));
     @views N = rowIDT[1,2];
     @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));   
-    @views Mtau = 1;
     @views Mrho =  (I(N)-rhomy*Wv[1])\I(N);
     @views Pi = σᵥ²*(Mrho*Mrho');
     @views lndetPi = log(det(Pi));
@@ -1037,9 +1029,9 @@ end # @floop begin
         @floop begin
     @inbounds  for ttt=1:T  
                     @views ind = rowIDT[ttt,1];
-                    @views his = Mtau*hi[ind];
-                    @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind] - PorC.* Mrho*(eps[ind,:]*eta) ;
-                    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+                    @views his = hi[ind];
+                    @views ϵs  = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
+                    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
                     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                     @views es2 = -0.5*ϵs'*invPi*ϵs ;
                     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -1064,16 +1056,15 @@ elseif length(Wy)>1
 @inbounds for ttt=1:T
 
     @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));      
-    @views Mtau = 1;
     @views Mrho =  (I(N)-rhomy*Wv[ttt])\I(N);   
     @views Pi = σᵥ²*(Mrho*Mrho');
     @views lndetPi = log(det(Pi));
     @views invPi = (I(N)-rhomy*(Wv[ttt])')*(I(N)-rhomy*Wv[ttt])/σᵥ²;
     
     @views ind = rowIDT[ttt,1];
-    @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] - PorC.* Mrho*(eps[ind,:]*eta) ;
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views his = hi[ind];
+    @views ϵs  = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -1143,10 +1134,10 @@ end # @floop begin
    γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
    # δ1 = rho[po.begz]
    gammap = rho[po.beggamma]
-   gamma  = (eigvalu.rymin)/(1+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1+exp(gammap));
+   gamma  = (eigvalu.rymin)/(1.0+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1.0+exp(gammap));
 
    taup = rho[po.begtau]
-   tau  = (eigvalu.rumin)/(1+exp(taup))+(eigvalu.rumax)*exp(taup)/(1+exp(taup));
+   tau  = (eigvalu.rumin)/(1.0+exp(taup))+(eigvalu.rumax)*exp(taup)/(1.0+exp(taup));
 
 
    hi  = exp.(Q*τ)
@@ -1154,7 +1145,7 @@ end # @floop begin
    σᵤ= exp(0.5*δ2) 
    σᵥ² = exp(γ)            # todo: 重新换一下字母 
    σᵥ = exp(0.5*γ)  
-   μ   = 0
+   μ   = 0.0
 
    ϵ =   PorC*(y - x*β  )
    T = size(rowIDT,1)
@@ -1165,15 +1156,15 @@ end # @floop begin
     @views N = rowIDT[1,2];
     @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));   
     @views Mtau = (I(N)-tau*Wu[1])\I(N);
-    @views invPi = 1/σᵥ²*I(N);
+    @views invPi = 1.0/σᵥ²*I(N);
     @views lndetPi = N*log(σᵥ²);
         
         @floop begin
     @inbounds  for ttt=1:T  
             @views ind = rowIDT[ttt,1];
             @views his = Mtau*hi[ind];
-            @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind] - PorC.*(eps[ind,:]*eta) ;
-            @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+            @views ϵs  = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] - PorC*(eps[ind,:]*eta) ;
+            @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
             @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
             @views es2 = -0.5*ϵs'*invPi*ϵs ;
             @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -1199,13 +1190,13 @@ elseif length(Wy)>1
 
     @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));      
     @views Mtau = (I(N)-tau*Wu[ttt])\I(N);
-    @views invPi = 1/σᵥ²*I(N);
+    @views invPi = 1.0/σᵥ²*I(N);
     @views lndetPi = N*log(σᵥ²);
     
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] - PorC.*(eps[ind,:]*eta) ;
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views ϵs  = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] - PorC*(eps[ind,:]*eta) ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -1277,14 +1268,14 @@ end # @floop begin
    γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
    # δ1 = rho[po.begz]
    gammap = rho[po.beggamma]
-   gamma  = (eigvalu.rymin)/(1+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1+exp(gammap));
+   gamma  = (eigvalu.rymin)/(1.0+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1.0+exp(gammap));
 
    hi  = exp.(Q*τ)
    σᵤ²= exp(δ2) 
    σᵤ= exp(0.5*δ2) 
    σᵥ² = exp(γ)            # todo: 重新换一下字母 
    σᵥ = exp(0.5*γ)  
-   μ   = 0
+   μ   = 0.0
    ϵ = PorC*(y - x*β)
    T = size(rowIDT,1)
 
@@ -1294,15 +1285,14 @@ end # @floop begin
     lik = zero(eltype(y));
     @views N = rowIDT[1,2];
     @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));   
-    @views Mtau = 1;
-    @views invPi = 1/σᵥ²*I(N);
+    @views invPi = 1.0/σᵥ²*I(N);
     @views lndetPi = N*log(σᵥ²);
         @floop begin
     @inbounds  for ttt=1:T  
             @views ind = rowIDT[ttt,1];
-            @views his = Mtau*hi[ind];
-            @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind]  - PorC.*(eps[ind,:]*eta) ;
-            @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+            @views his = hi[ind];
+            @views ϵs  = ϵ[ind]-PorC*gamma*Wy[1]*y[ind]  - PorC*(eps[ind,:]*eta) ;
+            @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
             @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
             @views es2 = -0.5*ϵs'*invPi*ϵs ;
             @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -1327,14 +1317,13 @@ elseif length(Wy)>1
 @inbounds for ttt=1:T
 
     @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));      
-    @views Mtau = 1;
-    @views invPi = 1/σᵥ²*I(N);
+    @views invPi = 1.0/σᵥ²*I(N);
     @views lndetPi = N*log(σᵥ²);
     
     @views ind = rowIDT[ttt,1];
-    @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] - PorC.*(eps[ind,:]*eta)  ;
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views his = hi[ind];
+    @views ϵs  = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] - PorC*(eps[ind,:]*eta)  ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -1407,17 +1396,17 @@ end # @floop begin
    # δ1 = rho[po.begz]
 
    taup = rho[po.begtau]
-   tau  = (eigvalu.rumin)/(1+exp(taup))+(eigvalu.rumax)*exp(taup)/(1+exp(taup));
+   tau  = (eigvalu.rumin)/(1.0+exp(taup))+(eigvalu.rumax)*exp(taup)/(1.0+exp(taup));
 
    rhomyp = rho[po.begrho]
-   rhomy  = (eigvalu.rvmin)/(1+exp(rhomyp))+(eigvalu.rvmax)*exp(rhomyp)/(1+exp(rhomyp));
+   rhomy  = (eigvalu.rvmin)/(1.0+exp(rhomyp))+(eigvalu.rvmax)*exp(rhomyp)/(1.0+exp(rhomyp));
 
    hi  = exp.(Q*τ)
    σᵤ²= exp(δ2) 
    σᵤ= exp(0.5*δ2) 
    σᵥ² = exp(γ)            # todo: 重新换一下字母 
    σᵥ = exp(0.5*γ)  
-   μ   = 0
+   μ   = 0.0
    ϵ = PorC*(y - x*β)
    T = size(rowIDT,1)
 
@@ -1434,8 +1423,8 @@ end # @floop begin
     @inbounds  for ttt=1:T  
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind] - PorC.* Mrho*(eps[ind,:]*eta) ;
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views ϵs  = ϵ[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -1467,8 +1456,8 @@ elseif length(Wu)>1
     
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind]- PorC.* Mrho*(eps[ind,:]*eta) ;
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views ϵs  = ϵ[ind]- PorC* Mrho*(eps[ind,:]*eta) ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -1543,7 +1532,7 @@ end # @floop begin
    # δ1 = rho[po.begz]
 
    taup = rho[po.begtau]
-   tau  = (eigvalu.rumin)/(1+exp(taup))+(eigvalu.rumax)*exp(taup)/(1+exp(taup));
+   tau  = (eigvalu.rumin)/(1.0+exp(taup))+(eigvalu.rumax)*exp(taup)/(1.0+exp(taup));
 
 
    hi  = exp.(Q*τ)
@@ -1551,7 +1540,7 @@ end # @floop begin
    σᵤ= exp(0.5*δ2) 
    σᵥ² = exp(γ)            # todo: 重新换一下字母 
    σᵥ = exp(0.5*γ)  
-   μ   = 0
+   μ   = 0.0
    ϵ = PorC*(y - x*β)
    T = size(rowIDT,1)
 
@@ -1560,14 +1549,14 @@ end # @floop begin
     lik = zero(eltype(y));
     @views N = rowIDT[1,2];
     @views Mtau = (I(N)-tau*Wu[1])\I(N);
-    @views invPi = 1/σᵥ²*I(N);
+    @views invPi = 1.0/σᵥ²*I(N);
     @views lndetPi = N*log(σᵥ²);
         @floop begin
     @inbounds  for ttt=1:T  
             @views ind = rowIDT[ttt,1];
             @views his = Mtau*hi[ind];
-            @views ϵs  = ϵ[ind] - PorC.*(eps[ind,:]*eta) ;
-            @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+            @views ϵs  = ϵ[ind] - PorC*(eps[ind,:]*eta) ;
+            @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
             @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
             @views es2 = -0.5*ϵs'*invPi*ϵs ;
             @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -1592,13 +1581,13 @@ elseif length(Wu)>1
 @inbounds for ttt=1:T
 
     @views Mtau = (I(N)-tau*Wu[ttt])\I(N);
-    @views invPi = 1/σᵥ²*I(N);
+    @views invPi = 1.0 /σᵥ²*I(N);
     @views lndetPi = N*log(σᵥ²);
     
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind] - PorC.*(eps[ind,:]*eta) ;
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views ϵs  = ϵ[ind] - PorC*(eps[ind,:]*eta) ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -1623,9 +1612,6 @@ println("操作失败，发生错误：$e")
     return 1e100
 end
 end
-
-
-
 
 
 
@@ -1673,14 +1659,14 @@ end # @floop begin
    # δ1 = rho[po.begz]
 
    rhomyp = rho[po.begrho]
-   rhomy  = (eigvalu.rvmin)/(1+exp(rhomyp))+(eigvalu.rvmax)*exp(rhomyp)/(1+exp(rhomyp));
+   rhomy  = (eigvalu.rvmin)/(1.0+exp(rhomyp))+(eigvalu.rvmax)*exp(rhomyp)/(1.0+exp(rhomyp));
 
    hi  = exp.(Q*τ)
    σᵤ²= exp(δ2) 
    σᵤ= exp(0.5*δ2) 
    σᵥ² = exp(γ)            # todo: 重新换一下字母 
    σᵥ = exp(0.5*γ)  
-   μ   = 0
+   μ   = 0.0
    ϵ = PorC*(y - x*β)
    T = size(rowIDT,1)
 
@@ -1688,7 +1674,6 @@ end # @floop begin
 
     lik = zero(eltype(y));
     @views N = rowIDT[1,2];
-    @views Mtau = 1;
     @views Mrho =  (I(N)-rhomy*Wv[1])\I(N);
     @views Pi = σᵥ²*(Mrho*Mrho');
     @views lndetPi = log(det(Pi));
@@ -1696,9 +1681,9 @@ end # @floop begin
         @floop begin
     @inbounds  for ttt=1:T  
             @views ind = rowIDT[ttt,1];
-            @views his = Mtau*hi[ind];
-            @views ϵs  = ϵ[ind] - PorC.* Mrho*(eps[ind,:]*eta) ;
-            @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+            @views his = hi[ind];
+            @views ϵs  = ϵ[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
+            @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
             @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
             @views es2 = -0.5*ϵs'*invPi*ϵs ;
             @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -1722,16 +1707,15 @@ elseif length(Wv)>1
 
 @inbounds for ttt=1:T
 
-    @views Mtau = 1;
     @views Mrho =  (I(N)-rhomy*Wv[ttt])\I(N);   
     @views Pi = σᵥ²*(Mrho*Mrho');
     @views lndetPi = log(det(Pi));
     @views invPi = (I(N)-rhomy*(Wv[ttt])')*(I(N)-rhomy*Wv[ttt])/σᵥ²;
     
     @views ind = rowIDT[ttt,1];
-    @views his = Mtau*hi[ind];
-    @views ϵs  = ϵ[ind] - PorC.* Mrho*(eps[ind,:]*eta) ;
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views his = hi[ind];
+    @views ϵs  = ϵ[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -1807,7 +1791,7 @@ end # @floop begin
    σᵤ= exp(0.5*δ2) 
    σᵥ² = exp(γ)            # todo: 重新换一下字母 
    σᵥ = exp(0.5*γ)  
-   μ   = 0
+   μ   = 0.0
    ϵ = PorC*(y - x*β)
    T = size(rowIDT,1)
 
@@ -1815,15 +1799,14 @@ end # @floop begin
 
     lik = zero(eltype(y));
     @views N = rowIDT[1,2];
-    @views Mtau = 1;
-    @views invPi = 1/σᵥ²*I(N);
+    @views invPi = 1.0/σᵥ²*I(N);
     @views lndetPi = N*log(σᵥ²);
         @floop begin
     @inbounds  for ttt=1:T  
             @views ind = rowIDT[ttt,1];
-            @views his = Mtau*hi[ind];
-            @views ϵs  = ϵ[ind]  - PorC.*(eps[ind,:]*eta) ;
-            @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+            @views his = hi[ind];
+            @views ϵs  = ϵ[ind]  - PorC*(eps[ind,:]*eta) ;
+            @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
             @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
             @views es2 = -0.5*ϵs'*invPi*ϵs ;
             @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -1900,13 +1883,13 @@ function ssdoat_yuv( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,
    δ1 = rho[po.begz] 
 
    gammap = rho[po.beggamma]
-   gamma  = eigvalu.rymin/(1+exp(gammap))+eigvalu.rymax*exp(gammap)/(1+exp(gammap));
+   gamma  = eigvalu.rymin/(1.0+exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0+exp(gammap));
 
    taup = rho[po.begtau]
-   tau  = eigvalu.rumin/(1+exp(taup))+eigvalu.rumax*exp(taup)/(1+exp(taup));
+   tau  = eigvalu.rumin/(1.0+exp(taup))+eigvalu.rumax*exp(taup)/(1.0+exp(taup));
 
    rhomyp = rho[po.begrho]
-   rhomy  = eigvalu.rvmin/(1+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1+exp(rhomyp));
+   rhomy  = eigvalu.rvmin/(1.0+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1.0+exp(rhomyp));
 
    hi  = exp.(Q*τ)
    σᵤ²= exp(δ2) 
@@ -1939,7 +1922,7 @@ function ssdoat_yuv( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,
                 @views ind = rowIDT[ttt,1];
                 @views his = Mtau*hi[ind];
                 @views ϵs  = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] ;
-                @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+                @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
                 @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                 @views es2 = -0.5*ϵs'*invPi*ϵs ;
                 @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -1974,7 +1957,7 @@ elseif length(Wy)>1
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
     @views ϵs  = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] ;
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -2014,13 +1997,13 @@ function ssdoat_yv( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,
    δ1 = rho[po.begz] 
 
    gammap = rho[po.beggamma]
-   gamma  = eigvalu.rymin/(1+exp(gammap))+eigvalu.rymax*exp(gammap)/(1+exp(gammap));
+   gamma  = eigvalu.rymin/(1.0+exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0+exp(gammap));
 
    # taup = rho[po.begtau]
-   # tau  = eigvalu.rumin/(1+exp(taup))+eigvalu.rumax*exp(taup)/(1+exp(taup));
+   # tau  = eigvalu.rumin/(1.0+exp(taup))+eigvalu.rumax*exp(taup)/(1.0+exp(taup));
 
    rhomyp = rho[po.begrho]
-   rhomy  = eigvalu.rvmin/(1+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1+exp(rhomyp));
+   rhomy  = eigvalu.rvmin/(1.0+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1.0+exp(rhomyp));
 
    hi  = exp.(Q*τ)
    σᵤ²= exp(δ2) 
@@ -2040,7 +2023,6 @@ try
     @views N = rowIDT[1,2];
     @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));   
 
-    @views Mtau = 1;
     @views Mrho = (I(N)-rhomy*Wv[1]) \I(N);
     @views Pi = σᵥ²*(Mrho*Mrho');
     @views detPi = det(Pi)
@@ -2051,9 +2033,9 @@ try
         @floop begin
         @inbounds for ttt=1:T  
                 @views ind = rowIDT[ttt,1];
-                @views his = Mtau*hi[ind];
+                @views his = hi[ind];
                 @views ϵs  = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] ;
-                @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+                @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
                 @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                 @views es2 = -0.5*ϵs'*invPi*ϵs ;
                 @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -2076,7 +2058,6 @@ elseif length(Wy)>1
 @inbounds for ttt=1:T
 
     @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
-    @views Mtau = 1;
     @views Mrho =  (I(N)-rhomy*Wv[ttt])\I(N);
             
     @views Pi = σᵥ²*(Mrho*Mrho');
@@ -2085,9 +2066,9 @@ elseif length(Wy)>1
     @views invPi = (I(N)-rhomy*(Wv[ttt])')*(I(N)-rhomy*Wv[ttt])/σᵥ²;
         
     @views ind = rowIDT[ttt,1];
-    @views his = Mtau*hi[ind];
+    @views his = hi[ind];
     @views ϵs  = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] ;
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -2129,13 +2110,13 @@ function ssdoat_yu( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,
    δ1 = rho[po.begz] 
 
    gammap = rho[po.beggamma]
-   gamma  = eigvalu.rymin/(1+exp(gammap))+eigvalu.rymax*exp(gammap)/(1+exp(gammap));
+   gamma  = eigvalu.rymin/(1.0+exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0+exp(gammap));
 
    taup = rho[po.begtau]
-   tau  = eigvalu.rumin/(1+exp(taup))+eigvalu.rumax*exp(taup)/(1+exp(taup));
+   tau  = eigvalu.rumin/(1.0+exp(taup))+eigvalu.rumax*exp(taup)/(1.0+exp(taup));
 
    # rhomyp = rho[po.begrho]
-   # rhomy  = eigvalu.rvmin/(1+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1+exp(rhomyp));
+   # rhomy  = eigvalu.rvmin/(1.0+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1.0+exp(rhomyp));
 
    hi  = exp.(Q*τ)
    σᵤ²= exp(δ2) 
@@ -2155,7 +2136,7 @@ try
     @views N = rowIDT[1,2];
     @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));   
     @views Mtau = (I(N)-tau*Wu[1]) \I(N);
-    @views invPi = 1/σᵥ²*I(N);
+    @views invPi = 1.0/σᵥ²*I(N);
     @views lndetPi = N*log(σᵥ²);
 
         @floop begin
@@ -2163,7 +2144,7 @@ try
                 @views ind = rowIDT[ttt,1];
                 @views his = Mtau*hi[ind];
                 @views ϵs  = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] ;
-                @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+                @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
                 @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                 @views es2 = -0.5*ϵs'*invPi*ϵs ;
                 @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -2194,7 +2175,7 @@ elseif length(Wy)>1
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
     @views ϵs  = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] ;
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -2236,7 +2217,7 @@ function ssdoat_y( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,
    δ1 = rho[po.begz] 
 
    gammap = rho[po.beggamma]
-   gamma  = eigvalu.rymin/(1+exp(gammap))+eigvalu.rymax*exp(gammap)/(1+exp(gammap));
+   gamma  = eigvalu.rymin/(1.0+exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0+exp(gammap));
 
    hi  = exp.(Q*τ)
    σᵤ²= exp(δ2) 
@@ -2253,16 +2234,15 @@ try
     lik = zero(eltype(y));
     @views N = rowIDT[1,2];
     @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));   
-    @views Mtau = 1;
     @views invPi = I(N)/σᵥ²;
     @views lndetPi = N*log(σᵥ²);
 
         @floop begin
         @inbounds for ttt=1:T  
                 @views ind = rowIDT[ttt,1];
-                @views his = Mtau*hi[ind];
+                @views his = hi[ind];
                 @views ϵs  = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] ;
-                @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+                @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
                 @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                 @views es2 = -0.5*ϵs'*invPi*ϵs ;
                 @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -2287,14 +2267,13 @@ elseif length(Wy)>1
 @inbounds for ttt=1:T
 
     @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
-    @views Mtau = 1;
     @views invPi = I(N)/σᵥ²;
     @views lndetPi = N*log(σᵥ²);
                 
     @views ind = rowIDT[ttt,1];
-    @views his = Mtau*hi[ind];
+    @views his = hi[ind];
     @views ϵs  = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] ;
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -2337,10 +2316,10 @@ function ssdoat_uv( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,
    δ1 = rho[po.begz] 
 
    taup = rho[po.begtau]
-   tau  = eigvalu.rumin/(1+exp(taup))+eigvalu.rumax*exp(taup)/(1+exp(taup));
+   tau  = eigvalu.rumin/(1.0+exp(taup))+eigvalu.rumax*exp(taup)/(1.0+exp(taup));
 
    rhomyp = rho[po.begrho]
-   rhomy  = eigvalu.rvmin/(1+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1+exp(rhomyp));
+   rhomy  = eigvalu.rvmin/(1.0+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1.0+exp(rhomyp));
 
    hi  = exp.(Q*τ)
    σᵤ²= exp(δ2) 
@@ -2370,7 +2349,7 @@ try
                 @views ind = rowIDT[ttt,1];
                 @views his = Mtau*hi[ind];
                 @views ϵs  = ϵ[ind] ;
-                @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+                @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
                 @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                 @views es2 = -0.5*ϵs'*invPi*ϵs ;
                 @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -2404,7 +2383,7 @@ elseif length(Wu)>1
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
     @views ϵs  = ϵ[ind];
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -2449,7 +2428,7 @@ function ssdoat_u( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,
    δ1 = rho[po.begz] 
 
    taup = rho[po.begtau]
-   tau  = eigvalu.rumin/(1+exp(taup))+eigvalu.rumax*exp(taup)/(1+exp(taup));
+   tau  = eigvalu.rumin/(1.0+exp(taup))+eigvalu.rumax*exp(taup)/(1.0+exp(taup));
 
 
    hi  = exp.(Q*τ)
@@ -2478,7 +2457,7 @@ try
                 @views ind = rowIDT[ttt,1];
                 @views his = Mtau*hi[ind];
                 @views ϵs  = ϵ[ind];
-                @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+                @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
                 @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                 @views es2 = -0.5*ϵs'*invPi*ϵs ;
                 @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -2511,7 +2490,7 @@ elseif length(Wu)>1
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
     @views ϵs  = ϵ[ind] ;
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -2556,7 +2535,7 @@ function ssdoat_v( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,
    δ1 = rho[po.begz] 
 
    rhomyp = rho[po.begrho]
-   rhomy  = eigvalu.rvmin/(1+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1+exp(rhomyp));
+   rhomy  = eigvalu.rvmin/(1.0+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1.0+exp(rhomyp));
 
    hi  = exp.(Q*τ)
    σᵤ²= exp(δ2) 
@@ -2575,7 +2554,6 @@ try
     lik = zero(eltype(y));
     @views N = rowIDT[1,2];
 
-    @views Mtau = 1;
     @views Mrho =   (I(N)-rhomy*Wv[1]) \I(N);
     @views Pi = σᵥ²*(Mrho*Mrho');
     @views detPi = det(Pi)
@@ -2585,9 +2563,9 @@ try
         @floop begin
         @inbounds for ttt=1:T  
                 @views ind = rowIDT[ttt,1];
-                @views his = Mtau*hi[ind];
+                @views his = hi[ind];
                 @views ϵs  = ϵ[ind] ;
-                @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+                @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
                 @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                 @views es2 = -0.5*ϵs'*invPi*ϵs ;
                 @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -2610,7 +2588,6 @@ elseif length(Wv)>1
     @views N = rowIDT[1,2];
 @inbounds for ttt=1:T
 
-    @views Mtau = 1;
     @views Mrho =  (I(N)-rhomy*Wv[ttt])\I(N);
             
     @views Pi = σᵥ²*(Mrho*Mrho');
@@ -2619,9 +2596,9 @@ elseif length(Wv)>1
     @views invPi = (I(N)-rhomy*(Wv[ttt])')*(I(N)-rhomy*Wv[ttt])/σᵥ²;
         
     @views ind = rowIDT[ttt,1];
-    @views his = Mtau*hi[ind];
+    @views his = hi[ind];
     @views ϵs  = ϵ[ind] ;
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -2678,16 +2655,15 @@ try
     lik = zero(eltype(y));
     @views N = rowIDT[1,2];
 
-    @views Mtau = 1;
     @views invPi = I(N)/σᵥ²;
     @views lndetPi = N*log(σᵥ²);
 
         @floop begin
         @inbounds for ttt=1:T  
                 @views ind = rowIDT[ttt,1];
-                @views his = Mtau*hi[ind];
+                @views his = hi[ind];
                 @views ϵs  = ϵ[ind] ;
-                @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+                @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
                 @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                 @views es2 = -0.5*ϵs'*invPi*ϵs ;
                 @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -2757,13 +2733,13 @@ end # @floop begin
    γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
    δ1 = rho[po.begz]
    gammap = rho[po.beggamma]
-   gamma  = (eigvalu.rymin)/(1+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1+exp(gammap));
+   gamma  = (eigvalu.rymin)/(1.0+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1.0+exp(gammap));
 
    taup = rho[po.begtau]
-   tau  = (eigvalu.rumin)/(1+exp(taup))+(eigvalu.rumax)*exp(taup)/(1+exp(taup));
+   tau  = (eigvalu.rumin)/(1.0+exp(taup))+(eigvalu.rumax)*exp(taup)/(1.0+exp(taup));
 
    rhomyp = rho[po.begrho]
-   rhomy  = (eigvalu.rvmin)/(1+exp(rhomyp))+(eigvalu.rvmax)*exp(rhomyp)/(1+exp(rhomyp));
+   rhomy  = (eigvalu.rvmin)/(1.0+exp(rhomyp))+(eigvalu.rvmax)*exp(rhomyp)/(1.0+exp(rhomyp));
 
    hi  = exp.(Q*τ)
    σᵤ²= exp(δ2) 
@@ -2791,7 +2767,7 @@ end # @floop begin
                     @views ind = rowIDT[ttt,1];
                     @views his = Mtau*hi[ind];
                     @views ϵs  = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
-                    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+                    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
                     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                     @views es2 = -0.5*ϵs'*invPi*ϵs ;
                     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -2825,7 +2801,7 @@ elseif length(Wy)>1
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
     @views ϵs  = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -2895,10 +2871,10 @@ end # @floop begin
    γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
    δ1 = rho[po.begz]
    gammap = rho[po.beggamma]
-   gamma  = (eigvalu.rymin)/(1+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1+exp(gammap));
+   gamma  = (eigvalu.rymin)/(1.0+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1.0+exp(gammap));
 
    rhomyp = rho[po.begrho]
-   rhomy  = (eigvalu.rvmin)/(1+exp(rhomyp))+(eigvalu.rvmax)*exp(rhomyp)/(1+exp(rhomyp));
+   rhomy  = (eigvalu.rvmin)/(1.0+exp(rhomyp))+(eigvalu.rvmax)*exp(rhomyp)/(1.0+exp(rhomyp));
 
    hi  = exp.(Q*τ)
    σᵤ²= exp(δ2) 
@@ -2915,7 +2891,6 @@ end # @floop begin
     lik = zero(eltype(y));
     @views N = rowIDT[1,2];
     @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));   
-    @views Mtau = 1;
     @views Mrho =  (I(N)-rhomy*Wv[1])\I(N);
     @views Pi = σᵥ²*(Mrho*Mrho');
     @views lndetPi = log(det(Pi));
@@ -2923,9 +2898,9 @@ end # @floop begin
         @floop begin
     @inbounds  for ttt=1:T  
                     @views ind = rowIDT[ttt,1];
-                    @views his = Mtau*hi[ind];
+                    @views his = hi[ind];
                     @views ϵs  = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
-                    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+                    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
                     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
                     @views es2 = -0.5*ϵs'*invPi*ϵs ;
                     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -2950,16 +2925,15 @@ elseif length(Wy)>1
 @inbounds for ttt=1:T
 
     @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));      
-    @views Mtau = 1;
     @views Mrho =  (I(N)-rhomy*Wv[ttt])\I(N);   
     @views Pi = σᵥ²*(Mrho*Mrho');
     @views lndetPi = log(det(Pi));
     @views invPi = (I(N)-rhomy*(Wv[ttt])')*(I(N)-rhomy*Wv[ttt])/σᵥ²;
     
     @views ind = rowIDT[ttt,1];
-    @views his = Mtau*hi[ind];
+    @views his = hi[ind];
     @views ϵs  = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -3029,10 +3003,10 @@ end # @floop begin
    γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
    δ1 = rho[po.begz]
    gammap = rho[po.beggamma]
-   gamma  = (eigvalu.rymin)/(1+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1+exp(gammap));
+   gamma  = (eigvalu.rymin)/(1.0+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1.0+exp(gammap));
 
    taup = rho[po.begtau]
-   tau  = (eigvalu.rumin)/(1+exp(taup))+(eigvalu.rumax)*exp(taup)/(1+exp(taup));
+   tau  = (eigvalu.rumin)/(1.0+exp(taup))+(eigvalu.rumax)*exp(taup)/(1.0+exp(taup));
 
 
    hi  = exp.(Q*τ)
@@ -3050,14 +3024,14 @@ end # @floop begin
     @views N = rowIDT[1,2];
     @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));   
     @views Mtau = (I(N)-tau*Wu[1])\I(N);
-    @views invPi = 1/σᵥ²*I(N);
+    @views invPi = 1.0/σᵥ²*I(N);
     @views lndetPi = N*log(σᵥ²);
         @floop begin
     @inbounds  for ttt=1:T  
             @views ind = rowIDT[ttt,1];
             @views his = Mtau*hi[ind];
             @views ϵs  = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] - PorC*(eps[ind,:]*eta) ;
-            @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+            @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
             @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
             @views es2 = -0.5*ϵs'*invPi*ϵs ;
             @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -3089,7 +3063,7 @@ elseif length(Wy)>1
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
     @views ϵs  = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] - PorC*(eps[ind,:]*eta)  ;
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -3161,7 +3135,7 @@ end # @floop begin
    γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
    δ1 = rho[po.begz]
    gammap = rho[po.beggamma]
-   gamma  = (eigvalu.rymin)/(1+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1+exp(gammap));
+   gamma  = (eigvalu.rymin)/(1.0+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1.0+exp(gammap));
 
    hi  = exp.(Q*τ)
    σᵤ²= exp(δ2) 
@@ -3178,15 +3152,14 @@ end # @floop begin
     lik = zero(eltype(y));
     @views N = rowIDT[1,2];
     @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));   
-    @views Mtau = 1;
-    @views invPi = 1/σᵥ²*I(N);
+    @views invPi = 1.0/σᵥ²*I(N);
     @views lndetPi = N*log(σᵥ²);
         @floop begin
     @inbounds  for ttt=1:T  
             @views ind = rowIDT[ttt,1];
-            @views his = Mtau*hi[ind];
+            @views his = hi[ind];
             @views ϵs  = ϵ[ind]-PorC*gamma*Wy[1]*y[ind]  - PorC*(eps[ind,:]*eta) ;
-            @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+            @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
             @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
             @views es2 = -0.5*ϵs'*invPi*ϵs ;
             @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -3211,14 +3184,13 @@ elseif length(Wy)>1
 @inbounds for ttt=1:T
 
     @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));      
-    @views Mtau = 1;
-    @views invPi = 1/σᵥ²*I(N);
+    @views invPi = 1.0/σᵥ²*I(N);
     @views lndetPi = N*log(σᵥ²);
     
     @views ind = rowIDT[ttt,1];
-    @views his = Mtau*hi[ind];
+    @views his = hi[ind];
     @views ϵs  = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind]  - PorC*(eps[ind,:]*eta) ;
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -3291,10 +3263,10 @@ end # @floop begin
    δ1 = rho[po.begz]
 
    taup = rho[po.begtau]
-   tau  = (eigvalu.rumin)/(1+exp(taup))+(eigvalu.rumax)*exp(taup)/(1+exp(taup));
+   tau  = (eigvalu.rumin)/(1.0+exp(taup))+(eigvalu.rumax)*exp(taup)/(1.0+exp(taup));
 
    rhomyp = rho[po.begrho]
-   rhomy  = (eigvalu.rvmin)/(1+exp(rhomyp))+(eigvalu.rvmax)*exp(rhomyp)/(1+exp(rhomyp));
+   rhomy  = (eigvalu.rvmin)/(1.0+exp(rhomyp))+(eigvalu.rvmax)*exp(rhomyp)/(1.0+exp(rhomyp));
 
    hi  = exp.(Q*τ)
    σᵤ²= exp(δ2) 
@@ -3319,7 +3291,7 @@ end # @floop begin
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
     @views ϵs  = ϵ[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -3352,7 +3324,7 @@ elseif length(Wu)>1
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
     @views ϵs  = ϵ[ind]- PorC* Mrho*(eps[ind,:]*eta) ;
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -3427,7 +3399,7 @@ end # @floop begin
    δ1 = rho[po.begz]
 
    taup = rho[po.begtau]
-   tau  = (eigvalu.rumin)/(1+exp(taup))+(eigvalu.rumax)*exp(taup)/(1+exp(taup));
+   tau  = (eigvalu.rumin)/(1.0+exp(taup))+(eigvalu.rumax)*exp(taup)/(1.0+exp(taup));
 
 
    hi  = exp.(Q*τ)
@@ -3444,14 +3416,14 @@ end # @floop begin
     lik = zero(eltype(y));
     @views N = rowIDT[1,2];
     @views Mtau = (I(N)-tau*Wu[1])\I(N);
-    @views invPi = 1/σᵥ²*I(N);
+    @views invPi = 1.0/σᵥ²*I(N);
     @views lndetPi = N*log(σᵥ²);
         @floop begin
     @inbounds  for ttt=1:T  
             @views ind = rowIDT[ttt,1];
             @views his = Mtau*hi[ind];
             @views ϵs  = ϵ[ind] - PorC*(eps[ind,:]*eta) ;
-            @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+            @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
             @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
             @views es2 = -0.5*ϵs'*invPi*ϵs ;
             @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -3476,13 +3448,13 @@ elseif length(Wu)>1
 @inbounds for ttt=1:T
 
     @views Mtau = (I(N)-tau*Wu[ttt])\I(N);
-    @views invPi = 1/σᵥ²*I(N);
+    @views invPi = 1.0/σᵥ²*I(N);
     @views lndetPi = N*log(σᵥ²);
     
     @views ind = rowIDT[ttt,1];
     @views his = Mtau*hi[ind];
     @views ϵs  = ϵ[ind] - PorC*(eps[ind,:]*eta) ;
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -3557,7 +3529,7 @@ end # @floop begin
    δ1 = rho[po.begz]
 
    rhomyp = rho[po.begrho]
-   rhomy  = (eigvalu.rvmin)/(1+exp(rhomyp))+(eigvalu.rvmax)*exp(rhomyp)/(1+exp(rhomyp));
+   rhomy  = (eigvalu.rvmin)/(1.0+exp(rhomyp))+(eigvalu.rvmax)*exp(rhomyp)/(1.0+exp(rhomyp));
 
    hi  = exp.(Q*τ)
    σᵤ²= exp(δ2) 
@@ -3572,7 +3544,6 @@ end # @floop begin
 
     lik = zero(eltype(y));
     @views N = rowIDT[1,2];
-    @views Mtau = 1;
     @views Mrho =  (I(N)-rhomy*Wv[1])\I(N);
     @views Pi = σᵥ²*(Mrho*Mrho');
     @views lndetPi = log(det(Pi));
@@ -3580,9 +3551,9 @@ end # @floop begin
         @floop begin
     @inbounds  for ttt=1:T  
             @views ind = rowIDT[ttt,1];
-            @views his = Mtau*hi[ind];
+            @views his = hi[ind];
             @views ϵs  = ϵ[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
-            @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+            @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
             @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
             @views es2 = -0.5*ϵs'*invPi*ϵs ;
             @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -3606,16 +3577,15 @@ elseif length(Wv)>1
 
 @inbounds for ttt=1:T
 
-    @views Mtau = 1;
     @views Mrho =  (I(N)-rhomy*Wv[ttt])\I(N);   
     @views Pi = σᵥ²*(Mrho*Mrho');
     @views lndetPi = log(det(Pi));
     @views invPi = (I(N)-rhomy*(Wv[ttt])')*(I(N)-rhomy*Wv[ttt])/σᵥ²;
     
     @views ind = rowIDT[ttt,1];
-    @views his = Mtau*hi[ind];
+    @views his = hi[ind];
     @views ϵs  = ϵ[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
-    @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+    @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
     @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
     @views es2 = -0.5*ϵs'*invPi*ϵs ;
     @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -3699,15 +3669,14 @@ end # @floop begin
 
     lik = zero(eltype(y));
     @views N = rowIDT[1,2];
-    @views Mtau = 1;
-    @views invPi = 1/σᵥ²*I(N);
+    @views invPi = 1.0/σᵥ²*I(N);
     @views lndetPi = N*log(σᵥ²);
         @floop begin
     @inbounds  for ttt=1:T  
             @views ind = rowIDT[ttt,1];
-            @views his = Mtau*hi[ind];
+            @views his = hi[ind];
             @views ϵs  = ϵ[ind]  - PorC*(eps[ind,:]*eta) ;
-            @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
+            @views sigs2 = 1.0 / (his'*invPi*his + 1.0 /σᵤ²) ;
             @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
             @views es2 = -0.5*ϵs'*invPi*ϵs ;
             @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -3909,7 +3878,7 @@ end
 #   σᵤ= exp(0.5*δ2) 
 #   σᵥ² = exp(γ)            # todo: 重新换一下字母 
 #   σᵥ = exp(0.5*γ)  
-#   μ   = 0
+#   μ   = 0.0
 #   ϵ = PorC*(y - x*β)
 #   T = size(rowIDT,1)
 
@@ -3931,8 +3900,8 @@ end
 
 #         @views KK = -0.5*log(2 * π)-0.5*log(σᵥ²);
 #         @views his = hi[ii];
-#         @views wyy = PorC.*gamma*Wy[1]'*y[ind]
-#         @views ϵs  = ϵ[ii]-wyy[ind_indx] - PorC.*(eps[ii,:]'*eta)  ;
+#         @views wyy = PorC*gamma*Wy[1]'*y[ind]
+#         @views ϵs  = ϵ[ii]-wyy[ind_indx] - PorC*(eps[ii,:]'*eta)  ;
 #         @views sigs2 = 1 / (his'*(1/σᵥ²)*his + 1 /σᵤ²) ;
 #         @views mus = (μ/σᵤ² - ϵs'*(1/σᵥ²)*his)*sigs2 ;
 #         @views es2 = -0.5*ϵs'*ϵs ;
@@ -3987,8 +3956,8 @@ end
 # @inbounds for (ind_indx, ii) in enumerate(ind)
 #     @views KK = -0.5*log(2 * π)-0.5*log(σᵥ²);
 #    @views his = hi[ii];
-#    @views wyy = PorC.*gamma*Wy[1]'*y[ind]
-#    @views ϵs  = ϵ[ii]-wyy[ind_indx] - PorC.*(eps[ii,:]'*eta)  ;
+#    @views wyy = PorC*gamma*Wy[1]'*y[ind]
+#    @views ϵs  = ϵ[ii]-wyy[ind_indx] - PorC*(eps[ii,:]'*eta)  ;
 #    @views sigs2 = 1 / (his'*(1/σᵥ²)*his + 1 /σᵤ²) ;
 #    @views mus = (μ/σᵤ² - ϵs'*(1/σᵥ²)*his)*sigs2 ;
 #    @views es2 = -0.5*ϵs'*ϵs ;
@@ -4066,7 +4035,7 @@ end
 #        σᵤ= exp(0.5*δ2) 
 #        σᵥ² = exp(γ)            # todo: 重新换一下字母 
 #        σᵥ = exp(0.5*γ)  
-#        μ   = 0
+#        μ   = 0.0
 #        ϵ = PorC*(y - x*β)
 #        T = size(rowIDT,1)
     
@@ -4076,14 +4045,13 @@ end
 #         lik = zero(eltype(y));
 #         @views N = rowIDT[1,2];
 #         @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));   
-#         @views Mtau = 1;
 #         @views invPi = 1/σᵥ²*I(N);
 #         @views lndetPi = N*log(σᵥ²);
 #             @floop begin
 #         @inbounds  for ttt=1:T  
 #                 @views ind = rowIDT[ttt,1];
-#                 @views his = Mtau*hi[ind];
-#                 @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind]  - PorC.*(eps[ind,:]*eta) ;
+#                 @views his = hi[ind];
+#                 @views ϵs  = ϵ[ind]-PorC*gamma*Wy[1]*y[ind]  - PorC*(eps[ind,:]*eta) ;
 #                 @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
 #                 @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
 #                 @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -4109,13 +4077,12 @@ end
 #     @inbounds for ttt=1:T
     
 #         @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));      
-#         @views Mtau = 1;
 #         @views invPi = 1/σᵥ²*I(N);
 #         @views lndetPi = N*log(σᵥ²);
         
 #         @views ind = rowIDT[ttt,1];
-#         @views his = Mtau*hi[ind];
-#         @views ϵs  = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] - PorC.*(eps[ind,:]*eta)  ;
+#         @views his = hi[ind];
+#         @views ϵs  = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] - PorC*(eps[ind,:]*eta)  ;
 #         @views sigs2 = 1 / (his'*invPi*his + 1 /σᵤ²) ;
 #         @views mus = (μ/σᵤ² - ϵs'*invPi*his)*sigs2 ;
 #         @views es2 = -0.5*ϵs'*invPi*ϵs ;
@@ -4195,7 +4162,7 @@ end
 #        σᵤ= exp(0.5*δ2) 
 #        σᵥ² = exp(γ)            # todo: 重新换一下字母 
 #        σᵥ = exp(0.5*γ)  
-#        μ   = 0
+#        μ   = 0.0
 #        ϵ = PorC*(y - x*β)
 #        T = size(rowIDT,1)
     
@@ -4212,7 +4179,7 @@ end
 #         @views lndetPi = log(σᵥ²);
    
 #         @views his = hi;
-#         @views ϵs  = ϵ-PorC.*gamma.*Wyt*y  - PorC.*(eps*eta) ;
+#         @views ϵs  = ϵ-PorC*gamma*Wyt*y  - PorC*(eps*eta) ;
 #         @views sigs2 = 1 ./ (his.^2 .*invPi .+ 1 /σᵤ²) ;
 #         @views mus = (μ/σᵤ² .- ϵs .* his .* invPi) .* sigs2 ;
 #         @views es2 = -0.5 .* ϵs.^2 .*invPi;
@@ -4242,7 +4209,7 @@ end
 #         @views invPi = 1/σᵥ²;
 #         @views lndetPi = log(σᵥ²);
 #         @views his = hi;
-#         @views ϵs  = ϵ-PorC.*gamma.*Wyt*y  - PorC.*(eps*eta) ;
+#         @views ϵs  = ϵ-PorC*gamma*Wyt*y  - PorC*(eps*eta) ;
 #         @views sigs2 = 1 ./ (his.^2 .*invPi .+ 1 /σᵤ²) ;
 #         @views mus = (μ/σᵤ² .- ϵs .* his .* invPi) .* sigs2 ;
 #         @views es2 = -0.5 .* ϵs.^2 .*invPi;
@@ -4310,14 +4277,14 @@ function ssdkuhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
         γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
         # δ1 = rho[po.begz]
         gammap = rho[po.beggamma]
-        gamma  = (eigvalu.rymin)/(1+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1+exp(gammap));
+        gamma  = (eigvalu.rymin)/(1.0+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1.0+exp(gammap));
     
         hi  = exp.(Q*τ)
         σᵤ²= exp(δ2) 
         σᵤ= exp(0.5*δ2) 
         σᵥ² = exp(γ)            # todo: 重新换一下字母 
         σᵥ = exp(0.5*γ)  
-        μ   = 0
+        μ   = 0.0
         ϵ = PorC*(y - x*β)
         T = size(rowIDT,1)
     
@@ -4330,11 +4297,11 @@ function ssdkuhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
 
         @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));  
         @views lndetIrhoWt = lndetIrhoW*T
-        @views invPi = 1/σᵥ²;
+        @views invPi = 1.0/σᵥ²;
         @views lndetPi = log(σᵥ²);
     
         @views ϵ  =  ϵ-PorC*gamma*Wyt*y  - PorC*(eps*eta) ;
-        @views sigs2 = @. 1 / (hi^2 *invPi + 1 /σᵤ²) ;
+        @views sigs2 = @. 1.0 / (hi^2 *invPi + 1.0 /σᵤ²) ;
         @views mus = @. (μ/σᵤ² - ϵ * hi * invPi) * sigs2 ;
         @views es2 =@. -0.5 * ϵ^2 *invPi;
         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
@@ -4361,10 +4328,10 @@ function ssdkuhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
         end # for ttt=1:T
         end # begin
         
-        @views invPi = 1/σᵥ²;
+        @views invPi = 1.0/σᵥ²;
         @views lndetPi = log(σᵥ²);
         @views ϵ  =  ϵ-PorC*gamma*Wyt*y  - PorC*(eps*eta) ;
-        @views sigs2 = @. 1 / (hi^2 *invPi + 1 /σᵤ²) ;
+        @views sigs2 = @. 1.0 / (hi^2 *invPi + 1.0 /σᵤ²) ;
         @views mus = @. (μ/σᵤ² - ϵ * hi * invPi) * sigs2 ;
         @views es2 =@. -0.5 * ϵ^2 *invPi;
         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
@@ -4398,14 +4365,14 @@ function ssdkuh( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
         γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
         # δ1 = rho[po.begz]
         gammap = rho[po.beggamma]
-        gamma  = (eigvalu.rymin)/(1+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1+exp(gammap));
+        gamma  = (eigvalu.rymin)/(1.0+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1.0+exp(gammap));
     
         hi  = exp.(Q*τ)
         σᵤ²= exp(δ2) 
         σᵤ= exp(0.5*δ2) 
         σᵥ² = exp(γ)            # todo: 重新换一下字母 
         σᵥ = exp(0.5*γ)  
-        μ   = 0
+        μ   = 0.0
         ϵ = PorC*(y - x*β)
         T = size(rowIDT,1)
     
@@ -4418,11 +4385,11 @@ function ssdkuh( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
 
         @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));  
         @views lndetIrhoWt = lndetIrhoW*T
-        @views invPi = 1/σᵥ²;
+        @views invPi = 1.0/σᵥ²;
         @views lndetPi = log(σᵥ²);
     
         @views ϵ  = ϵ-PorC*gamma*Wyt*y   ;
-        @views sigs2 = @. 1 / (hi^2 *invPi + 1 /σᵤ²) ;
+        @views sigs2 = @. 1.0 / (hi^2 *invPi + 1.0 /σᵤ²) ;
         @views mus = @. (μ/σᵤ² - ϵ * hi * invPi) * sigs2 ;
         @views es2 =@.  -0.5 * ϵ^2 *invPi;
         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
@@ -4450,10 +4417,10 @@ function ssdkuh( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
         end # for ttt=1:T
         end # begin
         
-        @views invPi = 1/σᵥ²;
+        @views invPi = 1.0/σᵥ²;
         @views lndetPi = log(σᵥ²);
         @views ϵ  = ϵ-PorC*gamma*Wyt*y   ;
-        @views sigs2 =@. 1 / (hi^2 *invPi + 1 /σᵤ²) ;
+        @views sigs2 =@. 1.0 / (hi^2 *invPi + 1.0 /σᵤ²) ;
         @views mus = @. (μ/σᵤ² - ϵ * hi * invPi) * sigs2 ;
         @views es2 = @. -0.5 * ϵ^2 *invPi;
         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
@@ -4542,7 +4509,7 @@ function ssdkute( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
         γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
         δ1 = rho[po.begz]
         gammap = rho[po.beggamma]
-        gamma  = (eigvalu.rymin)/(1+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1+exp(gammap));
+        gamma  = (eigvalu.rymin)/(1.0+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1.0+exp(gammap));
     
         hi  = exp.(Q*τ)
         σᵤ²= exp(δ2) 
@@ -4562,11 +4529,11 @@ function ssdkute( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
 
         @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));  
         @views lndetIrhoWt = lndetIrhoW*T
-        @views invPi = 1/σᵥ²;
+        @views invPi = 1.0/σᵥ²;
         @views lndetPi = log(σᵥ²);
     
         @views ϵ  =  ϵ-PorC*gamma*Wyt*y  - PorC*(eps*eta) ;
-        @views sigs2 = @.  1 / (hi^2 *invPi + 1 /σᵤ²) ;
+        @views sigs2 = @.  1.0 / (hi^2 *invPi + 1.0 /σᵤ²) ;
         @views mus =@. (μ/σᵤ² - ϵ * hi * invPi) * sigs2 ;
         @views es2 =@. -0.5 * ϵ^2 *invPi;
         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
@@ -4592,10 +4559,10 @@ function ssdkute( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
         end # for ttt=1:T
         end # begin
         
-        @views invPi = 1/σᵥ²;
+        @views invPi = 1.0/σᵥ²;
         @views lndetPi = log(σᵥ²);
         @views ϵ  =  ϵ-PorC*gamma*Wyt*y  - PorC*(eps*eta) ;
-        @views sigs2 = @.  1 / (hi^2 *invPi + 1 /σᵤ²) ;
+        @views sigs2 = @.  1.0 / (hi^2 *invPi + 1.0 /σᵤ²) ;
         @views mus =@. (μ/σᵤ² - ϵ * hi * invPi) * sigs2 ;
         @views es2 =@. -0.5 * ϵ^2 *invPi;
         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
@@ -4630,7 +4597,7 @@ function ssdkut( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
         γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
         δ1 = rho[po.begz]
         gammap = rho[po.beggamma]
-        gamma  = (eigvalu.rymin)/(1+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1+exp(gammap));
+        gamma  = (eigvalu.rymin)/(1.0+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1.0+exp(gammap));
     
         hi  = exp.(Q*τ)
         σᵤ²= exp(δ2) 
@@ -4650,11 +4617,11 @@ function ssdkut( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
 
         @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));  
         @views lndetIrhoWt = lndetIrhoW*T
-        @views invPi = 1/σᵥ²;
+        @views invPi = 1.0/σᵥ²;
         @views lndetPi = log(σᵥ²);
 
         @views ϵ  =  ϵ-PorC*gamma*Wyt*y   ;
-        @views sigs2 =@. 1 / (hi^2 *invPi + 1 /σᵤ²) ;
+        @views sigs2 =@. 1.0 / (hi^2 *invPi + 1.0 /σᵤ²) ;
         @views mus =@. (μ/σᵤ² - ϵ * hi * invPi) * sigs2 ;
         @views es2 =@. -0.5 * ϵ ^2 *invPi;
         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
@@ -4682,10 +4649,10 @@ function ssdkut( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
         end # for ttt=1:T
         end # begin
         
-        @views invPi = 1/σᵥ²;
+        @views invPi = 1.0/σᵥ²;
         @views lndetPi = log(σᵥ²);
         @views ϵ  =  ϵ-PorC*gamma*Wyt*y   ;
-        @views sigs2 =@. 1 / (hi^2 *invPi + 1 /σᵤ²) ;
+        @views sigs2 =@. 1.0 / (hi^2 *invPi + 1.0 /σᵤ²) ;
         @views mus =@. (μ/σᵤ² - ϵ * hi * invPi) * sigs2 ;
         @views es2 =@. -0.5 * ϵ ^2 *invPi;
         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
@@ -4783,14 +4750,14 @@ function ssdkkhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
     σᵤ= exp(0.5*δ2) 
     σᵥ² = exp(γ)            # todo: 重新换一下字母 
     σᵥ = exp(0.5*γ)  
-    μ   = 0
+    μ   = 0.0
     ϵ = PorC*(y - x*β)
     ID = size(rowIDT,1)
 
 
     lik = zero(eltype(y));
     @views N = rowIDT[1,2];
-    @views invPi = 1/σᵥ²;
+    @views invPi = 1.0/σᵥ²;
     @views lndetPi = N*log(σᵥ²);
     @floop begin
     @inbounds  for iidd=1:ID  
@@ -4841,13 +4808,13 @@ function ssdkkh( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
     σᵤ= exp(0.5*δ2) 
     σᵥ² = exp(γ)            # todo: 重新换一下字母 
     σᵥ = exp(0.5*γ)  
-    μ   = 0
+    μ   = 0.0
     ϵ = PorC*(y - x*β)
     ID = size(rowIDT,1)
 
     lik = zero(eltype(y));
     @views N = rowIDT[1,2];
-    @views invPi = 1/σᵥ²;
+    @views invPi = 1.0/σᵥ²;
     @views lndetPi = N*log(σᵥ²);
 
     try
@@ -4955,7 +4922,7 @@ function ssdkkte( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
 
     lik = zero(eltype(y));
     @views N = rowIDT[1,2];
-    @views invPi = 1/σᵥ²;
+    @views invPi = 1.0/σᵥ²;
     @views lndetPi = N*log(σᵥ²);
     @floop begin
     @inbounds  for iidd=1:ID  
@@ -5012,7 +4979,7 @@ function ssdkkt( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
 
     lik = zero(eltype(y));
     @views N = rowIDT[1,2];
-    @views invPi = 1/σᵥ²;
+    @views invPi = 1.0/σᵥ²;
     @views lndetPi = N*log(σᵥ²);
 
     try

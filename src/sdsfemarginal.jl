@@ -28,8 +28,7 @@ function marg_ssfoadt(ttt::Int, iii::Int, N::Int,# PorC::Int64,
               hs = Mtau[iii]*h;
          end
     else
-        Mtau = 1;
-        hs = 1*h;
+        hs = h;
     end
      hsμ  = hs*μ
      hsσᵤ = hs*σᵤ 
@@ -105,7 +104,7 @@ function marg_ssfoadh(ttt::Int, iii::Int, N::Int,# PorC::Int64,
 
      h = exp(Qmarg'*coef[pos.begq : pos.endq])
      σᵤ = exp(0.5 * Wmarg'*coef[pos.begw : pos.endw]) # σᵤ
-     μ = 0
+     μ = 0.0
      
      taup = coef[pos.begtau]
      tau  = eigvalu.rumin/(1+exp(taup))+eigvalu.rumax*exp(taup)/(1+exp(taup));
@@ -119,8 +118,7 @@ function marg_ssfoadh(ttt::Int, iii::Int, N::Int,# PorC::Int64,
               hs = Mtau[iii]*h;
          end
     else
-        Mtau = 1;
-        hs = 1*h;
+        hs = h;
     end
      hsμ  = hs*μ
      hsσᵤ = hs*σᵤ 
@@ -196,7 +194,7 @@ function marg_ssfoah(ttt::Int, iii::Int, N::Int,# PorC::Int64,
 
      h = exp(Qmarg'*coef[pos.begq : pos.endq])
      σᵤ = exp(0.5 * Wmarg'*coef[pos.begw : pos.endw]) # σᵤ
-     μ = 0  # mu, a scalar
+     μ = 0.0  # mu, a scalar
      
      taup = coef[pos.begtau]
      tau  = eigvalu.rumin/(1+exp(taup))+eigvalu.rumax*exp(taup)/(1+exp(taup));
@@ -396,9 +394,9 @@ function IrhoW(gamma::Float64, rowIDT::Matrix{Any} )
 		 indire = (sum(wirho) - tr(wirho))/N
 	
 	else
-		NN=0
-		dire=0
-		indire=0
+		NN=0.0
+		dire=0.0
+		indire=0.0
 		for ttt=i:T
         @views N = rowIDT[ttt,2];
 
@@ -434,9 +432,9 @@ function IrhoWW(gamma::Float64, rowIDT::Matrix{Any} )
 		 indire = (sum(wirho) - tr(wirho))/N
     
 	else
-		NN=0
-		dire=0
-		indire=0
+		NN=0.0
+		dire=0.0
+		indire=0.0
 		for ttt=i:T
 			
         @views N = rowIDT[1,2];
@@ -467,9 +465,9 @@ function IrhoWWIrhoW(gamma::Float64,dgamma::Float64, rowIDT::Matrix{Any} )
          dire = tr(wirho)/N
          indire = (sum(wirho) - tr(wirho))/N
    else
-        NN=0
-        dire=0
-        indire=0 
+        NN=0.0
+        dire=0.0
+        indire=0.0
         for ttt=i:T
         @views N = rowIDT[1,2];
     
@@ -502,9 +500,9 @@ function IrhoWWIrhoWW(gamma::Float64,dgamma::Float64, rowIDT::Matrix{Any} )
 		 dire = tr(wirho)/N
 		 indire = (sum(wirho) - tr(wirho))/N
     else
-		NN=0
-		dire=0
-		indire=0
+		NN=0.0
+		dire=0.0
+		indire=0.0
 		for ttt=i:T
             @views N = rowIDT[1,2];
     		 NN = NN +N
@@ -648,9 +646,9 @@ function nonConsDataFrame(D::DataFrame, M::Matrix)
 
      h = exp(Qmarg'*coef[pos.begq : pos.endq])
      σᵤ = exp(0.5 * Wmarg'*coef[pos.begw : pos.endw]) # σᵤ
-     μ = 0
+     μ = 0.0
      
-     hs = 1*h;
+     hs = h;
     
      hsμ  = hs*μ
      hsσᵤ = hs*σᵤ 
@@ -729,7 +727,7 @@ function marg_ssfkut(ttt::Int, iii::Int, N::Int,# PorC::Int64,
      μ = Zmarg'*coef[pos.begz : pos.endz]  # mu, a scalar
      
 
-     hs = 1*h;
+     hs = h;
     
      hsμ  = hs*μ
      hsσᵤ = hs*σᵤ 
@@ -804,9 +802,9 @@ function marg_ssfkueh(ttt::Int, iii::Int, N::Int,# PorC::Int64,
 
      h = exp(Qmarg'*coef[pos.begq : pos.endq])
      σᵤ = exp(0.5 * Wmarg'*coef[pos.begw : pos.endw]) # σᵤ
-     μ = 0
+     μ = 0.0
      
-     hs = 1*h;
+     hs = h;
     
      hsμ  = hs*μ
      hsσᵤ = hs*σᵤ 
@@ -883,7 +881,7 @@ function marg_ssfkuet(ttt::Int, iii::Int, N::Int,# PorC::Int64,
      μ = Zmarg'*coef[pos.begz : pos.endz]  # mu, a scalar
      
 
-     hs = 1*h;
+     hs = h;
     
      hsμ  = hs*μ
      hsσᵤ = hs*σᵤ 
@@ -962,9 +960,9 @@ function marg_ssfkkh(ttt::Int, iii::Int, N::Int,# PorC::Int64,
 
      h = exp(Qmarg'*coef[pos.begq : pos.endq])
      σᵤ = exp(0.5 * Wmarg'*coef[pos.begw : pos.endw]) # σᵤ
-     μ = 0
+     μ = 0.0
      
-     hs = 1*h;
+     hs = h;
     
      hsμ  = hs*μ
      hsσᵤ = hs*σᵤ 
@@ -1043,7 +1041,7 @@ function marg_ssfkkt(ttt::Int, iii::Int, N::Int,# PorC::Int64,
      μ = Zmarg'*coef[pos.begz : pos.endz]  # mu, a scalar
      
 
-     hs = 1*h;
+     hs = h;
     
      hsμ  = hs*μ
      hsσᵤ = hs*σᵤ 
@@ -1118,9 +1116,9 @@ function marg_ssfkkeh(ttt::Int, iii::Int, N::Int,# PorC::Int64,
 
      h = exp(Qmarg'*coef[pos.begq : pos.endq])
      σᵤ = exp(0.5 * Wmarg'*coef[pos.begw : pos.endw]) # σᵤ
-     μ = 0
+     μ = 0.0
      
-     hs = 1*h;
+     hs = h;
     
      hsμ  = hs*μ
      hsσᵤ = hs*σᵤ 
@@ -1197,7 +1195,7 @@ function marg_ssfkket(ttt::Int, iii::Int, N::Int,# PorC::Int64,
      μ = Zmarg'*coef[pos.begz : pos.endz]  # mu, a scalar
      
 
-     hs = 1*h;
+     hs = h;
     
      hsμ  = hs*μ
      hsσᵤ = hs*σᵤ 

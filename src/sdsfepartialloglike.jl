@@ -23,13 +23,13 @@ eta = rho[pos.begeta:pos.endeta]
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 δ1 = rho[pos.begz]
 gammap = rho[pos.beggamma]
-gamma  = eigvalu.rymin/(1+exp(gammap))+eigvalu.rymax*exp(gammap)/(1+exp(gammap));
+gamma  = eigvalu.rymin/(1.0+exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0+exp(gammap));
 
 taup = rho[pos.begtau]
-tau  = eigvalu.rumin/(1+exp(taup))+eigvalu.rumax*exp(taup)/(1+exp(taup));
+tau  = eigvalu.rumin/(1.0+exp(taup))+eigvalu.rumax*exp(taup)/(1.0+exp(taup));
 
 rhomyp = rho[pos.begrho]
-rhomy  = eigvalu.rvmin/(1+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1+exp(rhomyp));
+rhomy  = eigvalu.rvmin/(1.0+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1.0+exp(rhomyp));
 
 hi  = exp.(Q*τ)
 σᵤ²= exp(δ2) 
@@ -59,8 +59,8 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
 @inbounds for ttt=1:T 
   @views ind = rowIDT[ttt,1];
   @views hi[ind]= Mtau*hi[ind];
-  @views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind] - PorC.* Mrho*(eps[ind,:]*eta) ;
-  @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+  @views ϵ[ind] = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
+  @views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
   @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
   @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
   @views KK[ttt] = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -79,8 +79,8 @@ elseif length(Wy)>1
 
 @views ind = rowIDT[ttt,1];
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] - PorC.* Mrho*(eps[ind,:]*eta) ;
-@views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+@views ϵ[ind] = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
+@views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
 @views KK[ttt] = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi; 
@@ -112,10 +112,10 @@ eta = rho[pos.begeta:pos.endeta]
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 δ1 = rho[pos.begz]
 gammap = rho[pos.beggamma]
-gamma  = eigvalu.rymin/(1+exp(gammap))+eigvalu.rymax*exp(gammap)/(1+exp(gammap));
+gamma  = eigvalu.rymin/(1.0+exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0+exp(gammap));
 
 taup = rho[pos.begtau]
-tau  = eigvalu.rumin/(1+exp(taup))+eigvalu.rumax*exp(taup)/(1+exp(taup));
+tau  = eigvalu.rumin/(1.0+exp(taup))+eigvalu.rumax*exp(taup)/(1.0+exp(taup));
 
 hi  = exp.(Q*τ)
 σᵤ²= exp(δ2) 
@@ -136,15 +136,15 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
 @views N = rowIDT[1,2];
 @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));   
 @views Mtau = (I(N)-tau*Wu[1])\I(N);
-@views invPi = 1/σᵥ²*I(N);
+@views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
 
 @floop begin
 @inbounds for ttt=1:T 
   @views ind = rowIDT[ttt,1];
   @views hi[ind]= Mtau*hi[ind];
-  @views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind]  ;
-  @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+  @views ϵ[ind] = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] - PorC* Mrho*(eps[ind,:]*eta)  ;
+  @views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
   @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
   @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
   @views KK[ttt] = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -156,13 +156,13 @@ elseif length(Wy)>1
 @views N = rowIDT[1,2];
 @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
 @views Mtau = (I(N)-tau*Wu[ttt])\I(N);
-@views invPi = 1/σᵥ²*I(N);
+@views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
 
 @views ind = rowIDT[ttt,1];
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind]  ;
-@views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+@views ϵ[ind] = ϵ[ind]-PorC *gamma*Wy[ttt]*y[ind] - PorC* Mrho*(eps[ind,:]*eta)  ;
+@views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
 @views KK[ttt] = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi; 
@@ -198,10 +198,10 @@ eta = rho[pos.begeta:pos.endeta]
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 δ1 = rho[pos.begz]
 gammap = rho[pos.beggamma]
-gamma  = eigvalu.rymin/(1+exp(gammap))+eigvalu.rymax*exp(gammap)/(1+exp(gammap));
+gamma  = eigvalu.rymin/(1.0+exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0+exp(gammap));
 
 rhomyp = rho[pos.begrho]
-rhomy  = eigvalu.rvmin/(1+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1+exp(rhomyp));
+rhomy  = eigvalu.rvmin/(1.0+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1.0+exp(rhomyp));
 
 hi  = exp.(Q*τ)
 σᵤ²= exp(δ2) 
@@ -221,7 +221,7 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
 
 @views N = rowIDT[1,2];
 @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));   
-@views Mtau = 1 ;
+@views Mtau = 1.0 ;
 @views Mrho =  (I(N)-rhomy*Wv[1])\I(N);
 @views Pi = σᵥ²*(Mrho*Mrho');
 @views lndetPi = log(det(Pi));
@@ -232,8 +232,8 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
 @inbounds for ttt=1:T 
   @views ind = rowIDT[ttt,1];
   @views hi[ind]= Mtau*hi[ind];
-  @views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind] - PorC.* Mrho*(eps[ind,:]*eta) ;
-  @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+  @views ϵ[ind] = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
+  @views sigs2[ttt] = 1.0  /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
   @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
   @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
   @views KK[ttt] = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -244,7 +244,7 @@ elseif length(Wy)>1
 @inbounds for ttt=1:T  
 @views N = rowIDT[1,2];
 @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
-@views Mtau = 1;
+@views Mtau = 1.0;
 @views Mrho =  (I(N)-rhomy*Wv[ttt])\I(N);
 @views Pi = σᵥ²*(Mrho*Mrho');
 @views lndetPi = log(det(Pi));
@@ -252,8 +252,8 @@ elseif length(Wy)>1
 
 @views ind = rowIDT[ttt,1];
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] - PorC.* Mrho*(eps[ind,:]*eta) ;
-@views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+@views ϵ[ind] = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
+@views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
 @views KK[ttt] = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi; 
@@ -290,7 +290,7 @@ eta = rho[pos.begeta:pos.endeta]
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 δ1 = rho[pos.begz]
 gammap = rho[pos.beggamma]
-gamma  = eigvalu.rymin/(1+exp(gammap))+eigvalu.rymax*exp(gammap)/(1+exp(gammap));
+gamma  = eigvalu.rymin/(1.0+exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0 +exp(gammap));
 
 
 hi  = exp.(Q*τ)
@@ -311,8 +311,8 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
 
 @views N = rowIDT[1,2];
 @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));   
-@views Mtau = 1;
-@views invPi = 1/σᵥ²*I(N);
+@views Mtau = 1.0;
+@views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
 
 #   @views Mgamma = (I(N)-gamma*Wy[1])\I(N)
@@ -322,8 +322,8 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
 @inbounds for ttt=1:T 
   @views ind = rowIDT[ttt,1];
   @views hi[ind]= Mtau*hi[ind];
-  @views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind]  ;
-  @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+  @views ϵ[ind] = ϵ[ind]-PorC*gamma*Wy[1]*y[ind]  - PorC* Mrho*(eps[ind,:]*eta) ;
+  @views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
   @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
   @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
   @views KK[ttt] = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -334,14 +334,14 @@ elseif length(Wy)>1
 @inbounds for ttt=1:T  
 @views N = rowIDT[1,2];
 @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
-@views Mtau = 1;
-@views invPi = 1/σᵥ²*I(N);
+@views Mtau = 1.0;
+@views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
 
 @views ind = rowIDT[ttt,1];
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind]  ;
-@views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+@views ϵ[ind] = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] - PorC* Mrho*(eps[ind,:]*eta)  ;
+@views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
 @views KK[ttt] = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi; 
@@ -379,10 +379,10 @@ eta = rho[pos.begeta:pos.endeta]
 
 
 taup = rho[pos.begtau]
-tau  = eigvalu.rumin/(1+exp(taup))+eigvalu.rumax*exp(taup)/(1+exp(taup));
+tau  = eigvalu.rumin/(1.0+exp(taup))+eigvalu.rumax*exp(taup)/(1.0+exp(taup));
 
 rhomyp = rho[pos.begrho]
-rhomy  = eigvalu.rvmin/(1+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1+exp(rhomyp));
+rhomy  = eigvalu.rvmin/(1.0+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1.0+exp(rhomyp));
 
 hi  = exp.(Q*τ)
 σᵤ²= exp(δ2) 
@@ -411,8 +411,8 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
 @inbounds for ttt=1:T 
   @views ind = rowIDT[ttt,1];
   @views hi[ind]= Mtau*hi[ind];
-  @views ϵ[ind] = ϵ[ind]- PorC.* Mrho*(eps[ind,:]*eta) ;
-  @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+  @views ϵ[ind] = ϵ[ind]- PorC* Mrho*(eps[ind,:]*eta) ;
+  @views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
   @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
   @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
   @views KK[ttt] = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -430,8 +430,8 @@ elseif length(Wy)>1
 
 @views ind = rowIDT[ttt,1];
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind] - PorC.* Mrho*(eps[ind,:]*eta) ;
-@views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+@views ϵ[ind] = ϵ[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
+@views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
 @views KK[ttt] = -0.5*N*log(2 * π)-0.5*lndetPi; 
@@ -471,7 +471,7 @@ eta = rho[pos.begeta:pos.endeta]
 
 
 taup = rho[pos.begtau]
-tau  = eigvalu.rumin/(1+exp(taup))+eigvalu.rumax*exp(taup)/(1+exp(taup));
+tau  = eigvalu.rumin/(1.0+exp(taup))+eigvalu.rumax*exp(taup)/(1.0+exp(taup));
 
 
 hi  = exp.(Q*τ)
@@ -492,7 +492,7 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
 
 @views N = rowIDT[1,2];
 @views Mtau = (I(N)-tau*Wu[1])\I(N);
-@views invPi = 1/σᵥ²*I(N);
+@views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
 
 
@@ -500,8 +500,8 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
 @inbounds for ttt=1:T 
  @views ind = rowIDT[ttt,1];
  @views hi[ind]= Mtau*hi[ind];
- @views ϵ[ind] = ϵ[ind];
- @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+ @views ϵ[ind] = ϵ[ind]- PorC* Mrho*(eps[ind,:]*eta) ;
+ @views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
  @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
  @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
  @views KK[ttt] = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -512,13 +512,13 @@ elseif length(Wy)>1
 @inbounds for ttt=1:T  
 @views N = rowIDT[1,2];
 @views Mtau = (I(N)-tau*Wu[ttt])\I(N);
-@views invPi = 1/σᵥ²*I(N);
+@views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
 
 @views ind = rowIDT[ttt,1];
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind]   ;
-@views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+@views ϵ[ind] = ϵ[ind] - PorC* Mrho*(eps[ind,:]*eta)   ;
+@views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
 @views KK[ttt] = -0.5*N*log(2 * π)-0.5*lndetPi; 
@@ -556,7 +556,7 @@ eta = rho[pos.begeta:pos.endeta]
 δ1 = rho[pos.begz]
 
 rhomyp = rho[pos.begrho]
-rhomy  = eigvalu.rvmin/(1+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1+exp(rhomyp));
+rhomy  = eigvalu.rvmin/(1.0+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1.0+exp(rhomyp));
 
 hi  = exp.(Q*τ)
 σᵤ²= exp(δ2) 
@@ -575,7 +575,7 @@ KK = zeros(eltype(y),T,1);
 if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
 @views N = rowIDT[1,2];
-@views Mtau = 1 ;
+@views Mtau = 1.0 ;
 @views Mrho = (I(N)-rhomy*Wv[1])\I(N);
 @views Pi = σᵥ²*(Mrho*Mrho');
 @views lndetPi = log(det(Pi));
@@ -585,8 +585,8 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
 @inbounds for ttt=1:T 
  @views ind = rowIDT[ttt,1];
  @views hi[ind]= Mtau*hi[ind];
- @views ϵ[ind] = ϵ[ind]- PorC.* Mrho*(eps[ind,:]*eta) ;
- @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+ @views ϵ[ind] = ϵ[ind]- PorC* Mrho*(eps[ind,:]*eta) ;
+ @views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
  @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
  @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
  @views KK[ttt] = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -596,7 +596,7 @@ elseif length(Wy)>1
 @floop begin
 @inbounds for ttt=1:T  
 @views N = rowIDT[1,2];
-@views Mtau = 1;
+@views Mtau = 1.0;
 @views Mrho =  (I(N)-rhomy*Wv[ttt])\I(N);
 @views Pi = σᵥ²*(Mrho*Mrho');
 @views lndetPi = log(det(Pi));
@@ -604,8 +604,8 @@ elseif length(Wy)>1
 
 @views ind = rowIDT[ttt,1];
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind] - PorC.* Mrho*(eps[ind,:]*eta) ;
-@views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+@views ϵ[ind] = ϵ[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
+@views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
 @views KK[ttt] = -0.5*N*log(2 * π)-0.5*lndetPi; 
@@ -661,14 +661,14 @@ KK = zeros(eltype(y),T,1);
 @floop begin
 @inbounds for ttt=1:T  
 @views N = rowIDT[1,2];
-@views Mtau = 1;
-@views invPi = 1/σᵥ²*I(N);
+@views Mtau = 1.0;
+@views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
 
 @views ind = rowIDT[ttt,1];
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind]   ;
-@views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+@views ϵ[ind] = ϵ[ind] - PorC* Mrho*(eps[ind,:]*eta)   ;
+@views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
 @views KK[ttt] = -0.5*N*log(2 * π)-0.5*lndetPi; 
@@ -745,7 +745,7 @@ function prtlloglikekute( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Ma
         γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
         δ1 = rho[po.begz]
         gammap = rho[po.beggamma]
-        gamma  = (eigvalu.rymin)/(1+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1+exp(gammap));
+        gamma  = (eigvalu.rymin)/(1.0+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1.0+exp(gammap));
     
         hi  = exp.(Q*τ)
         σᵤ²= exp(δ2) 
@@ -765,11 +765,11 @@ function prtlloglikekute( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Ma
 
         @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));  
         @views lndetIrhoWt = lndetIrhoW*T
-        @views invPi = 1/σᵥ²;
+        @views invPi = 1.0/σᵥ²;
         @views lndetPi = log(σᵥ²);
     
         @views ϵ = ϵ - PorC*gamma*Wyt*y - PorC*(eps*eta) ;
-        @views sigs2 = @.  1 / (hi^2 *invPi + 1 /σᵤ²) ;
+        @views sigs2 = @.  1.0 / (hi^2 *invPi + 1.0 /σᵤ²) ;
         @views mus =@. (μ/σᵤ² - ϵ * hi * invPi) * sigs2 ;
         @views es2 =@. -0.5 * ϵ^2 *invPi;
         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
@@ -795,10 +795,10 @@ function prtlloglikekute( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Ma
         end # for ttt=1:T
         end # begin
         
-        @views invPi = 1/σᵥ²;
+        @views invPi = 1.0/σᵥ²;
         @views lndetPi = log(σᵥ²);
         @views ϵ  =  ϵ-PorC*gamma*Wyt*y  - PorC*(eps*eta) ;
-        @views sigs2 = @.  1 / (hi^2 *invPi + 1 /σᵤ²) ;
+        @views sigs2 = @.  1.0 / (hi^2 *invPi + 1.0 /σᵤ²) ;
         @views mus =@. (μ/σᵤ² - ϵ * hi * invPi) * sigs2 ;
         @views es2 =@. -0.5 * ϵ^2 *invPi;
         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
@@ -846,14 +846,14 @@ function prtlloglikekuhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Ma
       γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
       # δ1 = rho[po.begz]
       gammap = rho[po.beggamma]
-      gamma  = (eigvalu.rymin)/(1+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1+exp(gammap));
+      gamma  = (eigvalu.rymin)/(1.0+exp(gammap))+(eigvalu.rymax)*exp(gammap)/(1.0+exp(gammap));
   
       hi  = exp.(Q*τ)
       σᵤ²= exp(δ2) 
       σᵤ= exp(0.5*δ2) 
       σᵥ² = exp(γ)            # todo: 重新换一下字母 
       σᵥ = exp(0.5*γ)  
-      μ   = 0
+      μ   = 0.0
       ϵ = PorC*(y - x*β)
       T = size(rowIDT,1)
   
@@ -866,11 +866,11 @@ function prtlloglikekuhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Ma
 
       @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));  
       @views lndetIrhoWt = lndetIrhoW*T
-      @views invPi = 1/σᵥ²;
+      @views invPi = 1.0/σᵥ²;
       @views lndetPi = log(σᵥ²);
   
       @views ϵ = ϵ - PorC*gamma*Wyt*y - PorC*(eps*eta) ;
-      @views sigs2 = @.  1 / (hi^2 *invPi + 1 /σᵤ²) ;
+      @views sigs2 = @.  1.0 / (hi^2 *invPi + 1.0 /σᵤ²) ;
       @views mus =@. (μ/σᵤ² - ϵ * hi * invPi) * sigs2 ;
       @views es2 =@. -0.5 * ϵ^2 *invPi;
       @views KK = -0.5*log(2 * π)-0.5*lndetPi;
@@ -896,10 +896,10 @@ function prtlloglikekuhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Ma
       end # for ttt=1:T
       end # begin
       
-      @views invPi = 1/σᵥ²;
+      @views invPi = 1.0/σᵥ²;
       @views lndetPi = log(σᵥ²);
       @views ϵ  =  ϵ-PorC*gamma*Wyt*y  - PorC*(eps*eta) ;
-      @views sigs2 = @.  1 / (hi^2 *invPi + 1 /σᵤ²) ;
+      @views sigs2 = @.  1.0 / (hi^2 *invPi + 1.0 /σᵤ²) ;
       @views mus =@. (μ/σᵤ² - ϵ * hi * invPi) * sigs2 ;
       @views es2 =@. -0.5 * ϵ^2 *invPi;
       @views KK = -0.5*log(2 * π)-0.5*lndetPi;
@@ -956,14 +956,14 @@ function prtlloglikekkhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Ma
   σᵤ= exp(0.5*δ2) 
   σᵥ² = exp(γ)            # todo: 重新换一下字母 
   σᵥ = exp(0.5*γ)  
-  μ   = 0
+  μ   = 0.0
   ϵ = PorC*(y - x*β)
   ID = size(rowIDT,1)
 
 
   lik = zero(eltype(y));
   @views N = rowIDT[1,2];
-  @views invPi = 1/σᵥ²;
+  @views invPi = 1.0/σᵥ²;
   @views lndetPi = N*log(σᵥ²);
   @floop begin
   @inbounds  for iidd=1:ID  
@@ -1033,7 +1033,7 @@ function prtlloglikekkte( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Ma
 
   lik = zero(eltype(y));
   @views N = rowIDT[1,2];
-  @views invPi = 1/σᵥ²;
+  @views invPi = 1.0/σᵥ²;
   @views lndetPi = N*log(σᵥ²);
   @floop begin
   @inbounds  for iidd=1:ID  
@@ -1094,20 +1094,20 @@ eta = rho[pos.begeta:pos.endeta]
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 # δ1 = rho[pos.begz]
 gammap = rho[pos.beggamma]
-gamma  = eigvalu.rymin/(1+exp(gammap))+eigvalu.rymax*exp(gammap)/(1+exp(gammap));
+gamma  = eigvalu.rymin/(1.0+exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0+exp(gammap));
 
 taup = rho[pos.begtau]
-tau  = eigvalu.rumin/(1+exp(taup))+eigvalu.rumax*exp(taup)/(1+exp(taup));
+tau  = eigvalu.rumin/(1.0+exp(taup))+eigvalu.rumax*exp(taup)/(1.0+exp(taup));
 
 rhomyp = rho[pos.begrho]
-rhomy  = eigvalu.rvmin/(1+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1+exp(rhomyp));
+rhomy  = eigvalu.rvmin/(1.0+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1.0+exp(rhomyp));
 
 hi  = exp.(Q*τ)
 σᵤ²= exp(δ2) 
 σᵤ= exp(0.5*δ2) 
 σᵥ² = exp(γ)  
 σᵥ = exp(0.5*γ)    
-μ   = 0
+μ   = 0.0
 ϵ = PorC*(y - x * β )
 T = size(rowIDT,1)
 
@@ -1133,8 +1133,8 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
 @inbounds for ttt=1:T 
   @views ind = rowIDT[ttt,1];
   @views hi[ind]= Mtau*hi[ind];
-  @views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind] - PorC.* Mrho*(eps[ind,:]*eta) ;
-  @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+  @views ϵ[ind] = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
+  @views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
   @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
   @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
   @views KK[ttt] = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -1153,8 +1153,8 @@ elseif length(Wy)>1
 
 @views ind = rowIDT[ttt,1];
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] - PorC.* Mrho*(eps[ind,:]*eta) ;
-@views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+@views ϵ[ind] = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
+@views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
 @views KK[ttt] = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi; 
@@ -1186,17 +1186,17 @@ eta = rho[pos.begeta:pos.endeta]
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 # δ1 = rho[pos.begz]
 gammap = rho[pos.beggamma]
-gamma  = eigvalu.rymin/(1+exp(gammap))+eigvalu.rymax*exp(gammap)/(1+exp(gammap));
+gamma  = eigvalu.rymin/(1.0+exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0+exp(gammap));
 
 taup = rho[pos.begtau]
-tau  = eigvalu.rumin/(1+exp(taup))+eigvalu.rumax*exp(taup)/(1+exp(taup));
+tau  = eigvalu.rumin/(1.0+exp(taup))+eigvalu.rumax*exp(taup)/(1.0+exp(taup));
 
 hi  = exp.(Q*τ)
 σᵤ²= exp(δ2) 
 σᵤ= exp(0.5*δ2) 
 σᵥ² = exp(γ)  
 σᵥ = exp(0.5*γ)    
-μ   = 0
+μ   = 0.0
 ϵ = PorC*(y - x * β )
 T = size(rowIDT,1)
 
@@ -1210,15 +1210,15 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
 @views N = rowIDT[1,2];
 @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));   
 @views Mtau = (I(N)-tau*Wu[1])\I(N);
-@views invPi = 1/σᵥ²*I(N);
+@views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
 
 @floop begin
 @inbounds for ttt=1:T 
   @views ind = rowIDT[ttt,1];
   @views hi[ind]= Mtau*hi[ind];
-  @views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind]  ;
-  @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+  @views ϵ[ind] = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] - PorC* Mrho*(eps[ind,:]*eta)  ;
+  @views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
   @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
   @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
   @views KK[ttt] = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -1230,13 +1230,13 @@ elseif length(Wy)>1
 @views N = rowIDT[1,2];
 @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
 @views Mtau = (I(N)-tau*Wu[ttt])\I(N);
-@views invPi = 1/σᵥ²*I(N);
+@views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
 
 @views ind = rowIDT[ttt,1];
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind]  ;
-@views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+@views ϵ[ind] = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] - PorC* Mrho*(eps[ind,:]*eta)  ;
+@views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
 @views KK[ttt] = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi; 
@@ -1271,17 +1271,17 @@ eta = rho[pos.begeta:pos.endeta]
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 # δ1 = rho[pos.begz]
 gammap = rho[pos.beggamma]
-gamma  = eigvalu.rymin/(1+exp(gammap))+eigvalu.rymax*exp(gammap)/(1+exp(gammap));
+gamma  = eigvalu.rymin/(1.0+exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0+exp(gammap));
 
 rhomyp = rho[pos.begrho]
-rhomy  = eigvalu.rvmin/(1+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1+exp(rhomyp));
+rhomy  = eigvalu.rvmin/(1.0+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1.0+exp(rhomyp));
 
 hi  = exp.(Q*τ)
 σᵤ²= exp(δ2) 
 σᵤ= exp(0.5*δ2) 
 σᵥ² = exp(γ)  
 σᵥ = exp(0.5*γ)    
-μ   = 0
+μ   = 0.0
 ϵ = PorC*(y - x * β )
 T = size(rowIDT,1)
 
@@ -1294,7 +1294,7 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
 
 @views N = rowIDT[1,2];
 @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));   
-@views Mtau = 1 ;
+@views Mtau = 1.0 ;
 @views Mrho =  (I(N)-rhomy*Wv[1])\I(N);
 @views Pi = σᵥ²*(Mrho*Mrho');
 @views lndetPi = log(det(Pi));
@@ -1307,8 +1307,8 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
 @inbounds for ttt=1:T 
   @views ind = rowIDT[ttt,1];
   @views hi[ind]= Mtau*hi[ind];
-  @views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind] - PorC.* Mrho*(eps[ind,:]*eta) ;
-  @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+  @views ϵ[ind] = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
+  @views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
   @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
   @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
   @views KK[ttt] = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -1319,7 +1319,7 @@ elseif length(Wy)>1
 @inbounds for ttt=1:T  
 @views N = rowIDT[1,2];
 @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
-@views Mtau = 1;
+@views Mtau = 1.0;
 @views Mrho =  (I(N)-rhomy*Wv[ttt])\I(N);
 @views Pi = σᵥ²*(Mrho*Mrho');
 @views lndetPi = log(det(Pi));
@@ -1327,8 +1327,8 @@ elseif length(Wy)>1
 
 @views ind = rowIDT[ttt,1];
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind] - PorC.* Mrho*(eps[ind,:]*eta) ;
-@views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+@views ϵ[ind] = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
+@views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
 @views KK[ttt] = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi; 
@@ -1364,7 +1364,7 @@ eta = rho[pos.begeta:pos.endeta]
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 # δ1 = rho[pos.begz]
 gammap = rho[pos.beggamma]
-gamma  = eigvalu.rymin/(1+exp(gammap))+eigvalu.rymax*exp(gammap)/(1+exp(gammap));
+gamma  = eigvalu.rymin/(1.0+exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0+exp(gammap));
 
 
 hi  = exp.(Q*τ)
@@ -1372,7 +1372,7 @@ hi  = exp.(Q*τ)
 σᵤ= exp(0.5*δ2) 
 σᵥ² = exp(γ)  
 σᵥ = exp(0.5*γ)    
-μ   = 0
+μ   = 0.0
 ϵ = PorC*(y - x * β )
 T = size(rowIDT,1)
 
@@ -1385,8 +1385,8 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
 
 @views N = rowIDT[1,2];
 @views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));   
-@views Mtau = 1;
-@views invPi = 1/σᵥ²*I(N);
+@views Mtau = 1.0;
+@views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
 
 #   @views Mgamma = (I(N)-gamma*Wy[1])\I(N)
@@ -1396,8 +1396,8 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
 @inbounds for ttt=1:T 
   @views ind = rowIDT[ttt,1];
   @views hi[ind]= Mtau*hi[ind];
-  @views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[1]*y[ind]  ;
-  @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+  @views ϵ[ind] = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] - PorC* Mrho*(eps[ind,:]*eta)  ;
+  @views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
   @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
   @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
   @views KK[ttt] = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
@@ -1408,14 +1408,14 @@ elseif length(Wy)>1
 @inbounds for ttt=1:T  
 @views N = rowIDT[1,2];
 @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
-@views Mtau = 1;
-@views invPi = 1/σᵥ²*I(N);
+@views Mtau = 1.0;
+@views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
 
 @views ind = rowIDT[ttt,1];
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind]-PorC.*gamma*Wy[ttt]*y[ind]  ;
-@views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+@views ϵ[ind] = ϵ[ind]-PorC*gamma*Wy[ttt]*y[ind] - PorC* Mrho*(eps[ind,:]*eta)  ;
+@views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
 @views KK[ttt] = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi; 
@@ -1452,17 +1452,17 @@ eta = rho[pos.begeta:pos.endeta]
 
 
 taup = rho[pos.begtau]
-tau  = eigvalu.rumin/(1+exp(taup))+eigvalu.rumax*exp(taup)/(1+exp(taup));
+tau  = eigvalu.rumin/(1.0+exp(taup))+eigvalu.rumax*exp(taup)/(1.0+exp(taup));
 
 rhomyp = rho[pos.begrho]
-rhomy  = eigvalu.rvmin/(1+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1+exp(rhomyp));
+rhomy  = eigvalu.rvmin/(1.0+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1.0+exp(rhomyp));
 
 hi  = exp.(Q*τ)
 σᵤ²= exp(δ2) 
 σᵤ= exp(0.5*δ2) 
 σᵥ² = exp(γ)  
 σᵥ = exp(0.5*γ)    
-μ   = 0
+μ   = 0.0
 ϵ = PorC*(y - x * β )
 T = size(rowIDT,1)
 
@@ -1484,8 +1484,8 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
 @inbounds for ttt=1:T 
   @views ind = rowIDT[ttt,1];
   @views hi[ind]= Mtau*hi[ind];
-  @views ϵ[ind] = ϵ[ind]- PorC.* Mrho*(eps[ind,:]*eta) ;
-  @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+  @views ϵ[ind] = ϵ[ind]- PorC* Mrho*(eps[ind,:]*eta) ;
+  @views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
   @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
   @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
   @views KK[ttt] = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -1503,8 +1503,8 @@ elseif length(Wy)>1
 
 @views ind = rowIDT[ttt,1];
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind] - PorC.* Mrho*(eps[ind,:]*eta) ;
-@views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+@views ϵ[ind] = ϵ[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
+@views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
 @views KK[ttt] = -0.5*N*log(2 * π)-0.5*lndetPi; 
@@ -1544,7 +1544,7 @@ eta = rho[pos.begeta:pos.endeta]
 
 
 taup = rho[pos.begtau]
-tau  = eigvalu.rumin/(1+exp(taup))+eigvalu.rumax*exp(taup)/(1+exp(taup));
+tau  = eigvalu.rumin/(1.0+exp(taup))+eigvalu.rumax*exp(taup)/(1.0+exp(taup));
 
 
 hi  = exp.(Q*τ)
@@ -1552,7 +1552,7 @@ hi  = exp.(Q*τ)
 σᵤ= exp(0.5*δ2) 
 σᵥ² = exp(γ)  
 σᵥ = exp(0.5*γ)    
-μ   = 0
+μ   = 0.0
 ϵ = PorC*(y - x * β )
 T = size(rowIDT,1)
 
@@ -1565,7 +1565,7 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
 
 @views N = rowIDT[1,2];
 @views Mtau = (I(N)-tau*Wu[1])\I(N);
-@views invPi = 1/σᵥ²*I(N);
+@views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
 
 
@@ -1573,8 +1573,8 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
 @inbounds for ttt=1:T 
  @views ind = rowIDT[ttt,1];
  @views hi[ind]= Mtau*hi[ind];
- @views ϵ[ind] = ϵ[ind];
- @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+ @views ϵ[ind] = ϵ[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
+ @views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
  @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
  @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
  @views KK[ttt] = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -1585,13 +1585,13 @@ elseif length(Wy)>1
 @inbounds for ttt=1:T  
 @views N = rowIDT[1,2];
 @views Mtau = (I(N)-tau*Wu[ttt])\I(N);
-@views invPi = 1/σᵥ²*I(N);
+@views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
 
 @views ind = rowIDT[ttt,1];
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind]   ;
-@views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+@views ϵ[ind] = ϵ[ind] - PorC* Mrho*(eps[ind,:]*eta)   ;
+@views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
 @views KK[ttt] = -0.5*N*log(2 * π)-0.5*lndetPi; 
@@ -1629,14 +1629,14 @@ eta = rho[pos.begeta:pos.endeta]
 # δ1 = rho[pos.begz]
 
 rhomyp = rho[pos.begrho]
-rhomy  = eigvalu.rvmin/(1+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1+exp(rhomyp));
+rhomy  = eigvalu.rvmin/(1.0+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1.0+exp(rhomyp));
 
 hi  = exp.(Q*τ)
 σᵤ²= exp(δ2) 
 σᵤ= exp(0.5*δ2) 
 σᵥ² = exp(γ)  
 σᵥ = exp(0.5*γ)    
-μ   = 0
+μ   = 0.0
 ϵ = PorC*(y - x * β )
 T = size(rowIDT,1)
 
@@ -1648,7 +1648,7 @@ KK = zeros(eltype(y),T,1);
 if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
 @views N = rowIDT[1,2];
-@views Mtau = 1 ;
+@views Mtau = 1.0 ;
 @views Mrho = (I(N)-rhomy*Wv[1])\I(N);
 @views Pi = σᵥ²*(Mrho*Mrho');
 @views lndetPi = log(det(Pi));
@@ -1658,8 +1658,8 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
 @inbounds for ttt=1:T 
  @views ind = rowIDT[ttt,1];
  @views hi[ind]= Mtau*hi[ind];
- @views ϵ[ind] = ϵ[ind]- PorC.* Mrho*(eps[ind,:]*eta) ;
- @views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+ @views ϵ[ind] = ϵ[ind]- PorC* Mrho*(eps[ind,:]*eta) ;
+ @views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
  @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
  @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
  @views KK[ttt] = -0.5*N*log(2 * π)-0.5*lndetPi;
@@ -1669,7 +1669,7 @@ elseif length(Wy)>1
 @floop begin
 @inbounds for ttt=1:T  
 @views N = rowIDT[1,2];
-@views Mtau = 1;
+@views Mtau = 1.0;
 @views Mrho =  (I(N)-rhomy*Wv[ttt])\I(N);
 @views Pi = σᵥ²*(Mrho*Mrho');
 @views lndetPi = log(det(Pi));
@@ -1677,8 +1677,8 @@ elseif length(Wy)>1
 
 @views ind = rowIDT[ttt,1];
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind] - PorC.* Mrho*(eps[ind,:]*eta) ;
-@views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+@views ϵ[ind] = ϵ[ind] - PorC* Mrho*(eps[ind,:]*eta) ;
+@views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
 @views KK[ttt] = -0.5*N*log(2 * π)-0.5*lndetPi; 
@@ -1721,7 +1721,7 @@ hi  = exp.(Q*τ)
 σᵤ= exp(0.5*δ2) 
 σᵥ² = exp(γ)  
 σᵥ = exp(0.5*γ)    
-μ   = 0
+μ   = 0.0
 ϵ = PorC*(y - x * β )
 T = size(rowIDT,1)
 
@@ -1734,14 +1734,14 @@ KK = zeros(eltype(y),T,1);
 @floop begin
 @inbounds for ttt=1:T  
 @views N = rowIDT[1,2];
-@views Mtau = 1;
-@views invPi = 1/σᵥ²*I(N);
+@views Mtau = 1.0;
+@views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
 
 @views ind = rowIDT[ttt,1];
 @views hi[ind]= Mtau*hi[ind];
-@views ϵ[ind] = ϵ[ind]   ;
-@views sigs2[ttt] = 1 /(hi[ind]'*invPi*hi[ind]+1/σᵤ²);
+@views ϵ[ind] = ϵ[ind] - PorC* Mrho*(eps[ind,:]*eta)  ;
+@views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
 @views KK[ttt] = -0.5*N*log(2 * π)-0.5*lndetPi; 
