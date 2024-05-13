@@ -708,7 +708,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
           sf_init0 = vec(sf_init0)   
        (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
           eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFKKH, sfdat)
-          mfun0 = optimize(rho -> LL_T(SSFKKH, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+          mfun0 = optimize(rho -> LL_T(SSFKKH, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,Wy,Wu,Wv,
                                             _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
                                            sf_init0,         # initial values  
                                            NelderMead(),       # different from search run
@@ -739,7 +739,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
 
        (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
           eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFKKT, sfdat)
-          mfun0 = optimize(rho -> LL_T(SSFKKT, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+          mfun0 = optimize(rho -> LL_T(SSFKKT, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,Wy,Wu,Wv,
                                             _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
                                            sf_init0,         # initial values  
                                            NelderMead(),       # different from search run
@@ -774,12 +774,12 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                       
                     (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
                        eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAH, sfdat)
-                       mfun0 = optimize(rho -> LL_T(SSFOAH, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0,  envar0, ivvar0,
+                       mfun0 = optimize(rho -> LL_T(SSFOAH, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0,  envar0, ivvar0, Wy,Wu,Wv,
                                                               _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 1000, # different from search run
+                                                        iterations  = 100, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -803,12 +803,12 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
           
                     (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
                        eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAH, sfdat)
-                       mfun0 = optimize(rho -> LL_T(SSFOAH, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       mfun0 = optimize(rho -> LL_T(SSFOAH, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,Wy,Wu,Wv,
                                                               _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 1000, # different from search run
+                                                        iterations  = 100, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -832,12 +832,12 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
           
                     (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
                        eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAH, sfdat)
-                       mfun0 = optimize(rho -> LL_T(SSFOAH, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       mfun0 = optimize(rho -> LL_T(SSFOAH, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,Wy,Wu,Wv,
                                                               _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 1000, # different from search run
+                                                        iterations  = 100, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -859,12 +859,12 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
           
                     (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
                        eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAH, sfdat)
-                       mfun0 = optimize(rho -> LL_T(SSFOAH, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       mfun0 = optimize(rho -> LL_T(SSFOAH, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,Wy,Wu,Wv,
                                                               _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 1000, # different from search run
+                                                        iterations  = 100, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -890,12 +890,12 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
           
                     (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
                        eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAH, sfdat)
-                       mfun0 = optimize(rho -> LL_T(SSFOAH, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       mfun0 = optimize(rho -> LL_T(SSFOAH, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,Wy,Wu,Wv,
                                                               _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 1000, # different from search run
+                                                        iterations  = 100, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -918,12 +918,12 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
           
                     (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
                        eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAH, sfdat)
-                       mfun0 = optimize(rho -> LL_T(SSFOAH, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       mfun0 = optimize(rho -> LL_T(SSFOAH, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,Wy,Wu,Wv,
                                                               _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 1000, # different from search run
+                                                        iterations  = 100, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -948,12 +948,12 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                     (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
                        eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAH, sfdat)
                       
-                       mfun0 = optimize(rho -> LL_T(SSFOAH, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       mfun0 = optimize(rho -> LL_T(SSFOAH, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,Wy,Wu,Wv,
                                                               _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 1000, # different from search run
+                                                        iterations  = 100, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -975,12 +975,12 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                           
                     (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
                        eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAH, sfdat)
-                       mfun0 = optimize(rho -> LL_T(SSFOAH, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       mfun0 = optimize(rho -> LL_T(SSFOAH, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,Wy,Wu,Wv,
                                                               _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 1000, # different from search run
+                                                        iterations  = 100, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -1007,12 +1007,12 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                     (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
                        eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAT, sfdat) 
   
-                       mfun0 = optimize(rho -> LL_T(SSFOAT, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0,  envar0, ivvar0, 
+                       mfun0 = optimize(rho -> LL_T(SSFOAT, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0,  envar0, ivvar0,Wy,Wu,Wv,
                                                               _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 1000, # different from search run
+                                                        iterations  = 100, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -1037,12 +1037,12 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
           
                     (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
                        eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAT, sfdat)
-                       mfun0 = optimize(rho -> LL_T(SSFOAT, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       mfun0 = optimize(rho -> LL_T(SSFOAT, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,Wy,Wu,Wv,
                                                               _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 1000, # different from search run
+                                                        iterations  = 100, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -1067,12 +1067,12 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
           
                     (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
                        eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAT, sfdat)
-                       mfun0 = optimize(rho -> LL_T(SSFOAT, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       mfun0 = optimize(rho -> LL_T(SSFOAT, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,Wy,Wu,Wv,
                                                               _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 1000, # different from search run
+                                                        iterations  = 100, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -1095,12 +1095,12 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
           
                     (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
                        eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAT, sfdat)
-                       mfun0 = optimize(rho -> LL_T(SSFOAT, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       mfun0 = optimize(rho -> LL_T(SSFOAT, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,Wy,Wu,Wv,
                                                               _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 1000, # different from search run
+                                                        iterations  = 100, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -1127,12 +1127,12 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
           
                     (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0, 
                        eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAT, sfdat)
-                       mfun0 = optimize(rho -> LL_T(SSFOAT, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       mfun0 = optimize(rho -> LL_T(SSFOAT, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,Wy,Wu,Wv,
                                                               _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 1000, # different from search run
+                                                        iterations  = 100, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -1156,12 +1156,12 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
           
                     (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
                        eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAT, sfdat)
-                       mfun0 = optimize(rho -> LL_T(SSFOAT, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       mfun0 = optimize(rho -> LL_T(SSFOAT, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,Wy,Wu,Wv,
                                                               _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 1000, # different from search run
+                                                        iterations  = 100, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -1187,12 +1187,12 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                     (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
                        eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAT, sfdat)
                       
-                       mfun0 = optimize(rho -> LL_T(SSFOAT, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       mfun0 = optimize(rho -> LL_T(SSFOAT, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,Wy,Wu,Wv,
                                                               _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 1000, # different from search run
+                                                        iterations  = 100, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -1215,12 +1215,12 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                           
                     (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0,  qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
                        eigvalu0, indices_list0, rowIDT0, varlist0) = getvar(SSFOAT, sfdat)
-                       mfun0 = optimize(rho -> LL_T(SSFOAT, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
+                       mfun0 = optimize(rho -> LL_T(SSFOAT, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,Wy,Wu,Wv,
                                                               _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
                                                         sf_init0,         # initial values  
                                                         NelderMead(),       # different from search run
                                                         Optim.Options(g_tol = 1.0e-6,
-                                                        iterations  = 1000, # different from search run
+                                                        iterations  = 100, # different from search run
                                                         store_trace = false,
                                                         show_trace  = false))
   
@@ -1275,7 +1275,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
   #* ----- Define the problem's Hessian -----#
 
    _Hessian = TwiceDifferentiable(rho -> LL_T(tagD[:modelid], 
-                         yvar, xvar, qvar, wvar, vvar, zvar, envar, ivvar,
+                         yvar, xvar, qvar, wvar, vvar, zvar, envar, ivvar,Wy,Wu,Wv,
                             _porc, num, pos, rho,
                               eigvalu,   rowIDT, _dicM[:misc]),
                    sf_init;               
@@ -1398,7 +1398,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
   #                             eigvalu,   rowIDT, _dicM[:misc]), _coevec)
   # numerical_hessian = ForwardDiff.hessian(rho -> LL_T(tagD[:modelid], 
   #                        yvar, xvar, qvar, wvar, vvar, zvar, envar, ivvar,
-  #                          _porc, num, pos, rho,
+  #                          Wy,Wu,Wv,_porc, num, pos, rho,
   #                             eigvalu,   rowIDT, _dicM[:misc]), _coevec)
 
   # numerical_hessian  = hessian!(_Hessian, _coevec)  # Hessain
@@ -1410,7 +1410,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                           pinv(numerical_hessian)
                         catch err 
                           numerical_hessian = Calculus.hessian(rho -> LL_T(tagD[:modelid], 
-                                              yvar, xvar, qvar, wvar, vvar, zvar, envar, ivvar,
+                                              yvar, xvar, qvar, wvar, vvar, zvar, envar, ivvar,Wy,Wu,Wv,
                                                 _porc, num, pos, rho,
                                                     eigvalu,   rowIDT, _dicM[:misc]), _coevec)
 
@@ -1425,7 +1425,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
     else
 
       numerical_hessian = Calculus.hessian(rho -> LL_T(tagD[:modelid], 
-                            yvar, xvar, qvar, wvar, vvar, zvar, envar, ivvar,
+                            yvar, xvar, qvar, wvar, vvar, zvar, envar, ivvar,Wy,Wu,Wv,
                               _porc, num, pos, rho,
                                   eigvalu,   rowIDT, _dicM[:misc]), _coevec)
       var_cov_matrix =  try
@@ -1576,8 +1576,8 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
   if tagD[:modelid] in (SSFOADT,SSFOADH,SSFKUEH,SSFKUET,SSFKKEH,SSFKKET)
     llkkkk = -1* prtlloglike(tagD[:modelid], yvar, xvar,  qvar, wvar, vvar,  zvar, envar, ivvar, _porc, num, pos, _coevec,  eigvalu, rowIDT)
     stas[3,3] = llkkkk
-    stas[4,3] = (-2)* (llkkkk)+2*num.nofpara
-    stas[5,3] = (-2)* (llkkkk)+log(num.nofobs)*num.nofpara
+    stas[4,3] = (-2)* (llkkkk)+2*(num.nofpara-num.nofphi)
+    stas[5,3] = (-2)* (llkkkk)+log(num.nofobs)*(num.nofpara-num.nofphi)
   else
     stas[3,3] = -Optim.minimum(mfun)
     stas[4,3] = (-2)* (-Optim.minimum(mfun))+2*num.nofpara
@@ -1993,7 +1993,7 @@ function sfmodel_boot_marginal(; result::Any=nothing,  data::Any=nothing,
   #* ----- Define the problem's Hessian -----#
 
    _Hessian = TwiceDifferentiable(rho -> SFrontiers.LL_T(result.modelid, 
-                         yvar, xvar, zvar, qvar, wvar, vvar, 
+                         yvar, xvar, zvar, qvar, wvar, vvar, Wy,Wu,Wv,
                          _porc, nofobs1, pos, rho,
                                  rowIDT, mymisc),
                           sf_init;               

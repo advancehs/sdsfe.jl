@@ -14,13 +14,13 @@ function  jlmsbct_yuv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, 
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 δ1 = rho[pos.begz]
 gammap = rho[pos.beggamma]
-gamma  = eigvalu.rymin/(1.0+exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0+exp(gammap));
+gamma  = eigvalu.rymin/(1.0 +exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0 +exp(gammap));
 
 taup = rho[pos.begtau]
-tau  = eigvalu.rumin/(1.0+exp(taup))+eigvalu.rumax*exp(taup)/(1.0+exp(taup));
+tau  = eigvalu.rumin/(1.0 +exp(taup))+eigvalu.rumax*exp(taup)/(1.0 +exp(taup));
 
 rhomyp = rho[pos.begrho]
-rhomy  = eigvalu.rvmin/(1.0+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1.0+exp(rhomyp));
+rhomy  = eigvalu.rvmin/(1.0 +exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1.0 +exp(rhomyp));
 
 hi  = exp.(Q*τ)
 σᵤ²= exp(δ2) 
@@ -96,10 +96,10 @@ function  jlmsbct_yu(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 δ1 = rho[pos.begz]
 gammap = rho[pos.beggamma]
-gamma  = eigvalu.rymin/(1.0+exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0+exp(gammap));
+gamma  = eigvalu.rymin/(1.0 +exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0 +exp(gammap));
 
 taup = rho[pos.begtau]
-tau  = eigvalu.rumin/(1.0+exp(taup))+eigvalu.rumax*exp(taup)/(1.0+exp(taup));
+tau  = eigvalu.rumin/(1.0 +exp(taup))+eigvalu.rumax*exp(taup)/(1.0 +exp(taup));
 
 hi  = exp.(Q*τ)
 σᵤ²= exp(δ2) 
@@ -174,10 +174,10 @@ function  jlmsbct_yv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 δ1 = rho[pos.begz]
 gammap = rho[pos.beggamma]
-gamma  = eigvalu.rymin/(1.0+exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0+exp(gammap));
+gamma  = eigvalu.rymin/(1.0 +exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0 +exp(gammap));
 
 rhomyp = rho[pos.begrho]
-rhomy  = eigvalu.rvmin/(1.0+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1.0+exp(rhomyp));
+rhomy  = eigvalu.rvmin/(1.0 +exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1.0 +exp(rhomyp));
 
 hi  = exp.(Q*τ)
 σᵤ²= exp(δ2) 
@@ -256,7 +256,7 @@ function  jlmsbct_y(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v:
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 δ1 = rho[pos.begz]
 gammap = rho[pos.beggamma]
-gamma  = eigvalu.rymin/(1.0+exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0+exp(gammap));
+gamma  = eigvalu.rymin/(1.0 +exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0 +exp(gammap));
 
 hi  = exp.(Q*τ)
 σᵤ²= exp(δ2) 
@@ -331,10 +331,10 @@ function  jlmsbct_uv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v
 δ1 = rho[pos.begz]
 
 taup = rho[pos.begtau]
-tau  = eigvalu.rumin/(1.0+exp(taup))+eigvalu.rumax*exp(taup)/(1.0+exp(taup));
+tau  = eigvalu.rumin/(1.0 +exp(taup))+eigvalu.rumax*exp(taup)/(1.0 +exp(taup));
 
 rhomyp = rho[pos.begrho]
-rhomy  = eigvalu.rvmin/(1.0+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1.0+exp(rhomyp));
+rhomy  = eigvalu.rvmin/(1.0 +exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1.0 +exp(rhomyp));
 
 hi  = exp.(Q*τ)
 σᵤ²= exp(δ2) 
@@ -411,7 +411,7 @@ function  jlmsbct_u(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v:
 δ1 = rho[pos.begz]
 
 taup = rho[pos.begtau]
-tau  = eigvalu.rumin/(1.0+exp(taup))+eigvalu.rumax*exp(taup)/(1.0+exp(taup));
+tau  = eigvalu.rumin/(1.0 +exp(taup))+eigvalu.rumax*exp(taup)/(1.0 +exp(taup));
 
 
 hi  = exp.(Q*τ)
@@ -485,7 +485,7 @@ function  jlmsbct_v(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v:
 
 
 rhomyp = rho[pos.begrho]
-rhomy  = eigvalu.rvmin/(1.0+exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1.0+exp(rhomyp));
+rhomy  = eigvalu.rvmin/(1.0 +exp(rhomyp))+eigvalu.rvmax*exp(rhomyp)/(1.0 +exp(rhomyp));
 
 hi  = exp.(Q*τ)
 σᵤ²= exp(δ2) 
@@ -750,10 +750,10 @@ eta = rho[pos.begeta:pos.endeta]
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 δ1 = rho[pos.begz]
 gammap = rho[pos.beggamma]
-gamma  = eigvalu.rymin/(1.0+exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0+exp(gammap));
+gamma  = eigvalu.rymin/(1.0 +exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0 +exp(gammap));
 
 taup = rho[pos.begtau]
-tau  = eigvalu.rumin/(1.0+exp(taup))+eigvalu.rumax*exp(taup)/(1.0+exp(taup));
+tau  = eigvalu.rumin/(1.0 +exp(taup))+eigvalu.rumax*exp(taup)/(1.0 +exp(taup));
 
 
 hi  = exp.(Q*τ)

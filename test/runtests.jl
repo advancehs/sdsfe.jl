@@ -49,7 +49,7 @@ Wx[1]= W;
 #                     @σᵤ²(_cons),
 #                     @σᵥ²(_cons), message = true);             
                     
-sfmodel_spec(sfpanel(SSF_KUE2020),sftype(prod), sfdist(half), wy(Wx), #wx(Wx),
+sfmodel_spec(sfpanel(SSF_KKE2017),sftype(prod), sfdist(half), wy(Wx), #wx(Wx),
                     @timevar(t), @idvar(id),
                     @depvar(y),
                     @frontier(noconstant,z1,qf),
