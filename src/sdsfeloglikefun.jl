@@ -73,7 +73,7 @@ try
                                 0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                                 0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                 if simple_check(temp)
-                    lik += -1e99
+                    lik += -1e9
                 else
                     lik += temp
                 end # simple_check(temp)
@@ -108,7 +108,7 @@ elseif length(Wy)>1
                         0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
         
     if simple_check(temp)
-        lik += -1e99
+        lik += -1e9
     else
         lik += temp
     end # simple_check(temp)
@@ -184,7 +184,7 @@ try
                                 0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                                 0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                 if simple_check(temp)
-                    lik += -1e99
+                    lik += -1e9
                 else
                     lik += temp
                 end # simple_check(temp)
@@ -219,7 +219,7 @@ elseif length(Wy)>1
                         0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
         
     if simple_check(temp)
-        lik += -1e99
+        lik += -1e9
     else
         lik += temp
     end # simple_check(temp)
@@ -293,7 +293,7 @@ try
                                 0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                                 0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                 if simple_check(temp)
-                    lik += -1e99
+                    lik += -1e9
                 else
                     lik += temp
                 end # simple_check(temp)
@@ -324,7 +324,7 @@ elseif length(Wy)>1
                         0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
         
     if simple_check(temp)
-        lik += -1e99
+        lik += -1e9
     else
         lik += temp
     end # simple_check(temp)
@@ -391,7 +391,7 @@ try
                                 0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                 
                 if simple_check(temp)
-                    lik += -1e99
+                    lik += -1e9
                 else
                     lik += temp
                 end # simple_check(temp)
@@ -422,7 +422,7 @@ elseif length(Wy)>1
                         0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
         
     if simple_check(temp)
-        lik += -1e99
+        lik += -1e9
     else
         lik += temp
     end # simple_check(temp)
@@ -497,7 +497,7 @@ try
                                 0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                                 0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                 if simple_check(temp)
-                    lik += -1e99
+                    lik += -1e9
                 else
                     lik += temp
                 end # simple_check(temp)
@@ -531,7 +531,7 @@ elseif length(Wu)>1
                         0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
         
     if simple_check(temp)
-        lik += -1e99
+        lik += -1e9
     else
         lik += temp
     end # simple_check(temp)
@@ -604,7 +604,7 @@ try
                                 0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                                 0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                 if simple_check(temp)
-                    lik += -1e99
+                    lik += -1e9
                 else
                     lik += temp
                 end # simple_check(temp)
@@ -637,7 +637,7 @@ elseif length(Wu)>1
                         0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
         
     if simple_check(temp)
-        lik += -1e99
+        lik += -1e9
     else
         lik += temp
     end # simple_check(temp)
@@ -713,7 +713,7 @@ try
                                 0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                                 0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                 if simple_check(temp)
-                    lik += -1e99
+                    lik += -1e9
                 else
                     lik += temp
                 end # simple_check(temp)
@@ -747,7 +747,7 @@ elseif length(Wv)>1
                         0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
         
     if simple_check(temp)
-        lik += -1e99
+        lik += -1e9
     else
         lik += temp
     end # simple_check(temp)
@@ -812,7 +812,7 @@ try
                                 0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                                 0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                 if simple_check(temp)
-                    lik += -1e99
+                    lik += -1e9
                 else
                     lik += temp
                 end # simple_check(temp)
@@ -857,7 +857,7 @@ try
 @inbounds for iitt =1:num.nofobs
          tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
             if simple_check(tempx)
-                likx += -1e99
+                likx += -1e9
             else
                 likx += tempx
             end # simple_check(tempx)
@@ -914,7 +914,7 @@ end # @floop begin
                             0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                             0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                     if simple_check(temp)
-                        lik += -1e99
+                        lik += -1e9
                     else
                         lik += temp
                     end # simple_check(temp)
@@ -949,7 +949,7 @@ elseif length(Wy)>1
                     0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
         
         if simple_check(temp)
-            lik += -1e99
+            lik += -1e9
         else
             lik += temp
         end # simple_check(temp)
@@ -995,7 +995,7 @@ try
 @inbounds for iitt =1:num.nofobs
          tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
             if simple_check(tempx)
-                likx += -1e99
+                likx += -1e9
             else
                 likx += tempx
             end # simple_check(tempx)
@@ -1048,7 +1048,7 @@ end # @floop begin
                             0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                             0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                     if simple_check(temp)
-                        lik += -1e99
+                        lik += -1e9
                     else
                         lik += temp
                     end # simple_check(temp)
@@ -1083,7 +1083,7 @@ elseif length(Wy)>1
                     0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
         
         if simple_check(temp)
-            lik += -1e99
+            lik += -1e9
         else
             lik += temp
         end # simple_check(temp)
@@ -1129,7 +1129,7 @@ try
 @inbounds for iitt =1:num.nofobs
          tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
             if simple_check(tempx)
-                likx += -1e99
+                likx += -1e9
             else
                 likx += tempx
             end # simple_check(tempx)
@@ -1182,7 +1182,7 @@ end # @floop begin
                             0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                             0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                     if simple_check(temp)
-                        lik += -1e99
+                        lik += -1e9
                     else
                         lik += temp
                     end # simple_check(temp)
@@ -1215,7 +1215,7 @@ elseif length(Wy)>1
                     0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
         
         if simple_check(temp)
-            lik += -1e99
+            lik += -1e9
         else
             lik += temp
         end # simple_check(temp)
@@ -1263,7 +1263,7 @@ try
 @inbounds for iitt =1:num.nofobs
          tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
             if simple_check(tempx)
-                likx += -1e99
+                likx += -1e9
             else
                 likx += tempx
             end # simple_check(tempx)
@@ -1311,7 +1311,7 @@ end # @floop begin
                             0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                             0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                     if simple_check(temp)
-                        lik += -1e99
+                        lik += -1e9
                     else
                         lik += temp
                     end # simple_check(temp)
@@ -1344,7 +1344,7 @@ elseif length(Wy)>1
                     0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
         
         if simple_check(temp)
-            lik += -1e99
+            lik += -1e9
         else
             lik += temp
         end # simple_check(temp)
@@ -1392,7 +1392,7 @@ try
 @inbounds for iitt =1:num.nofobs
          tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
             if simple_check(tempx)
-                likx += -1e99
+                likx += -1e9
             else
                 likx += tempx
             end # simple_check(tempx)
@@ -1444,7 +1444,7 @@ end # @floop begin
                     0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                     0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
             if simple_check(temp)
-                lik += -1e99
+                lik += -1e9
             else
                 lik += temp
             end # simple_check(temp)
@@ -1478,7 +1478,7 @@ elseif length(Wu)>1
                     0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
         
         if simple_check(temp)
-            lik += -1e99
+            lik += -1e9
         else
             lik += temp
         end # simple_check(temp)
@@ -1528,7 +1528,7 @@ try
 @inbounds for iitt =1:num.nofobs
          tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
             if simple_check(tempx)
-                likx += -1e99
+                likx += -1e9
             else
                 likx += tempx
             end # simple_check(tempx)
@@ -1576,7 +1576,7 @@ end # @floop begin
                             0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                             0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                     if simple_check(temp)
-                        lik += -1e99
+                        lik += -1e9
                     else
                         lik += temp
                     end # simple_check(temp)
@@ -1608,7 +1608,7 @@ elseif length(Wu)>1
                     0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
         
         if simple_check(temp)
-            lik += -1e99
+            lik += -1e9
         else
             lik += temp
         end # simple_check(temp)
@@ -1658,7 +1658,7 @@ try
 @inbounds for iitt =1:num.nofobs
          tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
             if simple_check(tempx)
-                likx += -1e99
+                likx += -1e9
             else
                 likx += tempx
             end # simple_check(tempx)
@@ -1707,7 +1707,7 @@ end # @floop begin
                             0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                             0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                     if simple_check(temp)
-                        lik += -1e99
+                        lik += -1e9
                     else
                         lik += temp
                     end # simple_check(temp)
@@ -1741,7 +1741,7 @@ elseif length(Wv)>1
                     0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
         
         if simple_check(temp)
-            lik += -1e99
+            lik += -1e9
         else
             lik += temp
         end # simple_check(temp)
@@ -1788,7 +1788,7 @@ try
 @inbounds for iitt =1:num.nofobs
          tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
             if simple_check(tempx)
-                likx += -1e99
+                likx += -1e9
             else
                 likx += tempx
             end # simple_check(tempx)
@@ -1832,7 +1832,7 @@ end # @floop begin
                             0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                             0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                     if simple_check(temp)
-                        lik += -1e99
+                        lik += -1e9
                     else
                         lik += temp
                     end # simple_check(temp)
@@ -1949,7 +1949,7 @@ function ssdoat_yuv( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,
                                 0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                                 0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                 if simple_check(temp)
-                    lik += -1e99
+                    lik += -1e9
                 else
                     lik += temp
                 end # simple_check(temp)
@@ -1984,7 +1984,7 @@ elseif length(Wy)>1
                         0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
         
     if simple_check(temp)
-        lik += -1e99
+        lik += -1e9
     else
         lik += temp
     end # simple_check(temp)
@@ -2062,7 +2062,7 @@ try
                                 0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                                 0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                 if simple_check(temp)
-                    lik += -1e99
+                    lik += -1e9
                 else
                     lik += temp
                 end # simple_check(temp)
@@ -2097,7 +2097,7 @@ elseif length(Wy)>1
                         0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
         
     if simple_check(temp)
-        lik += -1e99
+        lik += -1e9
     else
         lik += temp
     end # simple_check(temp)
@@ -2173,7 +2173,7 @@ try
                                 0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                                 0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                 if simple_check(temp)
-                    lik += -1e99
+                    lik += -1e9
                 else
                     lik += temp
                 end # simple_check(temp)
@@ -2204,7 +2204,7 @@ elseif length(Wy)>1
                         0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
         
     if simple_check(temp)
-        lik += -1e99
+        lik += -1e9
     else
         lik += temp
     end # simple_check(temp)
@@ -2273,7 +2273,7 @@ try
                                 0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                 
                 if simple_check(temp)
-                    lik += -1e99
+                    lik += -1e9
                 else
                     lik += temp
                 end # simple_check(temp)
@@ -2304,7 +2304,7 @@ elseif length(Wy)>1
                         0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
         
     if simple_check(temp)
-        lik += -1e99
+        lik += -1e9
     else
         lik += temp
     end # simple_check(temp)
@@ -2380,7 +2380,7 @@ try
                                 0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                                 0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                 if simple_check(temp)
-                    lik += -1e99
+                    lik += -1e9
                 else
                     lik += temp
                 end # simple_check(temp)
@@ -2414,7 +2414,7 @@ elseif length(Wu)>1
                         0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
         
     if simple_check(temp)
-        lik += -1e99
+        lik += -1e9
     else
         lik += temp
     end # simple_check(temp)
@@ -2488,7 +2488,7 @@ try
                                 0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                                 0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                 if simple_check(temp)
-                    lik += -1e99
+                    lik += -1e9
                 else
                     lik += temp
                 end # simple_check(temp)
@@ -2521,7 +2521,7 @@ elseif length(Wu)>1
                         0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
         
     if simple_check(temp)
-        lik += -1e99
+        lik += -1e9
     else
         lik += temp
     end # simple_check(temp)
@@ -2597,7 +2597,7 @@ try
                                 0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                                 0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                 if simple_check(temp)
-                    lik += -1e99
+                    lik += -1e9
                 else
                     lik += temp
                 end # simple_check(temp)
@@ -2631,7 +2631,7 @@ elseif length(Wv)>1
                         0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
         
     if simple_check(temp)
-        lik += -1e99
+        lik += -1e9
     else
         lik += temp
     end # simple_check(temp)
@@ -2697,7 +2697,7 @@ try
                                 0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                                 0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                 if simple_check(temp)
-                    lik += -1e99
+                    lik += -1e9
                 else
                     lik += temp
                 end # simple_check(temp)
@@ -2743,7 +2743,7 @@ try
 @inbounds for iitt =1:num.nofobs
          tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
             if simple_check(tempx)
-                likx += -1e99
+                likx += -1e9
             else
                 likx += tempx
             end # simple_check(tempx)
@@ -2800,7 +2800,7 @@ end # @floop begin
                             0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                             0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                     if simple_check(temp)
-                        lik += -1e99
+                        lik += -1e9
                     else
                         lik += temp
                     end # simple_check(temp)
@@ -2835,7 +2835,7 @@ elseif length(Wy)>1
                     0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
         
         if simple_check(temp)
-            lik += -1e99
+            lik += -1e9
         else
             lik += temp
         end # simple_check(temp)
@@ -2881,7 +2881,7 @@ try
 @inbounds for iitt =1:num.nofobs
          tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
             if simple_check(tempx)
-                likx += -1e99
+                likx += -1e9
             else
                 likx += tempx
             end # simple_check(tempx)
@@ -2934,7 +2934,7 @@ end # @floop begin
                             0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                             0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                     if simple_check(temp)
-                        lik += -1e99
+                        lik += -1e9
                     else
                         lik += temp
                     end # simple_check(temp)
@@ -2969,7 +2969,7 @@ elseif length(Wy)>1
                     0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
         
         if simple_check(temp)
-            lik += -1e99
+            lik += -1e9
         else
             lik += temp
         end # simple_check(temp)
@@ -3015,7 +3015,7 @@ try
 @inbounds for iitt =1:num.nofobs
          tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
             if simple_check(tempx)
-                likx += -1e99
+                likx += -1e9
             else
                 likx += tempx
             end # simple_check(tempx)
@@ -3066,7 +3066,7 @@ end # @floop begin
                             0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                             0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                     if simple_check(temp)
-                        lik += -1e99
+                        lik += -1e9
                     else
                         lik += temp
                     end # simple_check(temp)
@@ -3099,7 +3099,7 @@ elseif length(Wy)>1
                     0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
         
         if simple_check(temp)
-            lik += -1e99
+            lik += -1e9
         else
             lik += temp
         end # simple_check(temp)
@@ -3147,7 +3147,7 @@ try
 @inbounds for iitt =1:num.nofobs
          tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
             if simple_check(tempx)
-                likx += -1e99
+                likx += -1e9
             else
                 likx += tempx
             end # simple_check(tempx)
@@ -3195,7 +3195,7 @@ end # @floop begin
                             0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                             0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                     if simple_check(temp)
-                        lik += -1e99
+                        lik += -1e9
                     else
                         lik += temp
                     end # simple_check(temp)
@@ -3228,7 +3228,7 @@ elseif length(Wy)>1
                     0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
         
         if simple_check(temp)
-            lik += -1e99
+            lik += -1e9
         else
             lik += temp
         end # simple_check(temp)
@@ -3276,7 +3276,7 @@ try
 @inbounds for iitt =1:num.nofobs
          tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
             if simple_check(tempx)
-                likx += -1e99
+                likx += -1e9
             else
                 likx += tempx
             end # simple_check(tempx)
@@ -3328,7 +3328,7 @@ end # @floop begin
                     0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                     0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
             if simple_check(temp)
-                lik += -1e99
+                lik += -1e9
             else
                 lik += temp
             end # simple_check(temp)
@@ -3362,7 +3362,7 @@ elseif length(Wu)>1
                     0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
         
         if simple_check(temp)
-            lik += -1e99
+            lik += -1e9
         else
             lik += temp
         end # simple_check(temp)
@@ -3412,7 +3412,7 @@ try
 @inbounds for iitt =1:num.nofobs
          tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
             if simple_check(tempx)
-                likx += -1e99
+                likx += -1e9
             else
                 likx += tempx
             end # simple_check(tempx)
@@ -3460,7 +3460,7 @@ end # @floop begin
                             0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                             0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                     if simple_check(temp)
-                        lik += -1e99
+                        lik += -1e9
                     else
                         lik += temp
                     end # simple_check(temp)
@@ -3492,7 +3492,7 @@ elseif length(Wu)>1
                     0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
         
         if simple_check(temp)
-            lik += -1e99
+            lik += -1e9
         else
             lik += temp
         end # simple_check(temp)
@@ -3542,7 +3542,7 @@ try
 @inbounds for iitt =1:num.nofobs
          tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
             if simple_check(tempx)
-                likx += -1e99
+                likx += -1e9
             else
                 likx += tempx
             end # simple_check(tempx)
@@ -3591,7 +3591,7 @@ end # @floop begin
                             0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                             0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                     if simple_check(temp)
-                        lik += -1e99
+                        lik += -1e9
                     else
                         lik += temp
                     end # simple_check(temp)
@@ -3625,7 +3625,7 @@ elseif length(Wv)>1
                     0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
         
         if simple_check(temp)
-            lik += -1e99
+            lik += -1e9
         else
             lik += temp
         end # simple_check(temp)
@@ -3672,7 +3672,7 @@ try
 @inbounds for iitt =1:num.nofobs
          tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
             if simple_check(tempx)
-                likx += -1e99
+                likx += -1e9
             else
                 likx += tempx
             end # simple_check(tempx)
@@ -3716,7 +3716,7 @@ end # @floop begin
                             0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                             0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                     if simple_check(temp)
-                        lik += -1e99
+                        lik += -1e9
                     else
                         lik += temp
                     end # simple_check(temp)
@@ -4435,7 +4435,7 @@ function ssdkuh( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
         @views temp_1 = map(x -> x ≠ x ? -1e99  : isinf(x) ? -1e99  : x, temp_1)
         # 计算总和
         @views lik = sum(temp_1)
-        @views lll =  lik.+lndetIrhoWt
+        @views lll =  lik+lndetIrhoWt
 
 
     elseif length(Wy)>1
@@ -4466,7 +4466,7 @@ function ssdkuh( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
         @views temp_1 = map(x -> x ≠ x ? -1e99  : isinf(x) ? -1e99  : x, temp_1)
         # 计算总和
         @views lik = sum(temp_1)
-        @views lll =  lik.+lndetIrhoWt
+        @views lll =  lik+lndetIrhoWt
 
     end # if length(Wy)==1 
         return -lll
@@ -4578,7 +4578,7 @@ function ssdkute( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
         @views temp_1 = map(x -> x ≠ x ? -1e99  : isinf(x) ? -1e99  : x, temp_1)
         # 计算总和
         @views lik = sum(temp_1)
-        @views lll =  lik.+likx.+lndetIrhoWt
+        @views lll =  lik+likx+lndetIrhoWt
 
     elseif length(Wy)>1
         lik = zero(eltype(y));
@@ -4607,7 +4607,7 @@ function ssdkute( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
         @views temp_1 = map(x -> x ≠ x ? -1e99  : isinf(x) ? -1e99  : x, temp_1)
         # 计算总和
         @views lik = sum(temp_1)
-        @views lll =  lik.+likx.+lndetIrhoWt
+        @views lll =  lik+likx+lndetIrhoWt
 
     end # if length(Wy)==1 
 
@@ -4667,7 +4667,7 @@ function ssdkut( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
         @views temp_1 = map(x -> x ≠ x ? -1e99  : isinf(x) ? -1e99  : x, temp_1)
         # 计算总和
         @views lik = sum(temp_1)
-        @views lll = lik.+lndetIrhoWt
+        @views lll = lik+lndetIrhoWt
 
 
     elseif length(Wy)>1
@@ -4698,7 +4698,7 @@ function ssdkut( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
         # 计算总和
         @views lik = sum(temp_1)
 
-        @views lll = lik.+lndetIrhoWt
+        @views lll = lik+lndetIrhoWt
 
     end # if length(Wy)==1 
 

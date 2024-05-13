@@ -1493,7 +1493,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
   stas[:,2:8] .= "";
   stas[1,3] = tuple(_bcM...)  
   stas[2,3] = num.nofobs
-  if tagD[:modelid] in (SSFOADT,SSFOADH,SSFOADH,SSFOADT)
+  if tagD[:modelid] in (SSFOADT,SSFOADH,SSFKUEH,SSFKUET)
     llkkkk = -1* prtlloglike(tagD[:modelid], yvar, xvar,  qvar, wvar, vvar,  zvar, envar, ivvar, _porc, num, pos, _coevec,  eigvalu, rowIDT)
     stas[3,3] = llkkkk
     stas[4,3] = (-2)* (llkkkk)+2*num.nofpara
