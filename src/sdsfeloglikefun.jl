@@ -3740,8 +3740,8 @@ end
 
 
 
-function LL_T(::Type{SSFOADT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, Wy,Wu,Wv,
-    EN::Matrix,IV::Matrix, PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
+function LL_T(::Type{SSFOADT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, 
+    EN::Matrix,IV::Matrix, Wy,Wu,Wv, PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
 
 
 
@@ -3780,8 +3780,8 @@ end
 
 
 
-function LL_T(::Type{SSFOADH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, Wy,Wu,Wv,
-    EN::Matrix,IV::Matrix, PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
+function LL_T(::Type{SSFOADH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,
+    EN::Matrix,IV::Matrix,  Wy,Wu,Wv, PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
 
 
 
@@ -3819,8 +3819,8 @@ end
 
 
 
-# function LL_T(::Type{SSFKUH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, Wy,Wu,Wv,
-#     EN::Matrix,IV::Matrix, PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
+# function LL_T(::Type{SSFKUH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,
+#     EN::Matrix,IV::Matrix,  Wy,Wu,Wv,PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
 
 
 
@@ -3976,8 +3976,8 @@ end
 # end
 
 
-# function LL_T(::Type{SSFKUH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, Wy,Wu,Wv,
-#     EN::Matrix,IV::Matrix, PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
+# function LL_T(::Type{SSFKUH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, 
+#     EN::Matrix,IV::Matrix, Wy,Wu,Wv,PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
 
 
 #   β  = rho[1:po.endx]
