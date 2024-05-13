@@ -413,7 +413,7 @@ function sfmodel_opt(arg::Vararg; message::Bool=false) # create a dictionary of 
   _dicOPT[:banner]           =  true
   _dicOPT[:ineff_index]      =  true
   _dicOPT[:marginal]         =  true
-  if tagD[:modelid] in (SSFOADT,SSFOADH,SSFKUEH,SSFKUET)
+  if tagD[:modelid] in (SSFOAT,SSFOAH,SSFOADT,SSFOADH,SSFKUEH,SSFKUET)
     _dicOPT[:mareffx]          =  true
   elseif tagD[:modelid] in (SSFKKEH,SSFKKET)
     _dicOPT[:mareffx]          =  false
@@ -552,14 +552,14 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
     #* 根据空间权重矩阵的特征值计算初始值
     r0 = 0.3
     ry = (r0 - eigvalu.rymin) / (eigvalu.rymax - eigvalu.rymin)
-    pgammaini = log(ry / (1 - ry))
+    pgammaini = log(ry / (1.0 - ry))
     if Wu!=Nothing 
       ru = (r0 - eigvalu.rumin) / (eigvalu.rumax - eigvalu.rumin)
-      ptauini = log(ru / (1 - ru))
+      ptauini = log(ru / (1.0 - ru))
     end
     if Wv!=Nothing 
       rv = (r0 - eigvalu.rvmin) / (eigvalu.rvmax - eigvalu.rvmin)
-      prhoini = log(rv / (1 - rv))
+      prhoini = log(rv / (1.0 - rv))
     end
     #* --- Create the dictionary -----------
 
@@ -568,7 +568,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
    else
        #*  Create ini vectors from user's values; if none, use the default.--- #      
        b_ini  = get(_dicINI, :frontier, β0)
-       t_ini  = get(_dicINI, :eqq, ones(num.nofq) * 1)
+       t_ini  = get(_dicINI, :eqq, ones(num.nofq) * 1.0)
        d2_ini = get(_dicINI, :eqw, log.(ones(num.nofw) * 0.1))
        g_ini  = get(_dicINI, :eqv, log.(ones(num.nofv) * 0.1))
        d1_ini = get(_dicINI, :eqz, ones(num.nofz) * 0.1)

@@ -468,29 +468,29 @@ ivvar = ()
 
 
 # 获得空间矩阵的特征值
-rymin=rymax=rumin=rumax=rvmin=rvmax=0
+rymin=rymax=rumin=rumax=rvmin=rvmax=0.0
 if  Wy!=Nothing   # yuvx
     dylams = eigen(Wy[1])
-    rymin = 1 / minimum(real(dylams.values))
-    rymax = 1
+    rymin = 1.0 / minimum(real(dylams.values))
+    rymax = 1.0
     if length(Wy) > 1
         for k = 2:length(Wy)
             dylams = eigen(Wy[k])
-            if rymin < 1 / minimum(real(dylams.values))
-                rymin = 1 / minimum(real(dylams.values))
+            if rymin < 1.0 / minimum(real(dylams.values))
+                rymin = 1.0 / minimum(real(dylams.values))
             end
         end
     end
   end
 if  Wu!=Nothing   # yuvx
     dulams = eigen(Wu[1])
-    rumin = 1 / minimum(real(dulams.values))
-    rumax = 1
+    rumin = 1.0 / minimum(real(dulams.values))
+    rumax = 1.0
     if length(Wu) > 1
         for k = 2:length(Wu)
             dulams = eigen(Wu[k])
-            if rumin < 1 / minimum(real(dulams.values))
-                rumin = 1 / minimum(real(dulams.values))
+            if rumin < 1.0 / minimum(real(dulams.values))
+                rumin = 1.0 / minimum(real(dulams.values))
             end
         end
     end
@@ -498,13 +498,13 @@ if  Wu!=Nothing   # yuvx
   
 if  Wv!=Nothing   # yuvx
     dvlams = eigen(Wv[1])
-    rvmin = 1 / minimum(real(dvlams.values))
-    rvmax = 1
+    rvmin = 1.0 / minimum(real(dvlams.values))
+    rvmax = 1.0
     if length(Wv) > 1
         for k = 2:length(Wv)
             dvlams = eigen(Wv[k])
-            if rvmin < 1 / minimum(real(dvlams.values))
-                rvmin = 1 / minimum(real(dvlams.values))
+            if rvmin < 1.0 / minimum(real(dvlams.values))
+                rvmin = 1.0 / minimum(real(dvlams.values))
             end
         end
     end
@@ -950,29 +950,29 @@ envar  = convert(Array{Float64}, Matrix(envar))
 
 
 # 获得空间矩阵的特征值
-rymin=rymax=rumin=rumax=rvmin=rvmax=0
+rymin=rymax=rumin=rumax=rvmin=rvmax=0.0
 if  Wy!=Nothing   # yuvx
     dylams = eigen(Wy[1])
-    rymin = 1 / minimum(real(dylams.values))
-    rymax = 1
+    rymin = 1.0 / minimum(real(dylams.values))
+    rymax = 1.0
     if length(Wy) > 1
         for k = 2:length(Wy)
             dylams = eigen(Wy[k])
-            if rymin < 1 / minimum(real(dylams.values))
-                rymin = 1 / minimum(real(dylams.values))
+            if rymin < 1.0 / minimum(real(dylams.values))
+                rymin = 1.0 / minimum(real(dylams.values))
             end
         end
     end
   end
 if  Wu!=Nothing   # yuvx
     dulams = eigen(Wu[1])
-    rumin = 1 / minimum(real(dulams.values))
-    rumax = 1
+    rumin = 1.0 / minimum(real(dulams.values))
+    rumax = 1.0
     if length(Wu) > 1
         for k = 2:length(Wu)
             dulams = eigen(Wu[k])
-            if rumin < 1 / minimum(real(dulams.values))
-                rumin = 1 / minimum(real(dulams.values))
+            if rumin < 1.0 / minimum(real(dulams.values))
+                rumin = 1.0 / minimum(real(dulams.values))
             end
         end
     end
@@ -980,13 +980,13 @@ if  Wu!=Nothing   # yuvx
   
 if  Wv!=Nothing   # yuvx
     dvlams = eigen(Wv[1])
-    rvmin = 1 / minimum(real(dvlams.values))
-    rvmax = 1
+    rvmin = 1.0 / minimum(real(dvlams.values))
+    rvmax = 1.0
     if length(Wv) > 1
         for k = 2:length(Wv)
             dvlams = eigen(Wv[k])
-            if rvmin < 1 / minimum(real(dvlams.values))
-                rvmin = 1 / minimum(real(dvlams.values))
+            if rvmin < 1.0 / minimum(real(dvlams.values))
+                rvmin = 1.0 / minimum(real(dvlams.values))
             end
         end
     end
@@ -1362,29 +1362,29 @@ ivvar = ()
 
 
 # 获得空间矩阵的特征值
-rymin=rymax=rumin=rumax=rvmin=rvmax=0
+rymin=rymax=rumin=rumax=rvmin=rvmax=0.0
 if  Wy!=Nothing   # yuvx
     dylams = eigen(Wy[1])
-    rymin = 1 / minimum(real(dylams.values))
-    rymax = 1
+    rymin = 1.0 / minimum(real(dylams.values))
+    rymax = 1.0
     if length(Wy) > 1
         for k = 2:length(Wy)
             dylams = eigen(Wy[k])
-            if rymin < 1 / minimum(real(dylams.values))
-                rymin = 1 / minimum(real(dylams.values))
+            if rymin < 1.0 / minimum(real(dylams.values))
+                rymin = 1.0 / minimum(real(dylams.values))
             end
         end
     end
   end
 if  Wu!=Nothing   # yuvx
     dulams = eigen(Wu[1])
-    rumin = 1 / minimum(real(dulams.values))
-    rumax = 1
+    rumin = 1.0 / minimum(real(dulams.values))
+    rumax = 1.0
     if length(Wu) > 1
         for k = 2:length(Wu)
             dulams = eigen(Wu[k])
-            if rumin < 1 / minimum(real(dulams.values))
-                rumin = 1 / minimum(real(dulams.values))
+            if rumin < 1.0 / minimum(real(dulams.values))
+                rumin = 1.0 / minimum(real(dulams.values))
             end
         end
     end
@@ -1392,13 +1392,13 @@ if  Wu!=Nothing   # yuvx
   
 if  Wv!=Nothing   # yuvx
     dvlams = eigen(Wv[1])
-    rvmin = 1 / minimum(real(dvlams.values))
-    rvmax = 1
+    rvmin = 1.0 / minimum(real(dvlams.values))
+    rvmax = 1.0
     if length(Wv) > 1
         for k = 2:length(Wv)
             dvlams = eigen(Wv[k])
-            if rvmin < 1 / minimum(real(dvlams.values))
-                rvmin = 1 / minimum(real(dvlams.values))
+            if rvmin < 1.0 / minimum(real(dvlams.values))
+                rvmin = 1.0 / minimum(real(dvlams.values))
             end
         end
     end
@@ -1825,29 +1825,29 @@ zvar = ()
 
 
 # 获得空间矩阵的特征值
-rymin=rymax=rumin=rumax=rvmin=rvmax=0
+rymin=rymax=rumin=rumax=rvmin=rvmax=0.0
 if  Wy!=Nothing   # yuvx
     dylams = eigen(Wy[1])
-    rymin = 1 / minimum(real(dylams.values))
-    rymax = 1
+    rymin = 1.0 / minimum(real(dylams.values))
+    rymax = 1.0
     if length(Wy) > 1
         for k = 2:length(Wy)
             dylams = eigen(Wy[k])
-            if rymin < 1 / minimum(real(dylams.values))
-                rymin = 1 / minimum(real(dylams.values))
+            if rymin < 1.0 / minimum(real(dylams.values))
+                rymin = 1.0 / minimum(real(dylams.values))
             end
         end
     end
   end
 if  Wu!=Nothing   # yuvx
     dulams = eigen(Wu[1])
-    rumin = 1 / minimum(real(dulams.values))
-    rumax = 1
+    rumin = 1.0 / minimum(real(dulams.values))
+    rumax = 1.0
     if length(Wu) > 1
         for k = 2:length(Wu)
             dulams = eigen(Wu[k])
-            if rumin < 1 / minimum(real(dulams.values))
-                rumin = 1 / minimum(real(dulams.values))
+            if rumin < 1.0 / minimum(real(dulams.values))
+                rumin = 1.0 / minimum(real(dulams.values))
             end
         end
     end
@@ -1855,13 +1855,13 @@ if  Wu!=Nothing   # yuvx
   
 if  Wv!=Nothing   # yuvx
     dvlams = eigen(Wv[1])
-    rvmin = 1 / minimum(real(dvlams.values))
-    rvmax = 1
+    rvmin = 1.0 / minimum(real(dvlams.values))
+    rvmax = 1.0
     if length(Wv) > 1
         for k = 2:length(Wv)
             dvlams = eigen(Wv[k])
-            if rvmin < 1 / minimum(real(dvlams.values))
-                rvmin = 1 / minimum(real(dvlams.values))
+            if rvmin < 1.0 / minimum(real(dvlams.values))
+                rvmin = 1.0 / minimum(real(dvlams.values))
             end
         end
     end
