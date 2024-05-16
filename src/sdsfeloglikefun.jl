@@ -4757,11 +4757,11 @@ function ssdkkhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
 
 
     lik = zero(eltype(y));
-    @views N = rowIDT[1,2];
     @views invPi = 1.0/σᵥ²;
-    @views lndetPi = N*log(σᵥ²);
     @floop begin
     @inbounds  for iidd=1:ID  
+        @views N = rowIDT[iidd,2];
+        @views lndetPi = N*log(σᵥ²);
             @views ind = rowIDT[iidd,1];
             @views his = hi[ind];
             @views ϵs  = ϵ[ind]  - PorC*(eps[ind,:]*eta) ;
@@ -4814,13 +4814,14 @@ function ssdkkh( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
     ID = size(rowIDT,1)
 
     lik = zero(eltype(y));
-    @views N = rowIDT[1,2];
     @views invPi = 1.0/σᵥ²;
-    @views lndetPi = N*log(σᵥ²);
 
     try
     @floop begin
     @inbounds  for iidd=1:ID  
+        @views N = rowIDT[iidd,2];
+        @views lndetPi = N*log(σᵥ²);
+
             @views ind = rowIDT[iidd,1];
             @views his = hi[ind];
             @views ϵs  = ϵ[ind]   ;
@@ -4922,11 +4923,11 @@ function ssdkkte( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
 
 
     lik = zero(eltype(y));
-    @views N = rowIDT[1,2];
     @views invPi = 1.0/σᵥ²;
-    @views lndetPi = N*log(σᵥ²);
     @floop begin
     @inbounds  for iidd=1:ID  
+        @views N = rowIDT[iidd,2];
+        @views lndetPi = N*log(σᵥ²);
             @views ind = rowIDT[iidd,1];
             @views his = hi[ind];
             @views ϵs  = ϵ[ind]  - PorC*(eps[ind,:]*eta) ;
@@ -4979,13 +4980,13 @@ function ssdkkt( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
     ID = size(rowIDT,1)
 
     lik = zero(eltype(y));
-    @views N = rowIDT[1,2];
     @views invPi = 1.0/σᵥ²;
-    @views lndetPi = N*log(σᵥ²);
 
     try
     @floop begin
     @inbounds  for iidd=1:ID  
+        @views N = rowIDT[iidd,2];
+        @views lndetPi = N*log(σᵥ²);
             @views ind = rowIDT[iidd,1];
             @views his = hi[ind];
             @views ϵs  = ϵ[ind]   ;

@@ -413,9 +413,9 @@ function sfmodel_opt(arg::Vararg; message::Bool=false) # create a dictionary of 
   _dicOPT[:banner]           =  true
   _dicOPT[:ineff_index]      =  true
   _dicOPT[:marginal]         =  true
-  if tagD[:modelid] in (SSFOAT,SSFOAH,SSFOADT,SSFOADH,SSFKUEH,SSFKUET)
+  if tagD[:modelid] in (SSFOAT,SSFOAH,SSFOADT,SSFOADH,SSFKUEH,SSFKUET,SSFKUH,SSFKUT)
     _dicOPT[:mareffx]          =  true
-  elseif tagD[:modelid] in (SSFKKEH,SSFKKET)
+  elseif tagD[:modelid] in (SSFKKEH,SSFKKET,SSFKKH,SSFKKT)
     _dicOPT[:mareffx]          =  false
   end
   _dicOPT[:mareffu]          =  true
@@ -1568,8 +1568,8 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
   table[:,1], table[:,2] = table[:,2], table[:,1]   # swap the first name column and the function column
   table[1,2] = "Var."
 
-  stas = zeros(5, 7)
-  stas = hcat([ "Median Efficiency"; "Num of obs." ;"Log of Likelihood" ; "AIC";  "BIC"], stas )
+  stas = zeros(6, 7)
+  stas = hcat([ "Median Efficiency"; "Num of obs." ;"Log of Likelihood" ; "AIC";  "BIC"; "HQC"], stas )
   stas[:,2:8] .= "";
   stas[1,3] = tuple(_bcM...)  
   stas[2,3] = num.nofobs
@@ -1578,10 +1578,14 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
     stas[3,3] = llkkkk
     stas[4,3] = (-2)* (llkkkk)+2*(num.nofpara-num.nofphi)
     stas[5,3] = (-2)* (llkkkk)+log(num.nofobs)*(num.nofpara-num.nofphi)
+    stas[6,3] = (-2)* (llkkkk)+log(log(num.nofobs))*2*(num.nofpara-num.nofphi)
+
   else
     stas[3,3] = -Optim.minimum(mfun)
     stas[4,3] = (-2)* (-Optim.minimum(mfun))+2*num.nofpara
     stas[5,3] = (-2)* (-Optim.minimum(mfun))+log(num.nofobs)*num.nofpara
+    stas[6,3] = (-2)* (-Optim.minimum(mfun))+log(log(num.nofobs))*2*num.nofpara
+
   end
   table= vcat(table, stas)  
 
