@@ -962,11 +962,12 @@ function prtlloglikekkhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Ma
 
 
   lik = zero(eltype(y));
-  @views N = rowIDT[1,2];
   @views invPi = 1.0/σᵥ²;
-  @views lndetPi = N*log(σᵥ²);
+
   @floop begin
   @inbounds  for iidd=1:ID  
+    @views N = rowIDT[iidd,2];
+    @views lndetPi = N*log(σᵥ²);
           @views ind = rowIDT[iidd,1];
           @views his = hi[ind];
           @views ϵs  = ϵ[ind]  - PorC*(eps[ind,:]*eta) ;
@@ -1032,11 +1033,11 @@ function prtlloglikekkte( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Ma
 
 
   lik = zero(eltype(y));
-  @views N = rowIDT[1,2];
   @views invPi = 1.0/σᵥ²;
-  @views lndetPi = N*log(σᵥ²);
   @floop begin
   @inbounds  for iidd=1:ID  
+    @views N = rowIDT[iidd,2];
+    @views lndetPi = N*log(σᵥ²);
           @views ind = rowIDT[iidd,1];
           @views his = hi[ind];
           @views ϵs  = ϵ[ind]  - PorC*(eps[ind,:]*eta) ;
