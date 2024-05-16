@@ -69,7 +69,7 @@ end # for ttt=1:T
 elseif length(Wy)>1
 @floop begin
 @inbounds for ttt=1:T  
-@views N = rowIDT[1,2];
+@views N = rowIDT[ttt,2];
 @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
 @views Mtau = (I(N)-tau*Wu[ttt])\I(N);
 @views Mrho =  (I(N)-rhomy*Wv[ttt])\I(N);
@@ -153,8 +153,8 @@ end # for ttt=1:T
 elseif length(Wy)>1
 @floop begin
 @inbounds for ttt=1:T  
-@views N = rowIDT[1,2];
-@views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
+  @views N = rowIDT[ttt,2];
+  @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
 @views Mtau = (I(N)-tau*Wu[ttt])\I(N);
 @views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
@@ -242,8 +242,8 @@ end # for ttt=1:T
 elseif length(Wy)>1
 @floop begin
 @inbounds for ttt=1:T  
-@views N = rowIDT[1,2];
-@views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
+  @views N = rowIDT[ttt,2];
+  @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
 @views Mtau = 1.0;
 @views Mrho =  (I(N)-rhomy*Wv[ttt])\I(N);
 @views Pi = σᵥ²*(Mrho*Mrho');
@@ -332,8 +332,8 @@ end # for ttt=1:T
 elseif length(Wy)>1
 @floop begin
 @inbounds for ttt=1:T  
-@views N = rowIDT[1,2];
-@views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
+  @views N = rowIDT[ttt,2];
+  @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
 @views Mtau = 1.0;
 @views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
@@ -421,8 +421,8 @@ end # for ttt=1:T
 elseif length(Wy)>1
 @floop begin
 @inbounds for ttt=1:T  
-@views N = rowIDT[1,2];
-@views Mtau = (I(N)-tau*Wu[ttt])\I(N);
+  @views N = rowIDT[ttt,2];
+  @views Mtau = (I(N)-tau*Wu[ttt])\I(N);
 @views Mrho =  (I(N)-rhomy*Wv[ttt])\I(N);
 @views Pi = σᵥ²*(Mrho*Mrho');
 @views lndetPi = log(det(Pi));
@@ -510,8 +510,8 @@ end # for ttt=1:T
 elseif length(Wy)>1
 @floop begin
 @inbounds for ttt=1:T  
-@views N = rowIDT[1,2];
-@views Mtau = (I(N)-tau*Wu[ttt])\I(N);
+  @views N = rowIDT[ttt,2];
+  @views Mtau = (I(N)-tau*Wu[ttt])\I(N);
 @views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
 
@@ -595,8 +595,8 @@ end # for ttt=1:T
 elseif length(Wy)>1
 @floop begin
 @inbounds for ttt=1:T  
-@views N = rowIDT[1,2];
-@views Mtau = 1.0;
+  @views N = rowIDT[ttt,2];
+  @views Mtau = 1.0;
 @views Mrho =  (I(N)-rhomy*Wv[ttt])\I(N);
 @views Pi = σᵥ²*(Mrho*Mrho');
 @views lndetPi = log(det(Pi));
@@ -660,7 +660,7 @@ KK = zeros(eltype(y),T,1);
 
 @floop begin
 @inbounds for ttt=1:T  
-@views N = rowIDT[1,2];
+@views N = rowIDT[ttt,2];
 @views Mtau = 1.0;
 @views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
@@ -785,11 +785,12 @@ function prtlloglikekute( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Ma
 
     elseif length(Wy)>1
         lik = zero(eltype(y));
-        @views N = rowIDT[1,2];
         Wyt = kron(I(T), Wy[1])
 
         @floop begin
         @inbounds for ttt=1:T
+          @views N = rowIDT[ttt,2];
+
             @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));    
             @views lndetIrhoWt += lndetIrhoW
         end # for ttt=1:T
@@ -886,11 +887,12 @@ function prtlloglikekuhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Ma
 
   elseif length(Wy)>1
       lik = zero(eltype(y));
-      @views N = rowIDT[1,2];
       Wyt = kron(I(T), Wy[1])
 
       @floop begin
       @inbounds for ttt=1:T
+        @views N = rowIDT[ttt,2];
+
           @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));    
           @views lndetIrhoWt += lndetIrhoW
       end # for ttt=1:T
@@ -1144,8 +1146,8 @@ end # for ttt=1:T
 elseif length(Wy)>1
 @floop begin
 @inbounds for ttt=1:T  
-@views N = rowIDT[1,2];
-@views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
+  @views N = rowIDT[ttt,2];
+  @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
 @views Mtau = (I(N)-tau*Wu[ttt])\I(N);
 @views Mrho =  (I(N)-rhomy*Wv[ttt])\I(N);
 @views Pi = σᵥ²*(Mrho*Mrho');
@@ -1228,8 +1230,8 @@ end # for ttt=1:T
 elseif length(Wy)>1
 @floop begin
 @inbounds for ttt=1:T  
-@views N = rowIDT[1,2];
-@views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
+  @views N = rowIDT[ttt,2];
+  @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
 @views Mtau = (I(N)-tau*Wu[ttt])\I(N);
 @views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
@@ -1318,8 +1320,8 @@ end # for ttt=1:T
 elseif length(Wy)>1
 @floop begin
 @inbounds for ttt=1:T  
-@views N = rowIDT[1,2];
-@views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
+  @views N = rowIDT[ttt,2];
+  @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
 @views Mtau = 1.0;
 @views Mrho =  (I(N)-rhomy*Wv[ttt])\I(N);
 @views Pi = σᵥ²*(Mrho*Mrho');
@@ -1407,8 +1409,8 @@ end # for ttt=1:T
 elseif length(Wy)>1
 @floop begin
 @inbounds for ttt=1:T  
-@views N = rowIDT[1,2];
-@views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
+  @views N = rowIDT[ttt,2];
+  @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
 @views Mtau = 1.0;
 @views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
@@ -1495,8 +1497,8 @@ end # for ttt=1:T
 elseif length(Wy)>1
 @floop begin
 @inbounds for ttt=1:T  
-@views N = rowIDT[1,2];
-@views Mtau = (I(N)-tau*Wu[ttt])\I(N);
+  @views N = rowIDT[ttt,2];
+  @views Mtau = (I(N)-tau*Wu[ttt])\I(N);
 @views Mrho =  (I(N)-rhomy*Wv[ttt])\I(N);
 @views Pi = σᵥ²*(Mrho*Mrho');
 @views lndetPi = log(det(Pi));
@@ -1584,8 +1586,8 @@ end # for ttt=1:T
 elseif length(Wy)>1
 @floop begin
 @inbounds for ttt=1:T  
-@views N = rowIDT[1,2];
-@views Mtau = (I(N)-tau*Wu[ttt])\I(N);
+  @views N = rowIDT[ttt,2];
+  @views Mtau = (I(N)-tau*Wu[ttt])\I(N);
 @views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
 
@@ -1669,8 +1671,8 @@ end # for ttt=1:T
 elseif length(Wy)>1
 @floop begin
 @inbounds for ttt=1:T  
-@views N = rowIDT[1,2];
-@views Mtau = 1.0;
+  @views N = rowIDT[ttt,2];
+  @views Mtau = 1.0;
 @views Mrho =  (I(N)-rhomy*Wv[ttt])\I(N);
 @views Pi = σᵥ²*(Mrho*Mrho');
 @views lndetPi = log(det(Pi));
@@ -1734,7 +1736,7 @@ KK = zeros(eltype(y),T,1);
 
 @floop begin
 @inbounds for ttt=1:T  
-@views N = rowIDT[1,2];
+@views N = rowIDT[ttt,2];
 @views Mtau = 1.0;
 @views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
