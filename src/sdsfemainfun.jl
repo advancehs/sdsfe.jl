@@ -108,7 +108,7 @@ function sfmodel_spec(arg::Vararg; message::Bool=false)
 
        #* -- creates default values ---
 
-      for k in (:panel, :timevar, :idvar,  :dist, :type, :depvar, :frontier,:frontierWx, :mareffx, :mareffu,  
+      for k in (:panel, :timevar, :idvar,  :dist, :type, :depvar, :frontier,:frontierWx, :mareffx, 
                   :μ, :hscale,  :σᵤ², :σᵥ²,  :hasDF, :transfer, :misc) # take out :data, :η, :λ, :τ, in this revision
           _dicM[k] = nothing
       end
@@ -145,7 +145,7 @@ function sfmodel_spec(arg::Vararg; message::Bool=false)
          varname = [:depvar]
          _dicM[:depvar] = [:depvar]
 
-         for k in (:timevar, :idvar, :frontier,:frontierWx, :mareffx, :mareffu,  :μ, :hscale,  :σᵤ², :σᵥ²) 
+         for k in (:timevar, :idvar, :frontier,:frontierWx, :mareffx,  :μ, :hscale,  :σᵤ², :σᵥ²) 
              if _dicM[k] !== nothing # if not nothing, must be Array
                 isa(_dicM[k], Vector) || isa(_dicM[k][1], Vector) || isa(_dicM[k][1], Matrix) || throw("
                    `k` has to be a Vector or Matrix (e.g., Array{Float64, 1} or Array{Float64, 2}). 
@@ -408,17 +408,17 @@ function sfmodel_opt(arg::Vararg; message::Bool=false) # create a dictionary of 
   _dicOPT[:main_solver]      = :(Newton())
   _dicOPT[:main_maxIT]       =  2000
   _dicOPT[:tolerance]        =  1.0e-8
-  _dicOPT[:autodiff_mode]     = :(forward)
+  _dicOPT[:autodiff_mode]    = :(forward)
   _dicOPT[:verbose]          =  true
   _dicOPT[:banner]           =  true
   _dicOPT[:ineff_index]      =  true
   _dicOPT[:marginal]         =  true
   if tagD[:modelid] in (SSFOAT,SSFOAH,SSFOADT,SSFOADH,SSFKUEH,SSFKUET,SSFKUH,SSFKUT)
-    _dicOPT[:mareffx]          =  true
+    _dicOPT[:mareffx]        =  true
   elseif tagD[:modelid] in (SSFKKEH,SSFKKET,SSFKKH,SSFKKT)
-    _dicOPT[:mareffx]          =  false
+    _dicOPT[:mareffx]        =  false
   end
-  _dicOPT[:mareffu]          =  true
+
   _dicOPT[:table_format]     = :(text)
 
   #* -- replace the defaults with the user's value ---
@@ -519,7 +519,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
    # varlist: ("x1", "x2",...); variable names for making table
 
    (minfo1, minfo2, pos, num, eqvec, eqvec2, yvar, xvar,  qvar, wvar, vvar, zvar, envar, ivvar,
-         eigvalu,  indices_list, rowIDT, varlist) = getvar(tagD[:modelid], sfdat)
+         eigvalu, indices_list, rowIDT, varlist) = getvar(tagD[:modelid], sfdat)
 
 #* ### print preliminary information ########
 
@@ -1277,7 +1277,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
    _Hessian = TwiceDifferentiable(rho -> LL_T(tagD[:modelid], 
                          yvar, xvar, qvar, wvar, vvar, zvar, envar, ivvar,
                             _porc, num, pos, rho,
-                              eigvalu,   rowIDT, _dicM[:misc]),
+                              eigvalu, rowIDT, _dicM[:misc]),
                    sf_init;               
                   autodiff = automode); 
   
@@ -1479,23 +1479,20 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
   
    #* ---- marginal effect on x or wx -------------- 
 
-   if _dicOPT[:mareffx] 
+   if _dicOPT[:mareffx]                    
       if Wy!=Nothing 
       totalemat, diremat, indiremat = get_mareffx( pos, _coevec,  var_cov_matrix, eigvalu, indices_list, rowIDT )
       else
       totalemat, diremat, indiremat = nothing, nothing, nothing
       end
-  else      
+   else      
       totalemat, diremat, indiremat = nothing, nothing, nothing
    end      
-   #* ---- marginal effect on u -------------- 
+   #* ---- Counterfactual analysis -------------- 
 
-   # if _dicOPT[:mareffu] 
-   #    margeff = get_mareffu(tagD[:modelid], pos, num, _coevec,  qvar, wvar, zvar, eigvalu, rowIDT )
-   # else
-   #    margeff = nothing
-   # end        
-
+   @views (_counterfactjlms, _counterfactbc) = counterfactindex(  tagD[:modelid], yvar, xvar, qvar, wvar, vvar,  zvar, envar, ivvar,
+                                     _porc, num, pos, _coevec, eigvalu, rowIDT )
+    
   
    #* ------- Make Table ------------------
    for i in 1:size(var_cov_matrix, 1)
@@ -1704,6 +1701,8 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
     _dicRES[:totalemat] = totalemat
     _dicRES[:diremat] = diremat
     _dicRES[:indiremat] = indiremat
+    _dicRES[:counterfactjlms] = _counterfactjlms
+    _dicRES[:counterfactbc]   = _counterfactbc
     _dicRES[:_____________] = "___________________"  #31      
     _dicRES[:model]         = minfo1      
      #     _dicRES[:data]          = "$sfdat"

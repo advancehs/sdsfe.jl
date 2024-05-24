@@ -1299,6 +1299,14 @@ function autodiff_mode(arg=nothing)
     return (:autodiff_mode, Symbol(arg))
 end
 
+function cfindices(arg=nothing)
+    
+    if !(isa(arg, Integer))
+        throw("The keyword of `cfindices` in `sfmodel_opt()` is specified incorrectly. Only allow Integer. Got `$(arg)` instead.")
+    end 
+
+    return (:cfindices, arg)
+end
  
   #? ------ functions for sfmodel_fit ----------
  

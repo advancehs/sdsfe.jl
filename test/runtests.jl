@@ -29,14 +29,18 @@ W = read(file, "wm"); # note that this does NOT introduce a variable ``varname``
 Wx = Array{Matrix}(undef, 1, 1)
 Wx[1]= W;
 
-# sfmodel_spec(sfpanel(SSF_OA2019),sftype(prod), sfdist(trun), wy(Wx) ,wu(Wx),wv(Wx),
-#                     @timevar(t), @idvar(id),
-#                     @depvar(y),
-#                     @frontier(x),
-#                     @μ(_cons),
-#                     @hscale(z),                # h(.) function
-#                     @σᵤ²(_cons),
-#                     @σᵥ²(_cons), message = true);    
+sfmodel_spec(sfpanel(SSF_OA2019),sftype(prod), sfdist(half), wy(Wx), wx(Wx),wu(Wx),wv(Wx),
+                    @timevar(t), @idvar(id),
+                    @depvar(y),
+                    @frontier(noconstant,z1,qf),
+                    @frontierWx(z1,qf),
+                    @hscale(z2,qu),                # h(.) function
+                    # @envar(qf,qu),
+                    # @ivvar(z3,z4),
+                    # @μ(_cons),
+                    @σᵤ²(_cons),
+                    @σᵥ²(_cons), message = true);      
+
 # sfmodel_spec(sfpanel(SSF_OAD2024),sftype(prod), sfdist(half), wy(Wx), wx(Wx),wu(Wx),wv(Wx),
 #                     @timevar(t), @idvar(id),
 #                     @depvar(y),
@@ -49,23 +53,24 @@ Wx[1]= W;
 #                     @σᵤ²(_cons),
 #                     @σᵥ²(_cons), message = true);             
                     
-sfmodel_spec(sfpanel(SSF_KKE2017),sftype(prod), sfdist(half), wy(Wx), #wx(Wx),
-                    @timevar(t), @idvar(id),
-                    @depvar(y),
-                    @frontier(noconstant,z1,qf),
-                    # @frontierWx(z1,qf),
-                    @hscale(z2,qu),                # h(.) function
-                    @envar(qf,qu),
-                    @ivvar(z3,z4),
-                    # @μ(_cons),
-                    @σᵤ²(_cons),
-                    @σᵥ²(_cons), message = true);   
+# sfmodel_spec(sfpanel(SSF_KK2017),sftype(prod), sfdist(half), wy(Wx), #wx(Wx),
+#                     @timevar(t), @idvar(id),
+#                     @depvar(y),
+#                     @frontier(noconstant,z1,qf),
+#                     # @frontierWx(z1,qf),
+#                     @hscale(z2,qu),                # h(.) function
+#                     # @envar(qf,qu),
+#                     # @ivvar(z3,z4),
+#                     # @μ(_cons),
+#                     @σᵤ²(_cons),
+#                     @σᵥ²(_cons), message = true);   
 
 sfmodel_opt(warmstart_solver(NelderMead()),   
                     warmstart_maxIT(1000),
                     # main_solver(Newton(linesearch=LineSearches.BackTracking())), 
                     main_solver(BFGS(linesearch=LineSearches.BackTracking())), 
                     main_maxIT(2000), 
-                    tolerance(1e-6),autodiff_mode(forward));
+                    tolerance(1e-6),autodiff_mode(forward),
+                    cfindices(1));
 
 res = sfmodel_fit(useData(dat)) 

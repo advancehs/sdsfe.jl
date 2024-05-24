@@ -31,7 +31,7 @@ export sfmodel_spec, sfmodel_init, sfmodel_opt,
        # functions for sfmodel_opt
         warmstart_solver, warmstart_maxIT,
         main_solver, main_maxIT, tolerance, verbose, banner,
-        ineff_index, marginal, table_format,autodiff_mode,
+        ineff_index, marginal, table_format,autodiff_mode, cfindices,
        # functions for sfmodel_fit
         useData,
         sfmodel_CI,
@@ -41,6 +41,8 @@ export sfmodel_spec, sfmodel_init, sfmodel_opt,
         jlmsbc, jlmsbc_marg,
        # functions for partial loglikehood
         prtlloglike,
+       # functions for counterfact 
+        counterfactindex,
        # the table for regular and mixed Chi-square test
         sfmodel_MixTable, sfmodel_ChiSquareTable,
        # struct 
@@ -157,6 +159,7 @@ include("sdsfeindex.jl")
 include("sdsfemarginal.jl")
 include("sdsfemainfun.jl")
 include("sdsfepartialloglike.jl")
+include("sdsfecountf.jl")
 
 
 

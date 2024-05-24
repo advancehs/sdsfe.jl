@@ -1411,7 +1411,7 @@ eigvalu = (rymin=rymin, rymax=rymax, rumin=rumin, rumax=rumax, rvmin=rvmin, rvma
   
 
 return modelinfo1, modelinfo2, posvec, nofvar, eqvec, eqvec2, yvar, xvar,  qvar, wvar, vvar,  zvar, 
-                  envar, ivvar, eigvalu, indices_list,  rowIDT, varlist
+                  envar, ivvar, eigvalu, indices_list, rowIDT, varlist
 
 
 end
@@ -2086,7 +2086,7 @@ lnσᵥ²   = begv + 1,
       
     eigvalu = (rymin=rymin, rymax=rymax)
       indices_list = find_all_indices_ordered(vcat(_dicM[:frontier],_dicM[:frontierWx]))
-  
+
     return modelinfo1, modelinfo2, posvec, nofvar, eqvec, eqvec2, yvar, xvar, 
       qvar, wvar, vvar, zvar, envar, ivvar, eigvalu, indices_list,rowIDT, varlist
       
@@ -2280,7 +2280,7 @@ function getvar(::Type{SSFKUH}, dat::DataFrame)
         
       eigvalu = (rymin=rymin, rymax=rymax)
         indices_list = find_all_indices_ordered(vcat(_dicM[:frontier],_dicM[:frontierWx]))
-    
+
       return modelinfo1, modelinfo2, posvec, nofvar, eqvec, eqvec2, yvar, xvar, 
         qvar, wvar, vvar, zvar, envar, ivvar, eigvalu, indices_list,rowIDT, varlist
         
@@ -2692,7 +2692,6 @@ end
 eigvalu = (rymin=rymin, rymax=rymax)
 indices_list = find_all_indices_ordered(vcat(_dicM[:frontier],_dicM[:frontierWx]))
 
-
 return modelinfo1, modelinfo2, posvec, nofvar, eqvec, eqvec2, yvar, xvar, 
 qvar, wvar, vvar, zvar, envar, ivvar, eigvalu, indices_list,rowIDT, varlist
 
@@ -2987,7 +2986,7 @@ lnσᵥ²   = begv + 1)
   eigvalu = (rymin=rymin, rymax=rymax)
   
       indices_list = find_all_indices_ordered(vcat(_dicM[:frontier],_dicM[:frontierWx]))
-  
+
     return modelinfo1, modelinfo2, posvec, nofvar, eqvec, eqvec2, yvar, xvar, 
       qvar, wvar, vvar, zvar, envar, ivvar, eigvalu, indices_list,rowIDT, varlist
       
@@ -3290,7 +3289,7 @@ indices_list = find_all_indices_ordered(vcat(_dicM[:frontier],_dicM[:frontierWx]
 
 
 return modelinfo1, modelinfo2, posvec, nofvar, eqvec, eqvec2, yvar, xvar, 
-qvar, wvar, vvar, zvar, envar, ivvar, eigvalu, indices_list,rowIDT, varlist
+qvar, wvar, vvar, zvar, envar, ivvar, eigvalu, indices_list, rowIDT, varlist
 
 end
   

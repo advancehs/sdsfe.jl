@@ -1,15 +1,16 @@
 
-#########################################
-####        JLMS and BC index        ####
-#########################################
+###############################################
+####        Counterfactual analysis        ####
+###############################################
 
 #? --------------- Truncated Normal --------------
 
 
-function  jlmsbct_yuv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
-    Wy::Matrix, Wu::Matrix, Wv::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+function  cfindext_yuv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
+    Wy::Matrix, Wu::Matrix, Wv::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 δ1 = rho[pos.begz]
@@ -89,10 +90,11 @@ end
 
 
 
-function  jlmsbct_yu(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
-    Wy::Matrix, Wu::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+function  cfindext_yu(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
+    Wy::Matrix, Wu::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 δ1 = rho[pos.begz]
@@ -168,10 +170,11 @@ end
 
 
 
-function  jlmsbct_yv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
-    Wy::Matrix, Wv::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+function  cfindext_yv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
+    Wy::Matrix, Wv::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple,index::Int,  rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 δ1 = rho[pos.begz]
@@ -250,10 +253,11 @@ end
 
 
 
-function  jlmsbct_y(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
-    Wy::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+function  cfindext_y(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
+    Wy::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple,index::Int,  rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 δ1 = rho[pos.begz]
@@ -324,10 +328,11 @@ end
 
 
 
-function  jlmsbct_uv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
-   Wu::Matrix, Wv::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+function  cfindext_uv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
+   Wu::Matrix, Wv::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 δ1 = rho[pos.begz]
@@ -404,10 +409,11 @@ end
 
 
 
-function  jlmsbct_u(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
-    Wu::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+function  cfindext_u(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
+    Wu::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 δ1 = rho[pos.begz]
@@ -477,10 +483,11 @@ end
 
 
 
-function  jlmsbct_v(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
-    Wv::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+function  jcfindext_v(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
+    Wv::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple,index::Int,  rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 δ1 = rho[pos.begz]
@@ -549,10 +556,11 @@ return TE_jlms, TE_bc
 end
 
 
-function  jlmsbct_(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
-    PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+function  cfindext_(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
+    PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 δ1 = rho[pos.begz]
@@ -599,28 +607,29 @@ end
 
 
 
-function jlmsbc(::Type{SSFOAT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z::Matrix,en,iv,
+function counterfactindex(::Type{SSFOAT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z::Matrix,en,iv,
   PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any}) 
 
 Wy = _dicM[:wy]
 Wu = _dicM[:wu]
 Wv = _dicM[:wv]
+index = _dicOPT[:cfindices]
 
 if Wy!=Nothing  # yuv
     gammap = rho[pos.beggamma]
     gamma  = eigvalu.rymin/(1.0 +exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0 +exp(gammap));
-     dire_ratio,indire_ratio = IrhoWratio(gamma, rowIDT)
+     dire_ratio,indire_ratio = IrhoWratiocf(gamma, rowIDT)
 if Wu!=Nothing 
 if Wv!=Nothing #yuv
-    jlms_, bc_  = jlmsbct_yuv( y, x, Q, w, v, z, Wy, Wu, Wv, PorC, pos, rho,  eigvalu, rowIDT )
+    jlms_, bc_  = cfindext_yuv( y, x, Q, w, v, z, Wy, Wu, Wv, PorC, pos, rho,  eigvalu, index,rowIDT )
 else # yu
-    jlms_, bc_  = jlmsbct_yu( y, x, Q, w, v, z, Wy, Wu, PorC, pos, rho,  eigvalu, rowIDT  )
+    jlms_, bc_  = cfindext_yu( y, x, Q, w, v, z, Wy, Wu, PorC, pos, rho,  eigvalu, index,rowIDT  )
 end    
 else 
 if Wv!=Nothing #yv
-    jlms_, bc_  = jlmsbct_yv(y, x, Q, w, v, z, Wy, Wv, PorC, pos, rho,  eigvalu, rowIDT )
+    jlms_, bc_  = cfindext_yv(y, x, Q, w, v, z, Wy, Wv, PorC, pos, rho,  eigvalu,index, rowIDT )
 else #y
-    jlms_, bc_  = jlmsbct_y(y, x, Q, w, v, z, Wy, PorC, pos, rho,  eigvalu, rowIDT )  
+    jlms_, bc_  = cfindext_y(y, x, Q, w, v, z, Wy, PorC, pos, rho,  eigvalu, index,rowIDT )  
 end
 end
 jlms_df = DataFrame(hcat(dire_ratio*jlms_,indire_ratio*jlms_), [:dire_jlms, :indire_jlms])
@@ -628,15 +637,15 @@ bc_df = DataFrame(hcat(dire_ratio*bc_,indire_ratio*bc_), [:dire_bc, :indire_bc])
 else
 if Wu!=Nothing 
 if Wv!=Nothing #uv
-    jlms_, bc_  = jlmsbct_uv(y, x, Q, w, v, z, Wu, Wv, PorC, pos, rho,  eigvalu, rowIDT  )
+    jlms_, bc_  = cfindext_uv(y, x, Q, w, v, z, Wu, Wv, PorC, pos, rho,  eigvalu,index, rowIDT  )
 else # u
-    jlms_, bc_  = jlmsbct_u(y, x, Q, w, v, z, Wu, PorC, pos, rho,  eigvalu, rowIDT  ) 
+    jlms_, bc_  = cfindext_u(y, x, Q, w, v, z, Wu, PorC, pos, rho,  eigvalu,index, rowIDT  ) 
 end    
 else 
 if Wv!=Nothing #v
-    jlms_, bc_  = jlmsbct_v(y, x, Q, w, v, z, Wv,PorC, pos, rho,  eigvalu, rowIDT )
+    jlms_, bc_  = cfindext_v(y, x, Q, w, v, z, Wv,PorC, pos, rho,  eigvalu,index, rowIDT )
 else # 
-    jlms_, bc_  = jlmsbct_( y, x, Q, w, v, z, PorC, pos, rho,  eigvalu, rowIDT  )  
+    jlms_, bc_  = cfindext_( y, x, Q, w, v, z, PorC, pos, rho,  eigvalu,index, rowIDT  )  
 end
 end
 jlms_df = DataFrame(jlms_, [:dire_jlms, :indire_jlms])
@@ -651,11 +660,13 @@ end
 
 
 
-function  jlmsbcdt_yuv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
+function  cfindexdt_yuv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
     Wy::Matrix, Wu::Matrix, Wv::Matrix,
- PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+ PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
+
 phi = rho[pos.begphi:pos.endphi]
 
 nofiv=num.nofphi/num.nofeta
@@ -739,11 +750,13 @@ end
 
 
 
-function  jlmsbcdt_yu(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
+function  cfindexdt_yu(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
     Wy::Matrix, Wu::Matrix,
- PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+ PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
+
 phi = rho[pos.begphi:pos.endphi]
 
 nofiv=num.nofphi/num.nofeta
@@ -825,11 +838,13 @@ end
 
 
 
-function  jlmsbcdt_yv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
+function  cfindexdt_yv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
     Wy::Matrix, Wv::Matrix,
- PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+ PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
+
 phi = rho[pos.begphi:pos.endphi]
 
 nofiv=num.nofphi/num.nofeta
@@ -913,11 +928,13 @@ end
 
 
 
-function  jlmsbcdt_y(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
+function  cfindexdt_y(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
     Wy::Matrix,
- PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+ PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
+
 phi = rho[pos.begphi:pos.endphi]
 
 nofiv=num.nofphi/num.nofeta
@@ -994,11 +1011,12 @@ end
 
 
 
-function  jlmsbcdt_uv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
+function  cfindexdt_uv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
     Wu::Matrix, Wv::Matrix,
- PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+ PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
 phi = rho[pos.begphi:pos.endphi]
 
 nofiv=num.nofphi/num.nofeta
@@ -1084,11 +1102,13 @@ end
 
 
 
-function  jlmsbcdt_u(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
+function  cfindexdt_u(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
     Wu::Matrix,
- PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+ PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
+
 phi = rho[pos.begphi:pos.endphi]
 
 nofiv=num.nofphi/num.nofeta
@@ -1167,11 +1187,13 @@ end
 
 
 
-function  jlmsbcdt_v(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
+function  cfindexdt_v(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
    Wv::Matrix,
- PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+ PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
+
 phi = rho[pos.begphi:pos.endphi]
 
 nofiv=num.nofphi/num.nofeta
@@ -1252,10 +1274,12 @@ end
 
 
 
-function  jlmsbcdt_(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
- PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+function  cfindexdt_(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
+ PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
+
 phi = rho[pos.begphi:pos.endphi]
 
 nofiv=num.nofphi/num.nofeta
@@ -1302,7 +1326,7 @@ end # begin
 return TE_jlms, TE_bc       
 end
 
-function IrhoWratio(gamma::Float64, rowIDT::Matrix{Any} )
+function IrhoWratiocf(gamma::Float64, rowIDT::Matrix{Any} )
     Wy = _dicM[:wy]
     T = size(rowIDT,1)
   if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
@@ -1333,29 +1357,30 @@ end
 
 
 
-function jlmsbc(::Type{SSFOADT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
+function counterfactindex(::Type{SSFOADT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
     PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
  
    Wy = _dicM[:wy]
    Wu = _dicM[:wu]
    Wv = _dicM[:wv]
+   index = _dicOPT[:cfindices]
 
      if Wy!=Nothing  # yuv
         gammap = rho[pos.beggamma]
         gamma  = eigvalu.rymin/(1.0 +exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0 +exp(gammap));
-         dire_ratio,indire_ratio = IrhoWratio(gamma, rowIDT)
+         dire_ratio,indire_ratio = IrhoWratiocf(gamma, rowIDT)
 
          if Wu!=Nothing 
              if Wv!=Nothing #yuv
-                 jlms_, bc_ = jlmsbcdt_yuv( y, x, Q, w, v, z, EN, IV, Wy, Wu, Wv, PorC, num, pos, rho,  eigvalu, rowIDT )
+                 jlms_, bc_ = cfindexdt_yuv( y, x, Q, w, v, z, EN, IV, Wy, Wu, Wv, PorC, num, pos, rho,  eigvalu, index, rowIDT )
              else # yu
-                jlms_, bc_ = jlmsbcdt_yu( y, x, Q, w, v, z, EN, IV, Wy, Wu, PorC, num, pos, rho,  eigvalu, rowIDT  )
+                jlms_, bc_ = cfindexdt_yu( y, x, Q, w, v, z, EN, IV, Wy, Wu, PorC, num, pos, rho,  eigvalu, index, rowIDT  )
              end    
          else 
              if Wv!=Nothing #yv
-                jlms_, bc_ = jlmsbcdt_yv(y, x, Q, w, v, z, EN, IV, Wy, Wv, PorC, num, pos, rho,  eigvalu, rowIDT )
+                jlms_, bc_ = cfindexdt_yv(y, x, Q, w, v, z, EN, IV, Wy, Wv, PorC, num, pos, rho,  eigvalu, index,rowIDT )
              else #y
-                jlms_, bc_ = jlmsbcdt_y(y, x, Q, w, v, z, EN, IV, Wy, PorC, num, pos, rho,  eigvalu, rowIDT )  
+                jlms_, bc_ = cfindexdt_y(y, x, Q, w, v, z, EN, IV, Wy, PorC, num, pos, rho,  eigvalu, index,rowIDT )  
              end
          end
          jlms_df = DataFrame(hcat(dire_ratio*jlms_,indire_ratio*jlms_), [:dire_jlms, :indire_jlms])
@@ -1363,15 +1388,15 @@ function jlmsbc(::Type{SSFOADT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, 
      else
          if Wu!=Nothing 
              if Wv!=Nothing #uv
-                jlms_, bc_  = jlmsbcdt_uv(y, x, Q, w, v, z, EN, IV, Wu, Wv, PorC, num, pos, rho,  eigvalu, rowIDT  )
+                jlms_, bc_  = cfindexdt_uv(y, x, Q, w, v, z, EN, IV, Wu, Wv, PorC, num, pos, rho,  eigvalu,index, rowIDT  )
              else # u
-                jlms_, bc_ = jlmsbcdt_u(y, x, Q, w, v, z, EN, IV, Wu, PorC, num, pos, rho,  eigvalu, rowIDT  )
+                jlms_, bc_ = cfindexdt_u(y, x, Q, w, v, z, EN, IV, Wu, PorC, num, pos, rho,  eigvalu, index,rowIDT  )
              end    
          else 
              if Wv!=Nothing #v
-                jlms_, bc_  = jlmsbcdt_v(y, x, Q, w, v, z, EN, IV, Wv,PorC, num, pos, rho,  eigvalu, rowIDT )
+                jlms_, bc_  = cfindexdt_v(y, x, Q, w, v, z, EN, IV, Wv,PorC, num, pos, rho,  eigvalu, index,rowIDT )
              else # 
-                jlms_, bc_  = jlmsbcdt_( y, x, Q, w, v, z, EN, IV, PorC, num, pos, rho,  eigvalu, rowIDT  )  
+                jlms_, bc_  = cfindexdt_( y, x, Q, w, v, z, EN, IV, PorC, num, pos, rho,  eigvalu, index,rowIDT  )  
              end
          end
          jlms_df = DataFrame(jlms_, [:dire_jlms, :indire_jlms])
@@ -1387,10 +1412,12 @@ function jlmsbc(::Type{SSFOADT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, 
 
 
 
- function  jlmsbch_yuv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
-    Wy::Matrix, Wu::Matrix, Wv::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+ function  cfindexh_yuv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
+    Wy::Matrix, Wu::Matrix, Wv::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
+
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 # δ1 = rho[pos.begz]
@@ -1470,10 +1497,12 @@ end
 
 
 
-function  jlmsbch_yu(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
-    Wy::Matrix, Wu::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+function  cfindexh_yu(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
+    Wy::Matrix, Wu::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
+
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 # δ1 = rho[pos.begz]
@@ -1549,10 +1578,12 @@ end
 
 
 
-function  jlmsbch_yv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
-    Wy::Matrix, Wv::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+function  cfindexh_yv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
+    Wy::Matrix, Wv::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
+
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 # δ1 = rho[pos.begz]
@@ -1631,10 +1662,12 @@ end
 
 
 
-function  jlmsbch_y(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
-    Wy::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+function cfindexh_y(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
+    Wy::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
+
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 # δ1 = rho[pos.begz]
@@ -1705,10 +1738,12 @@ end
 
 
 
-function  jlmsbch_uv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
-   Wu::Matrix, Wv::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+function  cfindexh_uv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
+   Wu::Matrix, Wv::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
+
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 # δ1 = rho[pos.begz]
@@ -1785,10 +1820,11 @@ end
 
 
 
-function  jlmsbch_u(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
-    Wu::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+function  cfindexh_u(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
+    Wu::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 # δ1 = rho[pos.begz]
@@ -1858,10 +1894,11 @@ end
 
 
 
-function  jlmsbch_v(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
-    Wv::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+function  cfindexh_v(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
+    Wv::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 # δ1 = rho[pos.begz]
@@ -1929,7 +1966,7 @@ return TE_jlms, TE_bc
 end
 
 
-function  jlmsbch_(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
+function  cfindexh_(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
     PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
@@ -1979,27 +2016,29 @@ end
 
 
 
-function jlmsbc(::Type{SSFOAH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, en,iv,
+function counterfactindex(::Type{SSFOAH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, en,iv,
   PorC::Int64,  num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
 
   Wy = _dicM[:wy]
   Wu = _dicM[:wu]
   Wv = _dicM[:wv]
+  index = _dicOPT[:cfindices]
+
   gammap = rho[pos.beggamma]
   gamma  = eigvalu.rymin/(1.0 +exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0 +exp(gammap));
-   dire_ratio,indire_ratio = IrhoWratio(gamma, rowIDT)
+   dire_ratio,indire_ratio = IrhoWratiocf(gamma, rowIDT)
     if Wy!=Nothing  # yuv
         if Wu!=Nothing 
             if Wv!=Nothing #yuv
-                jlms_, bc_ = jlmsbch_yuv( y, x, Q, w, v, z, Wy, Wu, Wv, PorC, pos, rho,  eigvalu, rowIDT )
+                jlms_, bc_ = cfindexh_yuv( y, x, Q, w, v, z, Wy, Wu, Wv, PorC, pos, rho,  eigvalu, index, rowIDT )
             else # yu
-                jlms_, bc_ = jlmsbch_yu( y, x, Q, w, v, z, Wy, Wu, PorC, pos, rho,  eigvalu, rowIDT  )
+                jlms_, bc_ = cfindexh_yu( y, x, Q, w, v, z, Wy, Wu, PorC, pos, rho,  eigvalu, index, rowIDT  )
             end    
         else 
             if Wv!=Nothing #yv
-                jlms_, bc_ = jlmsbch_yv(y, x, Q, w, v, z, Wy, Wv, PorC, pos, rho,  eigvalu, rowIDT )
+                jlms_, bc_ = cfindexh_yv(y, x, Q, w, v, z, Wy, Wv, PorC, pos, rho,  eigvalu, index, rowIDT )
             else #y
-                jlms_, bc_ = jlmsbch_y(y, x, Q, w, v, z, Wy, PorC, pos, rho,  eigvalu, rowIDT )  
+                jlms_, bc_ = cfindexh_y(y, x, Q, w, v, z, Wy, PorC, pos, rho,  eigvalu, index, rowIDT )  
             end
         end
         jlms_df = DataFrame(hcat(dire_ratio*jlms_,indire_ratio*jlms_), [:dire_jlms, :indire_jlms])
@@ -2007,15 +2046,15 @@ function jlmsbc(::Type{SSFOAH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w
     else
         if Wu!=Nothing 
             if Wv!=Nothing #uv
-                jlms_, bc_ = jlmsbch_uv(y, x, Q, w, v, z, Wu, Wv, PorC, pos, rho,  eigvalu, rowIDT  )
+                jlms_, bc_ = cfindexh_uv(y, x, Q, w, v, z, Wu, Wv, PorC, pos, rho,  eigvalu, index, rowIDT  )
             else # u
-                jlms_, bc_ = jlmsbch_u(y, x, Q, w, v, z, Wu, PorC, pos, rho,  eigvalu, rowIDT  ) 
+                jlms_, bc_ = cfindexh_u(y, x, Q, w, v, z, Wu, PorC, pos, rho,  eigvalu, index, rowIDT  ) 
             end    
         else 
             if Wv!=Nothing #v
-                jlms_, bc_ = jlmsbch_v(y, x, Q, w, v, z, Wv,PorC, pos, rho,  eigvalu, rowIDT )
+                jlms_, bc_ = cfindexh_v(y, x, Q, w, v, z, Wv,PorC, pos, rho,  eigvalu, index, rowIDT )
             else # 
-                jlms_, bc_ = jlmsbch_( y, x, Q, w, v, z, PorC, pos, rho,  eigvalu, rowIDT  )  
+                jlms_, bc_ = cfindexh_( y, x, Q, w, v, z, PorC, pos, rho,  eigvalu, index, rowIDT  )  
             end
         end
         jlms_df = DataFrame(jlms_, [:dire_jlms, :indire_jlms])
@@ -2032,11 +2071,12 @@ function jlmsbc(::Type{SSFOAH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w
 
 
 
-function  jlmsbcdh_yuv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
+function  cfindexdh_yuv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
     Wy::Matrix, Wu::Matrix, Wv::Matrix,
- PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+ PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
 phi = rho[pos.begphi:pos.endphi]
 
 nofiv=num.nofphi/num.nofeta
@@ -2124,11 +2164,12 @@ end
 
 
 
-function  jlmsbcdh_yu(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
+function  cfindexdh_yu(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
     Wy::Matrix, Wu::Matrix,
- PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+ PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
 phi = rho[pos.begphi:pos.endphi]
 
 nofiv=num.nofphi/num.nofeta
@@ -2213,11 +2254,12 @@ end
 
 
 
-function  jlmsbcdh_yv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
+function  cfindexdh_yv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
     Wy::Matrix, Wv::Matrix,
- PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+ PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
 phi = rho[pos.begphi:pos.endphi]
 
 nofiv=num.nofphi/num.nofeta
@@ -2303,11 +2345,12 @@ end
 
 
 
-function  jlmsbcdh_y(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
+function  cfindexdh_y(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
     Wy::Matrix,
- PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+ PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
 phi = rho[pos.begphi:pos.endphi]
 
 nofiv=num.nofphi/num.nofeta
@@ -2387,11 +2430,12 @@ end
 
 
 
-function  jlmsbcdh_uv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
+function  cfindexdh_uv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
     Wu::Matrix, Wv::Matrix,
- PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+ PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
 phi = rho[pos.begphi:pos.endphi]
 
 nofiv=num.nofphi/num.nofeta
@@ -2477,11 +2521,12 @@ end
 
 
 
-function  jlmsbcdh_u(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
+function  cfindexdh_u(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
     Wu::Matrix,
- PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+ PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0
 phi = rho[pos.begphi:pos.endphi]
 
 nofiv=num.nofphi/num.nofeta
@@ -2560,11 +2605,12 @@ end
 
 
 
-function  jlmsbcdh_v(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
+function  cfindexdh_v(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
    Wv::Matrix,
- PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+ PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index]  = 0
 phi = rho[pos.begphi:pos.endphi]
 
 nofiv=num.nofphi/num.nofeta
@@ -2645,10 +2691,11 @@ end
 
 
 
-function  jlmsbcdh_(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
- PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+function  cfindexdh_(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
+ PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0   
 phi = rho[pos.begphi:pos.endphi]
 
 nofiv=num.nofphi/num.nofeta
@@ -2698,27 +2745,29 @@ end
 
 
 
-function jlmsbc(::Type{SSFOADH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
+function counterfactindex(::Type{SSFOADH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
     PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
  
    Wy = _dicM[:wy]
    Wu = _dicM[:wu]
    Wv = _dicM[:wv]
+   index = _dicOPT[:cfindices]
+
    gammap = rho[pos.beggamma]
    gamma  = eigvalu.rymin/(1.0 +exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0 +exp(gammap));
-    dire_ratio,indire_ratio = IrhoWratio(gamma, rowIDT)
+    dire_ratio,indire_ratio = IrhoWratiocf(gamma, rowIDT)
      if Wy!=Nothing  # yuv
          if Wu!=Nothing 
              if Wv!=Nothing #yuv
-                jlms_, bc_ = jlmsbcdh_yuv( y, x, Q, w, v, z, EN, IV, Wy, Wu, Wv, PorC, num, pos, rho,  eigvalu, rowIDT )
+                jlms_, bc_ = cfindexdh_yuv( y, x, Q, w, v, z, EN, IV, Wy, Wu, Wv, PorC, num, pos, rho,  eigvalu, index, rowIDT )
              else # yu
-                jlms_, bc_ = jlmsbcdh_yu( y, x, Q, w, v, z, EN, IV, Wy, Wu, PorC, num, pos, rho,  eigvalu, rowIDT  )
+                jlms_, bc_ = cfindexdh_yu( y, x, Q, w, v, z, EN, IV, Wy, Wu, PorC, num, pos, rho,  eigvalu, index, rowIDT  )
              end    
          else 
              if Wv!=Nothing #yv
-                jlms_, bc_ = jlmsbcdh_yv(y, x, Q, w, v, z, EN, IV, Wy, Wv, PorC, num, pos, rho,  eigvalu, rowIDT )
+                jlms_, bc_ = cfindexdh_yv(y, x, Q, w, v, z, EN, IV, Wy, Wv, PorC, num, pos, rho,  eigvalu, index, rowIDT )
              else #y
-                jlms_, bc_ = jlmsbcdh_y(y, x, Q, w, v, z, EN, IV, Wy, PorC, num, pos, rho,  eigvalu, rowIDT )  
+                jlms_, bc_ = cfindexdh_y(y, x, Q, w, v, z, EN, IV, Wy, PorC, num, pos, rho,  eigvalu, index, rowIDT )  
              end
          end
          jlms_df = DataFrame(hcat(dire_ratio*jlms_,indire_ratio*jlms_), [:dire_jlms, :indire_jlms])
@@ -2726,15 +2775,15 @@ function jlmsbc(::Type{SSFOADH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, 
      else
          if Wu!=Nothing 
              if Wv!=Nothing #uv
-                jlms_, bc_ = jlmsbcdh_uv(y, x, Q, w, v, z, EN, IV, Wu, Wv, PorC, num, pos, rho,  eigvalu, rowIDT  )
+                jlms_, bc_ = cfindexdh_uv(y, x, Q, w, v, z, EN, IV, Wu, Wv, PorC, num, pos, rho,  eigvalu, index, rowIDT  )
              else # u
-                jlms_, bc_ = jlmsbcdh_u(y, x, Q, w, v, z, EN, IV, Wu, PorC, num, pos, rho,  eigvalu, rowIDT  ) 
+                jlms_, bc_ = cfindexdh_u(y, x, Q, w, v, z, EN, IV, Wu, PorC, num, pos, rho,  eigvalu, index, rowIDT  ) 
              end    
          else 
              if Wv!=Nothing #v
-                jlms_, bc_ = jlmsbcdh_v(y, x, Q, w, v, z, EN, IV, Wv,PorC, num,  pos, rho,  eigvalu, rowIDT )
+                jlms_, bc_ = cfindexdh_v(y, x, Q, w, v, z, EN, IV, Wv,PorC, num,  pos, rho,  eigvalu, index, rowIDT )
              else # 
-                jlms_, bc_ = jlmsbcdh_( y, x, Q, w, v, z, EN, IV, PorC, num, pos, rho,  eigvalu, rowIDT  )  
+                jlms_, bc_ = cfindexdh_( y, x, Q, w, v, z, EN, IV, PorC, num, pos, rho,  eigvalu, index, rowIDT  )  
              end
          end
          jlms_df = DataFrame(jlms_, [:dire_jlms, :indire_jlms])
@@ -2757,7 +2806,7 @@ function jlmsbc(::Type{SSFOADH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, 
   
 #    gammap = rho[pos.beggamma]
 #    gamma  = eigvalu.rymin/(1.0 +exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0 +exp(gammap));
-#     dire_ratio,indire_ratio = IrhoWratio(gamma, rowIDT)
+#     dire_ratio,indire_ratio = IrhoWratiocf(gamma, rowIDT)
      
 #     β  = rho[1:pos.endx]
 #     τ  = rho[pos.begq:pos.endq]
@@ -2844,7 +2893,7 @@ function jlmsbc(::Type{SSFOADH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, 
   
 #    gammap = rho[pos.beggamma]
 #    gamma  = eigvalu.rymin/(1+exp(gammap))+eigvalu.rymax*exp(gammap)/(1+exp(gammap));
-#     dire_ratio,indire_ratio = IrhoWratio(gamma, rowIDT)
+#     dire_ratio,indire_ratio = IrhoWratiocf(gamma, rowIDT)
      
 #     β  = rho[1:pos.endx]
 #     τ  = rho[pos.begq:pos.endq]
@@ -2921,12 +2970,13 @@ function jlmsbc(::Type{SSFOADH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, 
 #  end
  
 
-function  jlmsbckute(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix, IV::Matrix, Wy::Matrix,
- PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+function  cfindexkute(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix, IV::Matrix, Wy::Matrix,
+ PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 
 
  β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+τ[index] = 0         
 phi = rho[pos.begphi:pos.endphi]
 
 phi = reshape(phi,:,num.nofeta)
@@ -2997,13 +3047,13 @@ end
 
 
 
-function  jlmsbckut(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,   Wy::Matrix,
-    PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+function  cfindexkut(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,   Wy::Matrix,
+    PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
    
    
     β  = rho[1:pos.endx]
    τ  = rho[pos.begq:pos.endq]
-  
+    τ[index]=0
    δ2 = rho[pos.begw]  
    γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
    δ1 = rho[pos.begz]
@@ -3071,16 +3121,17 @@ function  jlmsbckut(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,   Wy::Matrix,
 
 
 
-function jlmsbc(::Type{SSFKUET}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
+function counterfactindex(::Type{SSFKUET}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
     PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
  
     Wy = _dicM[:wy]
+    index = _dicOPT[:cfindices]
 
     gammap = rho[pos.beggamma]
     gamma  = eigvalu.rymin/(1.0 +exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0 +exp(gammap));
 
-    dire_ratio,indire_ratio = IrhoWratio(gamma, rowIDT)
-    jlms_, bc_ = jlmsbckute(y, x, Q,  EN, IV, Wy, PorC, num, pos, rho,  eigvalu, rowIDT )  
+    dire_ratio,indire_ratio = IrhoWratiocf(gamma, rowIDT)
+    jlms_, bc_ = cfindexkute(y, x, Q,  EN, IV, Wy, PorC, num, pos, rho,  eigvalu, index, rowIDT )  
 
     jlms_df = DataFrame(hcat(dire_ratio*jlms_,indire_ratio*jlms_), [:dire_jlms, :indire_jlms])
     bc_df = DataFrame(hcat(dire_ratio*bc_,indire_ratio*bc_), [:dire_bc, :indire_bc])
@@ -3089,16 +3140,17 @@ function jlmsbc(::Type{SSFKUET}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, 
  
  end
 
- function jlmsbc(::Type{SSFKUT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
+ function counterfactindex(::Type{SSFKUT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
     PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
  
     Wy = _dicM[:wy]
+    index = _dicOPT[:cfindices]
 
     gammap = rho[pos.beggamma]
     gamma  = eigvalu.rymin/(1.0 +exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0 +exp(gammap));
 
-    dire_ratio,indire_ratio = IrhoWratio(gamma, rowIDT)
-    jlms_, bc_ = jlmsbckut(y, x, Q,  Wy, PorC, pos, rho,  eigvalu, rowIDT )  
+    dire_ratio,indire_ratio = IrhoWratiocf(gamma, rowIDT)
+    jlms_, bc_ = cfindexkut(y, x, Q,  Wy, PorC, pos, rho,  eigvalu, index, rowIDT )  
 
     jlms_df = DataFrame(hcat(dire_ratio*jlms_,indire_ratio*jlms_), [:dire_jlms, :indire_jlms])
     bc_df = DataFrame(hcat(dire_ratio*bc_,indire_ratio*bc_), [:dire_bc, :indire_bc])
@@ -3109,12 +3161,13 @@ function jlmsbc(::Type{SSFKUET}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, 
 
 
  
-function  jlmsbckuhe(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix, IV::Matrix, Wy::Matrix,
-    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+function  cdindexkuhe(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix, IV::Matrix, Wy::Matrix,
+    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
    
    
     β  = rho[1:pos.endx]
    τ  = rho[pos.begq:pos.endq]
+   τ[index] = 0
    phi = rho[pos.begphi:pos.endphi]
    
    phi = reshape(phi,:,num.nofeta)
@@ -3185,15 +3238,15 @@ function  jlmsbckuhe(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix,
    
    
    
-   function  jlmsbckuh(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,   Wy::Matrix,
-       PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+   function  cfindexkuh(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,   Wy::Matrix,
+       PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
       
       
-       β  = rho[1:pos.endx]
-      τ  = rho[pos.begq:pos.endq]
-     
-      δ2 = rho[pos.begw]  
-      γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
+        β  = rho[1:pos.endx]
+        τ  = rho[pos.begq:pos.endq]
+        τ[index] = 0
+        δ2 = rho[pos.begw]  
+        γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
     #   δ1 = rho[pos.begz]
       gammap = rho[pos.beggamma]
       gamma  = eigvalu.rymin/(1.0 +exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0 +exp(gammap));
@@ -3259,16 +3312,17 @@ function  jlmsbckuhe(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix,
    
    
    
-   function jlmsbc(::Type{SSFKUEH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
+   function counterfactindex(::Type{SSFKUEH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
        PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
     
        Wy = _dicM[:wy]
-   
+       index = _dicOPT[:cfindices]
+
        gammap = rho[pos.beggamma]
        gamma  = eigvalu.rymin/(1.0 +exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0 +exp(gammap));
-           dire_ratio,indire_ratio = IrhoWratio(gamma, rowIDT)
+           dire_ratio,indire_ratio = IrhoWratiocf(gamma, rowIDT)
    
-        jlms_, bc_ = jlmsbckuhe(y, x, Q,  EN, IV, Wy, PorC, num, pos, rho,  eigvalu, rowIDT )  
+        jlms_, bc_ = cdindexkuhe(y, x, Q,  EN, IV, Wy, PorC, num, pos, rho,  eigvalu, index, rowIDT )  
 
            
         jlms_df = DataFrame(hcat(dire_ratio.*jlms_,indire_ratio.*jlms_), [:dire_jlms, :indire_jlms])
@@ -3281,16 +3335,17 @@ function  jlmsbckuhe(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix,
 
 
        
-   function jlmsbc(::Type{SSFKUH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
+   function counterfactindex(::Type{SSFKUH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
     PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
  
     Wy = _dicM[:wy]
+    index = _dicOPT[:cfindices]
 
     gammap = rho[pos.beggamma]
     gamma  = eigvalu.rymin/(1.0 +exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0 +exp(gammap));
-        dire_ratio,indire_ratio = IrhoWratio(gamma, rowIDT)
+        dire_ratio,indire_ratio = IrhoWratiocf(gamma, rowIDT)
 
-    jlms_, bc_ = jlmsbckuh(y, x, Q,  Wy, PorC, pos, rho,  eigvalu, rowIDT )  
+    jlms_, bc_ = cfindexkuh(y, x, Q,  Wy, PorC, pos, rho,  eigvalu, index, rowIDT )  
 
         
      jlms_df = DataFrame(hcat(dire_ratio.*jlms_,indire_ratio.*jlms_), [:dire_jlms, :indire_jlms])
@@ -3303,11 +3358,13 @@ function  jlmsbckuhe(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix,
 
 
  
-function  jlmsbckkte(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix, IV::Matrix, 
-    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+ function  cfindexkkte(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix, IV::Matrix, 
+    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
+   
    
     β  = rho[1:pos.endx]
     τ  = rho[pos.begq:pos.endq]
+    τ[index] = 0
     phi = rho[pos.begphi:pos.endphi]
     
     phi = reshape(phi,:,num.nofeta)
@@ -3354,13 +3411,13 @@ function  jlmsbckkte(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix,
     
    
    
-   
-function  jlmsbckkt(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,   
-       PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
-      
+function  cfindexkkt(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,   
+        PorC::Int64, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
+       
        β  = rho[1:pos.endx]
        τ  = rho[pos.begq:pos.endq]
-       
+       τ[index] = 0
+
        δ2 = rho[pos.begw]  
        γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
        δ1 = rho[pos.begz]
@@ -3400,32 +3457,37 @@ function  jlmsbckkt(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
       
       
     
-function jlmsbc(::Type{SSFKKET}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
+function counterfactindex(::Type{SSFKKET}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
     PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+    index = _dicOPT[:cfindices]
 
-    jlms_, bc_ = jlmsbckkte(y, x, Q, EN, IV, PorC, num, pos, rho,  eigvalu, rowIDT )  
+    jlms_, bc_ = cfindexkkte(y, x, Q, EN, IV, PorC, num, pos, rho,  eigvalu, index, rowIDT )  
 
     return jlms_, bc_
 
 end
 
-function jlmsbc(::Type{SSFKKT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
+function counterfactindex(::Type{SSFKKT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
     PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+    index = _dicOPT[:cfindices]
 
-    jlms_, bc_ = jlmsbckkt(y, x, Q, PorC, pos, rho,  eigvalu, rowIDT )  
+    jlms_, bc_ = cfindexkkt(y, x, Q, PorC, pos, rho,  eigvalu, index, rowIDT )  
 
     return jlms_, bc_
 
 end
    
-   
+
+
 
  
-function  jlmsbckkhe(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix, IV::Matrix, 
-    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+function  cfindexkkhe(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix, IV::Matrix, 
+    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
    
     β  = rho[1:pos.endx]
     τ  = rho[pos.begq:pos.endq]
+    τ[index] = 0
+
     phi = rho[pos.begphi:pos.endphi]
     
     phi = reshape(phi,:,num.nofeta)
@@ -3466,19 +3528,20 @@ function  jlmsbckkhe(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix,
    
     @views TE_bc = exp.(-bc);
     @views TE_jlms = exp.(-jlms);
-    return TE_jlms, TE_bc     
+    return TE_jlms, TE_bc    
     end
     
     
    
    
    
-function  jlmsbckkh(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,   
-       PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
-      
+function  cfindexkkh(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,   
+       PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int,rowIDT::Matrix{Any})
+
+
        β  = rho[1:pos.endx]
        τ  = rho[pos.begq:pos.endq]
-       
+       τ[index] = 0
        δ2 = rho[pos.begw]  
        γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
     #    δ1 = rho[pos.begz]
@@ -3497,7 +3560,6 @@ function  jlmsbckkh(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
        bc = zeros(eltype(y),size(hi,1),1);
        jlms = zeros(eltype(y),size(hi,1),1);
        
-
        @views invPi = 1.0 /σᵥ²  ;
 
        @floop begin
@@ -3513,24 +3575,31 @@ function  jlmsbckkh(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
       
        @views TE_bc = exp.(-bc);
        @views TE_jlms = exp.(-jlms);
-       return TE_jlms, TE_bc     
-    end    
+
+
+
+       return TE_jlms, TE_bc
+       
+    end
+     
       
       
     
-function jlmsbc(::Type{SSFKKEH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
+function counterfactindex(::Type{SSFKKEH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
     PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+    index = _dicOPT[:cfindices]
 
-    jlms_, bc_ = jlmsbckkhe(y, x, Q, EN, IV, PorC, num, pos, rho,  eigvalu, rowIDT )  
+    jlms_, bc_ = cfindexkkhe(y, x, Q, EN, IV, PorC, num, pos, rho,  eigvalu,index, rowIDT )  
 
     return jlms_, bc_
 
 end
 
-function jlmsbc(::Type{SSFKKH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
+function counterfactindex(::Type{SSFKKH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
     PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+    index = _dicOPT[:cfindices]
 
-    jlms_, bc_ = jlmsbckkh(y, x, Q, PorC, pos, rho,  eigvalu, rowIDT )  
+    jlms_, bc_ = cfindexkkh(y, x, Q, PorC, pos, rho,  eigvalu, index, rowIDT )  
 
     return jlms_, bc_
 
