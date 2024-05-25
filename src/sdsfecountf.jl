@@ -10,7 +10,8 @@ function  cfindext_yuv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix,
     Wy::Matrix, Wu::Matrix, Wv::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 δ1 = rho[pos.begz]
@@ -94,7 +95,8 @@ function  cfindext_yu(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, 
     Wy::Matrix, Wu::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 δ1 = rho[pos.begz]
@@ -174,7 +176,8 @@ function  cfindext_yv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, 
     Wy::Matrix, Wv::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple,index::Int,  rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 δ1 = rho[pos.begz]
@@ -257,7 +260,8 @@ function  cfindext_y(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v
     Wy::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple,index::Int,  rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 δ1 = rho[pos.begz]
@@ -332,7 +336,8 @@ function  cfindext_uv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, 
    Wu::Matrix, Wv::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 δ1 = rho[pos.begz]
@@ -413,7 +418,8 @@ function  cfindext_u(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v
     Wu::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 δ1 = rho[pos.begz]
@@ -487,7 +493,8 @@ function  jcfindext_v(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, 
     Wv::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple,index::Int,  rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 δ1 = rho[pos.begz]
@@ -560,7 +567,8 @@ function  cfindext_(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v:
     PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 δ1 = rho[pos.begz]
@@ -665,7 +673,8 @@ function  cfindexdt_yuv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix
  PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 
 phi = rho[pos.begphi:pos.endphi]
 
@@ -755,7 +764,8 @@ function  cfindexdt_yu(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix,
  PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 
 phi = rho[pos.begphi:pos.endphi]
 
@@ -843,7 +853,8 @@ function  cfindexdt_yv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix,
  PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 
 phi = rho[pos.begphi:pos.endphi]
 
@@ -933,7 +944,8 @@ function  cfindexdt_y(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, 
  PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 
 phi = rho[pos.begphi:pos.endphi]
 
@@ -1016,7 +1028,8 @@ function  cfindexdt_uv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix,
  PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 phi = rho[pos.begphi:pos.endphi]
 
 nofiv=num.nofphi/num.nofeta
@@ -1107,7 +1120,8 @@ function  cfindexdt_u(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, 
  PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 
 phi = rho[pos.begphi:pos.endphi]
 
@@ -1192,7 +1206,8 @@ function  cfindexdt_v(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, 
  PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 
 phi = rho[pos.begphi:pos.endphi]
 
@@ -1278,7 +1293,8 @@ function  cfindexdt_(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v
  PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 
 phi = rho[pos.begphi:pos.endphi]
 
@@ -1416,7 +1432,8 @@ function counterfactindex(::Type{SSFOADT}, y::Union{Vector,Matrix}, x::Matrix, Q
     Wy::Matrix, Wu::Matrix, Wv::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
@@ -1501,7 +1518,8 @@ function  cfindexh_yu(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, 
     Wy::Matrix, Wu::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
@@ -1582,7 +1600,8 @@ function  cfindexh_yv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, 
     Wy::Matrix, Wv::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
@@ -1666,7 +1685,8 @@ function cfindexh_y(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v:
     Wy::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
@@ -1742,7 +1762,8 @@ function  cfindexh_uv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, 
    Wu::Matrix, Wv::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
@@ -1824,7 +1845,8 @@ function  cfindexh_u(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v
     Wu::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 # δ1 = rho[pos.begz]
@@ -1898,7 +1920,8 @@ function  cfindexh_v(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v
     Wv::Matrix, PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 # δ1 = rho[pos.begz]
@@ -2076,7 +2099,8 @@ function  cfindexdh_yuv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix
  PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 phi = rho[pos.begphi:pos.endphi]
 
 nofiv=num.nofphi/num.nofeta
@@ -2169,7 +2193,8 @@ function  cfindexdh_yu(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix,
  PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 phi = rho[pos.begphi:pos.endphi]
 
 nofiv=num.nofphi/num.nofeta
@@ -2259,7 +2284,8 @@ function  cfindexdh_yv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix,
  PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 phi = rho[pos.begphi:pos.endphi]
 
 nofiv=num.nofphi/num.nofeta
@@ -2350,7 +2376,8 @@ function  cfindexdh_y(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, 
  PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 phi = rho[pos.begphi:pos.endphi]
 
 nofiv=num.nofphi/num.nofeta
@@ -2435,7 +2462,8 @@ function  cfindexdh_uv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix,
  PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 phi = rho[pos.begphi:pos.endphi]
 
 nofiv=num.nofphi/num.nofeta
@@ -2526,7 +2554,8 @@ function  cfindexdh_u(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, 
  PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
 phi = rho[pos.begphi:pos.endphi]
 
 nofiv=num.nofphi/num.nofeta
@@ -2610,7 +2639,10 @@ function  cfindexdh_v(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, 
  PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index]  = 0
+column_of_threes = fill(index[2], size(Q, 1))
+Q[:, index[1]] = column_of_threes
+
+
 phi = rho[pos.begphi:pos.endphi]
 
 nofiv=num.nofphi/num.nofeta
@@ -2695,7 +2727,8 @@ function  cfindexdh_(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v
  PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, index::Int, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0   
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes   
 phi = rho[pos.begphi:pos.endphi]
 
 nofiv=num.nofphi/num.nofeta
@@ -2976,7 +3009,8 @@ function  cfindexkute(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix
 
  β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
-τ[index] = 0         
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes         
 phi = rho[pos.begphi:pos.endphi]
 
 phi = reshape(phi,:,num.nofeta)
@@ -3053,7 +3087,8 @@ function  cfindexkut(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,   Wy::Matrix
    
     β  = rho[1:pos.endx]
    τ  = rho[pos.begq:pos.endq]
-    τ[index]=0
+            column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
    δ2 = rho[pos.begw]  
    γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
    δ1 = rho[pos.begz]
@@ -3167,7 +3202,8 @@ function  cdindexkuhe(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix
    
     β  = rho[1:pos.endx]
    τ  = rho[pos.begq:pos.endq]
-   τ[index] = 0
+   column_of_threes = fill(index[2], size(Q, 1))
+   Q[:, index[1]] = column_of_threes
    phi = rho[pos.begphi:pos.endphi]
    
    phi = reshape(phi,:,num.nofeta)
@@ -3244,7 +3280,8 @@ function  cdindexkuhe(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix
       
         β  = rho[1:pos.endx]
         τ  = rho[pos.begq:pos.endq]
-        τ[index] = 0
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
         δ2 = rho[pos.begw]  
         γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
     #   δ1 = rho[pos.begz]
@@ -3364,7 +3401,8 @@ function  cdindexkuhe(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix
    
     β  = rho[1:pos.endx]
     τ  = rho[pos.begq:pos.endq]
-    τ[index] = 0
+    column_of_threes = fill(index[2], size(Q, 1))
+    Q[:, index[1]] = column_of_threes
     phi = rho[pos.begphi:pos.endphi]
     
     phi = reshape(phi,:,num.nofeta)
@@ -3416,8 +3454,8 @@ function  cfindexkkt(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
        
        β  = rho[1:pos.endx]
        τ  = rho[pos.begq:pos.endq]
-       τ[index] = 0
-
+       column_of_threes = fill(index[2], size(Q, 1))
+       Q[:, index[1]] = column_of_threes
        δ2 = rho[pos.begw]  
        γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
        δ1 = rho[pos.begz]
@@ -3486,8 +3524,8 @@ function  cfindexkkhe(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix
    
     β  = rho[1:pos.endx]
     τ  = rho[pos.begq:pos.endq]
-    τ[index] = 0
-
+    column_of_threes = fill(index[2], size(Q, 1))
+    Q[:, index[1]] = column_of_threes
     phi = rho[pos.begphi:pos.endphi]
     
     phi = reshape(phi,:,num.nofeta)
@@ -3541,11 +3579,12 @@ function  cfindexkkh(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
 
        β  = rho[1:pos.endx]
        τ  = rho[pos.begq:pos.endq]
-       τ[index] = 0
        δ2 = rho[pos.begw]  
        γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
     #    δ1 = rho[pos.begz]
-       
+        column_of_threes = fill(index[2], size(Q, 1))
+        Q[:, index[1]] = column_of_threes
+
        hi  = exp.(Q*τ)
        σᵤ²= exp(δ2) 
        σᵤ= exp(0.5*δ2) 

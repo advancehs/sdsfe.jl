@@ -1301,8 +1301,8 @@ end
 
 function cfindices(arg=nothing)
     
-    if !(isa(arg, Integer))
-        throw("The keyword of `cfindices` in `sfmodel_opt()` is specified incorrectly. Only allow Integer. Got `$(arg)` instead.")
+    if !(isa(arg, Tuple))
+        throw("The keyword of `cfindices` in `sfmodel_opt()` is specified incorrectly. Only allow Tuple. Got `$(arg)` instead.")
     end 
 
     return (:cfindices, arg)
