@@ -1469,9 +1469,9 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
       _jlms_directM = mean.(eachcol(_jlms_direct))
       _jlms_indirectM = mean.(eachcol(_jlms_indirect))
 
-      _te = exp.(_jlms)
-      _te_direct = exp.(_jlms_direct)
-      _te_indirect = exp.(_jlms_indirect)
+      _te = exp.(-_jlms)
+      _te_direct = exp.(-_jlms_direct)
+      _te_indirect = exp.(-_jlms_indirect)
 
       _teM = mean.(_te)
       _te_directM = mean.(_te_direct)
