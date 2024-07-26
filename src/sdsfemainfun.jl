@@ -1469,9 +1469,20 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
       _jlms_directM = mean.(eachcol(_jlms_direct))
       _jlms_indirectM = mean.(eachcol(_jlms_indirect))
 
+      _te = exp.(_jlms)
+      _te_direct = exp.(_jlms_direct)
+      _te_indirect = exp.(_jlms_indirect)
+
+      _teM = mean.(_te)
+      _te_directM = mean.(_te_direct)
+      _te_indirectM = mean.(_te_indirect)
+
    else
-    _jlms, _jlms_direct, _jlms_indirect  = nothing, nothing, nothing
-      _jlmsM, _jlms_directM, _jlms_indirectM = nothing
+      _jlms, _jlms_direct, _jlms_indirect  = nothing, nothing, nothing
+      _jlmsM, _jlms_directM, _jlms_indirectM = nothing, nothing, nothing
+      _te, _te_direct, _te_indirect = nothing, nothing, nothing
+      _teM,_te_directM,_te_indirectM = nothing, nothing, nothing
+
    end 
 
 
@@ -1578,7 +1589,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
   stas = zeros(6, 7)
   stas = hcat([ "Median Efficiency"; "Num of obs." ;"Log of Likelihood" ; "AIC";  "BIC"; "HQC"], stas )
   stas[:,2:8] .= "";
-  stas[1,3] = _jlmsM
+  stas[1,3] = _teM[1]
 
   stas[2,3] = num.nofobs
   if tagD[:modelid] in (SSFOADT,SSFOADH,SSFKUEH,SSFKUET,SSFKKEH,SSFKKET)
@@ -1708,6 +1719,10 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
     _dicRES[:jlms]            = _jlms
     _dicRES[:jlms_direct]     = _jlms_direct
     _dicRES[:jlms_indirect]   = _jlms_indirect
+
+    _dicRES[:te]            = _te
+    _dicRES[:te_direct]     = _te_direct
+    _dicRES[:te_indirect]   = _te_indirect
 
     _dicRES[:totalematu] = totalematu
     _dicRES[:dirematu] = dirematu
