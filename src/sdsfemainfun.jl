@@ -1585,8 +1585,8 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
     llkkkk = -1* prtlloglike(tagD[:modelid], yvar, xvar,  qvar, wvar, vvar,  zvar, envar, ivvar, _porc, num, pos, _coevec,  eigvalu, rowIDT)
     stas[3,3] = llkkkk
     stas[4,3] = (-2)* (llkkkk)+2*(num.nofpara-num.nofphi-num.nofeta)
-    stas[5,3] = (-2)* (llkkkk)+log(num.nofobs)*(num.nofpara-num.nofeta)
-    stas[6,3] = (-2)* (llkkkk)+log(log(num.nofobs))*2*(num.nofpara-num.nofeta)
+    stas[5,3] = (-2)* (llkkkk)+log(num.nofobs)*(num.nofpara-num.nofphi-num.nofeta)
+    stas[6,3] = (-2)* (llkkkk)+log(log(num.nofobs))*2*(num.nofpara-num.nofphi-num.nofeta)
 
   else
     stas[3,3] = -Optim.minimum(mfun)
