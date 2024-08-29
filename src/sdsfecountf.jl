@@ -2786,10 +2786,11 @@ function counterfactindex(::Type{SSFOADH}, y::Union{Vector,Matrix}, x::Matrix, Q
    Wv = _dicM[:wv]
    index = _dicOPT[:cfindices]
 
-   gammap = rho[pos.beggamma]
-   gamma  = eigvalu.rymin/(1.0 +exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0 +exp(gammap));
-    dire_ratio,indire_ratio = IrhoWratiocf(gamma, rowIDT)
+
      if Wy!=Nothing  # yuv
+        gammap = rho[pos.beggamma]
+        gamma  = eigvalu.rymin/(1.0 +exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0 +exp(gammap));
+         dire_ratio,indire_ratio = IrhoWratiocf(gamma, rowIDT)
          if Wu!=Nothing 
              if Wv!=Nothing #yuv
                 jlms_, bc_ = cfindexdh_yuv( y, x, Q, w, v, z, EN, IV, Wy, Wu, Wv, PorC, num, pos, rho,  eigvalu, index, rowIDT )
