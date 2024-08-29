@@ -525,7 +525,7 @@ function IrhoWItauW(gamma::Float64,tau::Float64, jlms0, rowIDT::Matrix{Any} )
      Wu = _dicM[:wu]
 
      T = size(rowIDT,1)
-   if length(Wy)==1  
+   if length(Wy)==1 
 		 
      NN=0.0
      dire=0.0
@@ -538,17 +538,9 @@ function IrhoWItauW(gamma::Float64,tau::Float64, jlms0, rowIDT::Matrix{Any} )
        @views N = rowIDT[1,2];
           NN = NN +N
           if Wu!=Nothing 
-               if Wy!=Nothing 
-                    wirho = ((I(N)-gamma*Wy[1])\I(N))*((I(N)-tau*Wu[1])\I(N))*Diagonal(jlms)
-               else
-                    wirho = ((I(N)-tau*Wu[1])\I(N))*Diagonal(jlms)
-               end
+               wirho = ((I(N)-gamma*Wy[1])\I(N))*((I(N)-tau*Wu[1])\I(N))*Diagonal(jlms)    
           else
-               if Wy!=Nothing 
-                    wirho = ((I(N)-gamma*Wy[1])\I(N))*Diagonal(jlms)
-               else
-                    wirho = Diagonal(jlms)
-               end
+               wirho = ((I(N)-gamma*Wy[1])\I(N))*Diagonal(jlms) 
           end
           dire =dire+ tr(wirho)
           total =total+ (sum(wirho) )
@@ -566,17 +558,9 @@ function IrhoWItauW(gamma::Float64,tau::Float64, jlms0, rowIDT::Matrix{Any} )
             @views N = rowIDT[ttt,2];
     		 NN = NN +N
           if Wu!=Nothing 
-               if Wy!=Nothing 
-    		          wirho = ((I(N)-gamma*Wy[ttt])\I(N))*((I(N)-tau*Wu[ttt])\I(N))*Diagonal(jlms)
-               else
-                    wirho = ((I(N)-tau*Wu[ttt])\I(N))*Diagonal(jlms)
-               end  
+               wirho = ((I(N)-gamma*Wy[ttt])\I(N))*((I(N)-tau*Wu[ttt])\I(N))*Diagonal(jlms)
     		else
-               if Wy!=Nothing 
-                    wirho = ((I(N)-gamma*Wy[ttt])\I(N))*Diagonal(jlms)
-               else
-                    wirho = Diagonal(jlms)
-               end 
+               wirho = ((I(N)-gamma*Wy[ttt])\I(N))*Diagonal(jlms)
           end
                dire =dire+ tr(wirho)
     		 total =total+ (sum(wirho))
@@ -589,6 +573,59 @@ function IrhoWItauW(gamma::Float64,tau::Float64, jlms0, rowIDT::Matrix{Any} )
 	return dire, total
 end
 
+# 对z求导  gamma = 0
+function IrhoWItauW2(tau::Float64, jlms0, rowIDT::Matrix{Any} )
+
+     Wu = _dicM[:wu]
+
+     T = size(rowIDT,1)
+   if length(Wu)==1 
+		 
+     NN=0.0
+     dire=0.0
+     total=0.0
+     for ttt=1:T
+          @views ind = rowIDT[ttt,1];
+          @views jlms= jlms0[ind];
+
+
+       @views N = rowIDT[1,2];
+          NN = NN +N
+          if Wu!=Nothing 
+               wirho = ((I(N)-tau*Wu[1])\I(N))*Diagonal(jlms)
+          else
+               wirho = Diagonal(jlms)
+          end
+          dire =dire+ tr(wirho)
+          total =total+ (sum(wirho) )
+     end
+          dire = dire/NN 
+          total = total /NN
+     else
+		NN=0.0
+		dire=0.0
+		total=0.0
+		for ttt=1:T
+               @views ind = rowIDT[ttt,1];
+               @views jlms= jlms0[ind];
+
+            @views N = rowIDT[ttt,2];
+    		 NN = NN +N
+          if Wu!=Nothing 
+               wirho = ((I(N)-tau*Wu[ttt])\I(N))*Diagonal(jlms)
+    		else
+               wirho = Diagonal(jlms)
+          end
+               dire =dire+ tr(wirho)
+    		 total =total+ (sum(wirho))
+        end
+        dire = dire/NN 
+        total = total /NN
+    end
+
+
+	return dire, total
+end
 
 
 
@@ -830,26 +867,40 @@ function get_margeffu(
      jlms0, pos::NamedTuple, coef::Array{Float64, 1},  var_cov_matrix::Symmetric{Float64, Matrix{Float64}},
      eigvalu::NamedTuple ,indices_listz::Vector{Any}, rowIDT::Matrix{Any})
     
-     gammap = coef[pos.beggamma];
-     gamma  = eigvalu.rymin/(1+exp(gammap))+eigvalu.rymax*exp(gammap)/(1+exp(gammap));
-
-
      C = cholesky(var_cov_matrix)
      L = C.L
+
+     Wu = _dicM[:wu]
+     Wy = _dicM[:wy]
+     if Wy!=Nothing 
+          gammap = coef[pos.beggamma];
+          gamma  = eigvalu.rymin/(1+exp(gammap))+eigvalu.rymax*exp(gammap)/(1+exp(gammap));
+          if Wu!=Nothing 
+               taup = coef[pos.begtau]
+               tau  = (eigvalu.rumin)/(1.0 +exp(taup))+(eigvalu.rumax)*exp(taup)/(1.0 +exp(taup));
+               dire0, total0= IrhoWItauW(gamma, tau, jlms0, rowIDT)
+          else
+               tau = 1.0;
+               dire0, total0= IrhoWItauW(gamma, tau, jlms0, rowIDT)
+          end
+     else
+          if Wu!=Nothing 
+               taup = coef[pos.begtau]
+               tau  = (eigvalu.rumin)/(1.0 +exp(taup))+(eigvalu.rumax)*exp(taup)/(1.0 +exp(taup));
+               dire0, total0= IrhoWItauW2( tau, jlms0, rowIDT)
+          else
+               tau = 1.0;
+               dire0, total0= IrhoWItauW2( tau, jlms0, rowIDT)
+          end
+     end
+
 
 
     totalemat = Array{Any}(undef,0,2)
     diremat   = Array{Any}(undef,0,2)
     indiremat = Array{Any}(undef,0,2)
     
-    Wu = _dicM[:wu]
-    if Wu!=Nothing 
-          taup = coef[pos.begtau]
-          tau  = (eigvalu.rumin)/(1.0 +exp(taup))+(eigvalu.rumax)*exp(taup)/(1.0 +exp(taup));
-    else
-          tau = 1.0;
-    end
-    dire0, total0= IrhoWItauW(gamma, tau, jlms0, rowIDT)
+
     
     for (_, indices) in indices_listz
         dire,indire,totale = get_margeffu_single(pos,coef,indices,dire0,total0, L)
