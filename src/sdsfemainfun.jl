@@ -108,7 +108,7 @@ function sfmodel_spec(arg::Vararg; message::Bool=false)
 
        #* -- creates default values ---
 
-      for k in (:panel, :timevar, :idvar,  :dist, :type, :depvar, :frontier,:frontierWx, :margeffu, :mareffx, 
+      for k in (:panel, :timevar, :idvar,  :dist, :type, :depvar, :frontier,:frontierWx, :margeffu, :mareffx, :counterfact,
                   :μ, :hscale,  :σᵤ², :σᵥ²,  :hasDF, :transfer, :misc) # take out :data, :η, :λ, :τ, in this revision
           _dicM[k] = nothing
       end
@@ -145,7 +145,7 @@ function sfmodel_spec(arg::Vararg; message::Bool=false)
          varname = [:depvar]
          _dicM[:depvar] = [:depvar]
 
-         for k in (:timevar, :idvar, :frontier,:frontierWx, :margeffu, :mareffx,  :μ, :hscale,  :σᵤ², :σᵥ²) 
+         for k in (:timevar, :idvar, :frontier,:frontierWx, :margeffu, :mareffx, :counterfact, :μ, :hscale,  :σᵤ², :σᵥ²) 
              if _dicM[k] !== nothing # if not nothing, must be Array
                 isa(_dicM[k], Vector) || isa(_dicM[k][1], Vector) || isa(_dicM[k][1], Matrix) || throw("
                    `k` has to be a Vector or Matrix (e.g., Array{Float64, 1} or Array{Float64, 2}). 
@@ -413,6 +413,7 @@ function sfmodel_opt(arg::Vararg; message::Bool=false) # create a dictionary of 
   _dicOPT[:banner]           =  true
   _dicOPT[:ineff_index]      =  true
   _dicOPT[:margeffu]         =  true
+  _dicOPT[:counterfact]      =  true
   if tagD[:modelid] in (SSFOAT,SSFOAH,SSFOADT,SSFOADH,SSFKUEH,SSFKUET,SSFKUH,SSFKUT)
     _dicOPT[:mareffx]        =  true
     _dicOPT[:margeffu]       =  true
@@ -1510,10 +1511,10 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
       totalemat, diremat, indiremat = nothing, nothing, nothing
    end      
    #* ---- Counterfactual analysis -------------- 
-
+   if _dicOPT[:counterfact]  
    @views (_counterfactjlms, _counterfactbc) = counterfactindex(  tagD[:modelid], yvar, xvar, qvar, wvar, vvar,  zvar, envar, ivvar,
                                      _porc, num, pos, _coevec, eigvalu, rowIDT )
-    
+   end
   
    #* ------- Make Table ------------------
    for i in 1:size(var_cov_matrix, 1)

@@ -31,7 +31,7 @@ export sfmodel_spec, sfmodel_init, sfmodel_opt,
        # functions for sfmodel_opt
         warmstart_solver, warmstart_maxIT,
         main_solver, main_maxIT, tolerance, verbose, banner,
-        ineff_index, margeffu, table_format,autodiff_mode, cfindices,
+        ineff_index, counterfact,mareffx,margeffu, table_format,autodiff_mode, cfindices,
        # functions for sfmodel_fit
         useData,
         sfmodel_CI,

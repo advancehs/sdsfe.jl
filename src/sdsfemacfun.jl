@@ -1263,6 +1263,40 @@ margeffu(arg::Bool)
     return (:margeffu, arg)
  end
 
+"""
+mareffx(arg::Bool)
+  
+ An argument in `sfmodel_opt()`. Specify whether (`true`, the default) to
+ compute the mareffx effects of the exogenous determinants of inefficiency (if any).
+ 
+ See the help on `sfmodel_opt()` for more information.
+  
+ # Examples
+ ```julia-repl
+ sfmodel_opt( mareffx(false), ...)
+ ```
+""" 
+ function mareffx(arg::Bool=true)
+    return (:mareffx, arg)
+ end
+"""
+
+counterfact(arg::Bool)
+  
+ An argument in `sfmodel_opt()`. Specify whether (`true`, the default) to
+ compute the counterfact effects of the exogenous determinants of inefficiency (if any).
+ 
+ See the help on `sfmodel_opt()` for more information.
+  
+ # Examples
+ ```julia-repl
+ sfmodel_opt( counterfact(false), ...)
+ ```
+""" 
+ function counterfact(arg::Bool=true)
+    return (:counterfact, arg)
+ end
+
   # -------------------------
 
 
