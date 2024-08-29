@@ -1721,19 +1721,22 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
     _dicRES[:jlms_direct]     = _jlms_direct
     _dicRES[:jlms_indirect]   = _jlms_indirect
 
-    _dicRES[:te]            = _te
-    _dicRES[:te_direct]     = _te_direct
-    _dicRES[:te_indirect]   = _te_indirect
+    _dicRES[:te]              = _te
+    _dicRES[:te_direct]       = _te_direct
+    _dicRES[:te_indirect]     = _te_indirect
 
-    _dicRES[:totalematu] = totalematu
-    _dicRES[:dirematu] = dirematu
-    _dicRES[:indirematu] = indirematu
+    _dicRES[:totalematu]      = totalematu
+    _dicRES[:dirematu]        = dirematu
+    _dicRES[:indirematu]      = indirematu
 
-    _dicRES[:totalemat] = totalemat
-    _dicRES[:diremat] = diremat
-    _dicRES[:indiremat] = indiremat
-    _dicRES[:counterfactjlms] = _counterfactjlms
-    _dicRES[:counterfactbc]   = _counterfactbc
+    _dicRES[:totalemat]        = totalemat
+    _dicRES[:diremat]         = diremat
+    _dicRES[:indiremat]       = indiremat
+
+    _dicRES[:counterfacttotal] =_counterfacttotal
+    _dicRES[:counterfactdire]  =_counterfactdire
+    _dicRES[:counterfactindire] =_counterfactindire
+    
     _dicRES[:_____________] = "___________________"  #31      
     _dicRES[:model]         = minfo1      
      #     _dicRES[:data]          = "$sfdat"
