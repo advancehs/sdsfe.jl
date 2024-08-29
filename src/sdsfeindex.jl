@@ -6314,7 +6314,7 @@ function  jlmsbct_yuv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, 
     
     sigs2 = zeros(eltype(y),T,1);
     mus = zeros(eltype(y),T,1);
-    bc = zeros(eltype(y),size(hi,1),1);
+
     jlms = zeros(eltype(y),size(hi,1),1);
     jlms_direct = zeros(eltype(y),size(hi,1),1);
     jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -6400,7 +6400,7 @@ function  jlmsbct_yu(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v
     
     sigs2 = zeros(eltype(y),T,1);
     mus = zeros(eltype(y),T,1);
-    bc = zeros(eltype(y),size(hi,1),1);
+
     jlms = zeros(eltype(y),size(hi,1),1);
     jlms_direct = zeros(eltype(y),size(hi,1),1);
     jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -6486,7 +6486,7 @@ function  jlmsbct_yv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v
     
     sigs2 = zeros(eltype(y),T,1);
     mus = zeros(eltype(y),T,1);
-    bc = zeros(eltype(y),size(hi,1),1);
+
     jlms = zeros(eltype(y),size(hi,1),1);
     jlms_direct = zeros(eltype(y),size(hi,1),1);
     jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -6571,7 +6571,7 @@ function  jlmsbct_y(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v:
     
     sigs2 = zeros(eltype(y),T,1);
     mus = zeros(eltype(y),T,1);
-    bc = zeros(eltype(y),size(hi,1),1);
+
     jlms = zeros(eltype(y),size(hi,1),1);
     jlms_direct = zeros(eltype(y),size(hi,1),1);
     jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -6656,7 +6656,7 @@ function  jlmsbct_uv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v
    
    sigs2 = zeros(eltype(y),T,1);
    mus = zeros(eltype(y),T,1);
-   bc = zeros(eltype(y),size(hi,1),1);
+
    jlms = zeros(eltype(y),size(hi,1),1);
    jlms_direct = zeros(eltype(y),size(hi,1),1);
    jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -6740,7 +6740,7 @@ function  jlmsbct_u(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v:
     
     sigs2 = zeros(eltype(y),T,1);
     mus = zeros(eltype(y),T,1);
-    bc = zeros(eltype(y),size(hi,1),1);
+
     jlms = zeros(eltype(y),size(hi,1),1);
     jlms_direct = zeros(eltype(y),size(hi,1),1);
     jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -6821,7 +6821,7 @@ function  jlmsbct_v(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v:
     
     sigs2 = zeros(eltype(y),T,1);
     mus = zeros(eltype(y),T,1);
-    bc = zeros(eltype(y),size(hi,1),1);
+
     jlms = zeros(eltype(y),size(hi,1),1);
     jlms_direct = zeros(eltype(y),size(hi,1),1);
     jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -6897,7 +6897,7 @@ function  jlmsbct_(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::
     
     sigs2 = zeros(eltype(y),T,1);
     mus = zeros(eltype(y),T,1);
-    bc = zeros(eltype(y),size(hi,1),1);
+
     jlms = zeros(eltype(y),size(hi,1),1);
     jlms_direct = zeros(eltype(y),size(hi,1),1);
     jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -6938,11 +6938,9 @@ Wu = _dicM[:wu]
 Wv = _dicM[:wv]
 
 if Wy!=Nothing  # yuv
-    gammap = rho[pos.beggamma]
-    gamma  = eigvalu.rymin/(1.0 +exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0 +exp(gammap));
+
 if Wu!=Nothing 
-    taup = rho[pos.begtau]
-    tau  = eigvalu.rumin/(1.0 +exp(taup))+eigvalu.rumax*exp(taup)/(1.0 +exp(taup));
+
 if Wv!=Nothing #yuv
     jlms,jlms_direct,jlms_indirect  = jlmsbct_yuv( y, x, Q, w, v, z, Wy, Wu, Wv, PorC, pos, rho,  eigvalu, rowIDT )
 else # yu
@@ -6958,8 +6956,7 @@ end
 jlms_df = DataFrame(hcat(dire_ratio*jlms_,indire_ratio*jlms_), [:dire_jlms, :indire_jlms])
 else
 if Wu!=Nothing 
-    taup = rho[pos.begtau]
-    tau  = eigvalu.rumin/(1.0 +exp(taup))+eigvalu.rumax*exp(taup)/(1.0 +exp(taup));
+
 if Wv!=Nothing #uv
     jlms,jlms_direct,jlms_indirect  = jlmsbct_uv(y, x, Q, w, v, z, Wu, Wv, PorC, pos, rho,  eigvalu, rowIDT  )
 else # u
@@ -7019,7 +7016,7 @@ function  jlmsbcdt_yuv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix,
  
  sigs2 = zeros(eltype(y),T,1);
  mus = zeros(eltype(y),T,1);
- bc = zeros(eltype(y),size(hi,1),1);
+
  
  jlms = zeros(eltype(y),size(hi,1),1);
  jlms_direct = zeros(eltype(y),size(hi,1),1);
@@ -7117,7 +7114,7 @@ function  jlmsbcdt_yu(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, 
  
  sigs2 = zeros(eltype(y),T,1);
  mus = zeros(eltype(y),T,1);
- bc = zeros(eltype(y),size(hi,1),1);
+
  jlms = zeros(eltype(y),size(hi,1),1);
  jlms_direct = zeros(eltype(y),size(hi,1),1);
  jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -7209,7 +7206,7 @@ function  jlmsbcdt_yv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, 
  
  sigs2 = zeros(eltype(y),T,1);
  mus = zeros(eltype(y),T,1);
- bc = zeros(eltype(y),size(hi,1),1);
+
  jlms = zeros(eltype(y),size(hi,1),1);
  jlms_direct = zeros(eltype(y),size(hi,1),1);
  jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -7301,7 +7298,7 @@ function  jlmsbcdt_y(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v
  
  sigs2 = zeros(eltype(y),T,1);
  mus = zeros(eltype(y),T,1);
- bc = zeros(eltype(y),size(hi,1),1);
+
  jlms = zeros(eltype(y),size(hi,1),1);
  jlms_direct = zeros(eltype(y),size(hi,1),1);
  jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -7394,7 +7391,7 @@ function  jlmsbcdt_uv(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, 
  
  sigs2 = zeros(eltype(y),T,1);
  mus = zeros(eltype(y),T,1);
- bc = zeros(eltype(y),size(hi,1),1);
+
  jlms = zeros(eltype(y),size(hi,1),1);
  jlms_direct = zeros(eltype(y),size(hi,1),1);
  jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -7491,7 +7488,7 @@ function  jlmsbcdt_u(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v
  
  sigs2 = zeros(eltype(y),T,1);
  mus = zeros(eltype(y),T,1);
- bc = zeros(eltype(y),size(hi,1),1);
+
  jlms = zeros(eltype(y),size(hi,1),1);
  jlms_direct = zeros(eltype(y),size(hi,1),1);
  jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -7586,7 +7583,7 @@ function  jlmsbcdt_v(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v
  
  sigs2 = zeros(eltype(y),T,1);
  mus = zeros(eltype(y),T,1);
- bc = zeros(eltype(y),size(hi,1),1);
+
  jlms = zeros(eltype(y),size(hi,1),1);
  jlms_direct = zeros(eltype(y),size(hi,1),1);
  jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -7676,7 +7673,7 @@ function  jlmsbcdt_(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v:
  
  sigs2 = zeros(eltype(y),T,1);
  mus = zeros(eltype(y),T,1);
- bc = zeros(eltype(y),size(hi,1),1);
+
  jlms = zeros(eltype(y),size(hi,1),1);
  jlms_direct = zeros(eltype(y),size(hi,1),1);
  jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -7716,8 +7713,7 @@ function jlmsbc(::Type{SSFOADT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, 
    Wv = _dicM[:wv]
 
      if Wy!=Nothing  # yuv
-        gammap = rho[pos.beggamma]
-        gamma  = eigvalu.rymin/(1.0 +exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0 +exp(gammap));
+
 
          if Wu!=Nothing 
              if Wv!=Nothing #yuv
@@ -7786,7 +7782,7 @@ T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);
 mus = zeros(eltype(y),T,1);
-bc = zeros(eltype(y),size(hi,1),1);
+
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -7871,7 +7867,7 @@ T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);
 mus = zeros(eltype(y),T,1);
-bc = zeros(eltype(y),size(hi,1),1);
+
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -7957,7 +7953,7 @@ T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);
 mus = zeros(eltype(y),T,1);
-bc = zeros(eltype(y),size(hi,1),1);
+
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -8043,7 +8039,7 @@ T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);
 mus = zeros(eltype(y),T,1);
-bc = zeros(eltype(y),size(hi,1),1);
+
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -8128,7 +8124,7 @@ T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);
 mus = zeros(eltype(y),T,1);
-bc = zeros(eltype(y),size(hi,1),1);
+
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -8212,7 +8208,7 @@ T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);
 mus = zeros(eltype(y),T,1);
-bc = zeros(eltype(y),size(hi,1),1);
+
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -8292,7 +8288,7 @@ T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);
 mus = zeros(eltype(y),T,1);
-bc = zeros(eltype(y),size(hi,1),1);
+
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -8370,7 +8366,7 @@ T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);
 mus = zeros(eltype(y),T,1);
-bc = zeros(eltype(y),size(hi,1),1);
+
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -8413,11 +8409,9 @@ function jlmsbc(::Type{SSFOAH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w
 
 
     if Wy!=Nothing  # yuv
-        gammap = rho[pos.beggamma]
-        gamma  = eigvalu.rymin/(1.0 +exp(gammap))+eigvalu.rymax*exp(gammap)/(1.0 +exp(gammap));
+
         if Wu!=Nothing 
-            taup = rho[pos.begtau]
-            tau  = eigvalu.rumin/(1.0 +exp(taup))+eigvalu.rumax*exp(taup)/(1.0 +exp(taup));
+
             if Wv!=Nothing #yuv
                 jlms,jlms_direct,jlms_indirect = jlmsbch_yuv( y, x, Q, w, v, z, Wy, Wu, Wv, PorC, pos, rho,  eigvalu, rowIDT )
             else # yu
@@ -8434,8 +8428,7 @@ function jlmsbc(::Type{SSFOAH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w
 
     else
         if Wu!=Nothing 
-            taup = rho[pos.begtau]
-            tau  = eigvalu.rumin/(1.0 +exp(taup))+eigvalu.rumax*exp(taup)/(1.0 +exp(taup));
+
             if Wv!=Nothing #uv
                 jlms,jlms_direct,jlms_indirect = jlmsbch_uv(y, x, Q, w, v, z, Wu, Wv, PorC, pos, rho,  eigvalu, rowIDT  )
             else # u
@@ -8779,7 +8772,7 @@ T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);
 mus = zeros(eltype(y),T,1);
-bc = zeros(eltype(y),size(hi,1),1);
+
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -8873,7 +8866,7 @@ T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);
 mus = zeros(eltype(y),T,1);
-bc = zeros(eltype(y),size(hi,1),1);
+
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -8970,7 +8963,7 @@ T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);
 mus = zeros(eltype(y),T,1);
-bc = zeros(eltype(y),size(hi,1),1);
+
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -9064,7 +9057,7 @@ T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);
 mus = zeros(eltype(y),T,1);
-bc = zeros(eltype(y),size(hi,1),1);
+
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -9154,7 +9147,7 @@ T = size(rowIDT,1)
 
 sigs2 = zeros(eltype(y),T,1);
 mus = zeros(eltype(y),T,1);
-bc = zeros(eltype(y),size(hi,1),1);
+
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -9781,7 +9774,7 @@ function  jlmsbckkte(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix,
     
     sigs2 = zeros(eltype(y),ID,1);
     mus = zeros(eltype(y),ID,1);
-    bc = zeros(eltype(y),size(hi,1),1);
+
     jlms = zeros(eltype(y),size(hi,1),1);
     jlms_direct = zeros(eltype(y),size(hi,1),1);
     jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -9829,7 +9822,7 @@ function  jlmsbckkt(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
        
        sigs2 = zeros(eltype(y),ID,1);
        mus = zeros(eltype(y),ID,1);
-       bc = zeros(eltype(y),size(hi,1),1);
+
        jlms = zeros(eltype(y),size(hi,1),1);
        jlms_direct = zeros(eltype(y),size(hi,1),1);
        jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -9901,7 +9894,7 @@ function  jlmsbckkhe(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix,
     
     sigs2 = zeros(eltype(y),ID,1);
     mus = zeros(eltype(y),ID,1);
-    bc = zeros(eltype(y),size(hi,1),1);
+
     jlms = zeros(eltype(y),size(hi,1),1);
     jlms_direct = zeros(eltype(y),size(hi,1),1);
     jlms_indirect = zeros(eltype(y),size(hi,1),1);
@@ -9950,7 +9943,7 @@ function  jlmsbckkh(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
        
        sigs2 = zeros(eltype(y),ID,1);
        mus = zeros(eltype(y),ID,1);
-       bc = zeros(eltype(y),size(hi,1),1);
+
        jlms = zeros(eltype(y),size(hi,1),1);
        jlms_direct = zeros(eltype(y),size(hi,1),1);
        jlms_indirect = zeros(eltype(y),size(hi,1),1);
