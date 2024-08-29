@@ -1512,7 +1512,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
    end      
    #* ---- Counterfactual analysis -------------- 
    if _dicOPT[:counterfact]  
-   @views (_counterfactjlms, _counterfactbc) = counterfactindex(  tagD[:modelid], yvar, xvar, qvar, wvar, vvar,  zvar, envar, ivvar,
+   @views (_counterfacttotal, _counterfactdire,_counterfactindire) = counterfactindex(  tagD[:modelid], yvar, xvar, qvar, wvar, vvar,  zvar, envar, ivvar,
                                      _porc, num, pos, _coevec, eigvalu, rowIDT )
    end
   

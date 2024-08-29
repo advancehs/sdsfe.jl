@@ -39,6 +39,7 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
 
 if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
@@ -125,6 +126,7 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
 
 if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
@@ -213,6 +215,7 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
 
 if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
@@ -298,6 +301,7 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
 
 if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
@@ -385,6 +389,7 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
 
 if length(Wu)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
@@ -469,6 +474,7 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
 
 if length(Wu)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
@@ -550,6 +556,7 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
 
 if length(Wv)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
@@ -625,6 +632,7 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
 
 
 
@@ -746,6 +754,7 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
 
 if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
@@ -843,6 +852,8 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
+
 if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
 @views N = rowIDT[1,2];
@@ -937,6 +948,8 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
+
 if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
 @views N = rowIDT[1,2];
@@ -1028,6 +1041,8 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
+
 if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
 @views N = rowIDT[1,2];
@@ -1123,6 +1138,8 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
+
 if length(Wu)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
 @views N = rowIDT[1,2];
@@ -1221,6 +1238,8 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
+
 if length(Wu)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
 @views N = rowIDT[1,2];
@@ -1316,6 +1335,8 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
+
 if length(Wv)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
 @views N = rowIDT[1,2];
@@ -1407,6 +1428,7 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
 
 
 
@@ -1549,6 +1571,7 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
 
 if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
@@ -1637,6 +1660,7 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
 
 if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
@@ -1725,6 +1749,7 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
 
 if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
@@ -1812,6 +1837,7 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
 
 if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
@@ -1898,6 +1924,7 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
 
 if length(Wu)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
@@ -1982,6 +2009,7 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
 
 if length(Wu)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
@@ -2062,6 +2090,7 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
 
 if length(Wv)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
@@ -2117,9 +2146,11 @@ end
 
 
 function  cfindexh_(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z,
-    PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+    PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple,index::Dict, rowIDT::Matrix{Any})
 β  = rho[1:pos.endx]
 τ  = rho[pos.begq:pos.endq]
+column_of_threes = fill(collect(values(index))[1], size(Q, 1))
+Q[:, collect(keys(index))[1]] = column_of_threes
 δ2 = rho[pos.begw]  
 γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
 # δ1 = rho[pos.begz]
@@ -2139,6 +2170,7 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
 
 
 
@@ -2262,6 +2294,7 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
 
 if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
@@ -2357,6 +2390,8 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
+
 if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
 @views N = rowIDT[1,2];
@@ -2450,6 +2485,8 @@ bc = zeros(eltype(y),size(hi,1),1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
+
 if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
 @views N = rowIDT[1,2];
@@ -2542,6 +2579,8 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
+
 if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
 @views N = rowIDT[1,2];
@@ -2636,6 +2675,8 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
+
 if length(Wu)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
 @views N = rowIDT[1,2];
@@ -2735,6 +2776,8 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
+
 if length(Wu)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
 @views N = rowIDT[1,2];
@@ -2835,6 +2878,8 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
+
 if length(Wv)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
 @views N = rowIDT[1,2];
@@ -2923,6 +2968,7 @@ mus = zeros(eltype(y),T,1);
 jlms = zeros(eltype(y),size(hi,1),1);
 jlms_direct = zeros(eltype(y),size(hi,1),1);
 jlms_indirect = zeros(eltype(y),size(hi,1),1);
+hitau = zeros(eltype(hi),size(hi,1),1);
 
 
 
