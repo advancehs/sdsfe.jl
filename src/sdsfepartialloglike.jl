@@ -398,7 +398,7 @@ mus = zeros(eltype(y),T,1);
 es2 = zeros(eltype(y),T,1);
 KK = zeros(eltype(y),T,1);
 
-if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
+if length(Wu)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
 @views N = rowIDT[1,2];
 @views Mtau = (I(N)-tau*Wu[1])\I(N);
@@ -418,7 +418,7 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
   @views KK[ttt] = -0.5*N*log(2 * π)-0.5*lndetPi;
 end # begin
 end # for ttt=1:T
-elseif length(Wy)>1
+elseif length(Wu)>1
 @floop begin
 @inbounds for ttt=1:T  
   @views N = rowIDT[ttt,2];
@@ -488,7 +488,7 @@ mus = zeros(eltype(y),T,1);
 es2 = zeros(eltype(y),T,1);
 KK = zeros(eltype(y),T,1);
 
-if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
+if length(Wu)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
 @views N = rowIDT[1,2];
 @views Mtau = (I(N)-tau*Wu[1])\I(N);
@@ -507,7 +507,7 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
  @views KK[ttt] = -0.5*N*log(2 * π)-0.5*lndetPi;
 end # begin
 end # for ttt=1:T
-elseif length(Wy)>1
+elseif length(Wu)>1
 @floop begin
 @inbounds for ttt=1:T  
   @views N = rowIDT[ttt,2];
@@ -572,7 +572,7 @@ mus = zeros(eltype(y),T,1);
 es2 = zeros(eltype(y),T,1);
 KK = zeros(eltype(y),T,1);
 
-if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
+if length(Wv)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
 @views N = rowIDT[1,2];
 @views Mtau = 1.0 ;
@@ -592,7 +592,7 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
  @views KK[ttt] = -0.5*N*log(2 * π)-0.5*lndetPi;
 end # begin
 end # for ttt=1:T
-elseif length(Wy)>1
+elseif length(Wv)>1
 @floop begin
 @inbounds for ttt=1:T  
   @views N = rowIDT[ttt,2];
@@ -1474,7 +1474,7 @@ mus = zeros(eltype(y),T,1);
 es2 = zeros(eltype(y),T,1);
 KK = zeros(eltype(y),T,1);
 
-if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
+if length(Wu)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
 @views N = rowIDT[1,2];
 @views Mtau = (I(N)-tau*Wu[1])\I(N);
@@ -1494,7 +1494,7 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
   @views KK[ttt] = -0.5*N*log(2 * π)-0.5*lndetPi;
 end # begin
 end # for ttt=1:T
-elseif length(Wy)>1
+elseif length(Wu)>1
 @floop begin
 @inbounds for ttt=1:T  
   @views N = rowIDT[ttt,2];
@@ -1564,7 +1564,7 @@ mus = zeros(eltype(y),T,1);
 es2 = zeros(eltype(y),T,1);
 KK = zeros(eltype(y),T,1);
 
-if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
+if length(Wu)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
 @views N = rowIDT[1,2];
 @views Mtau = (I(N)-tau*Wu[1])\I(N);
@@ -1583,7 +1583,7 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
  @views KK[ttt] = -0.5*N*log(2 * π)-0.5*lndetPi;
 end # begin
 end # for ttt=1:T
-elseif length(Wy)>1
+elseif length(Wu)>1
 @floop begin
 @inbounds for ttt=1:T  
   @views N = rowIDT[ttt,2];
@@ -1648,7 +1648,7 @@ mus = zeros(eltype(y),T,1);
 es2 = zeros(eltype(y),T,1);
 KK = zeros(eltype(y),T,1);
 
-if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
+if length(Wv)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
 @views N = rowIDT[1,2];
 @views Mtau = 1.0 ;
@@ -1668,7 +1668,7 @@ if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间
  @views KK[ttt] = -0.5*N*log(2 * π)-0.5*lndetPi;
 end # begin
 end # for ttt=1:T
-elseif length(Wy)>1
+elseif length(Wv)>1
 @floop begin
 @inbounds for ttt=1:T  
   @views N = rowIDT[ttt,2];
