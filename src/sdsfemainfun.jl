@@ -525,7 +525,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
    (minfo1, minfo2, pos, num, eqvec, eqvec2, yvar, xvar,  qvar, wvar, vvar, zvar, envar, ivvar,
          eigvalu, indices_list, indices_listz, rowIDT, varlist) = getvar(tagD[:modelid], sfdat)
   
-    println(rowIDT)
+    # println(rowIDT)
 
 #* ### print preliminary information ########
 
