@@ -11,6 +11,8 @@ using DataFrames
 
 
 
+
+
 dat=DataFrame(XLSX.readtable("C:\\Users\\10197\\yuv_nox\\spxtsfayuv.xlsx", "Sheet1"  #filename
            ));
 dat[!, :_cons] .= 1.0;
