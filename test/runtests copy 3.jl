@@ -48,15 +48,7 @@ sfmodel_opt(warmstart_solver(NelderMead()),
                     warmstart_maxIT(600),
                     main_solver(BFGS(linesearch=LineSearches.BackTracking())), 
                     main_maxIT(3000), 
-                    tolerance(1e-6),autodiff_mode(forward),
-                    
-                    margeffu(false),
-                    mareffx(false),
-                    counterfact(false),
-                    ineff_index(false)                    
-                    
-                    
-                    );
+                    tolerance(1e-6),autodiff_mode(forward),cfindices(Dict(1=>6.304568)) );
 
 res_2017 = sfmodel_fit(useData(df)) 
 

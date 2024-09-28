@@ -4936,6 +4936,7 @@ function ssdkkte( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
     @floop begin
     @inbounds  for iidd=1:ID  
         @views N = rowIDT[iidd,2];
+        # println("T IS ",N)
         @views lndetPi = N*log(σᵥ²);
             @views ind = rowIDT[iidd,1];
             @views his = hi[ind];
