@@ -31,14 +31,14 @@ println(first(df, 5))
 
 
     
-sfmodel_spec(sfpanel(SSF_KK2017),sftype(prod), sfdist(half),
+sfmodel_spec(sfpanel(SSF_KKE2017),sftype(prod), sfdist(half),
                     @timevar(t), @idvar(id),
                     @depvar(y),
                     @frontier(constant ,s1, qf),
                     # @frontierWx( agg2, indus2 ,human2 ,fdi2, roadpc2, lndis2),
                     @hscale( s2,qu ),               # h(.) function
-                    # @envar(lndis2),
-                    # @ivvar(ivdis22),
+                    @envar(qf,qu),
+                    @ivvar(z3,z4),
                     # @μ(_cons),
                     @σᵤ²(_cons),
                     @σᵥ²(_cons), message = true);                   

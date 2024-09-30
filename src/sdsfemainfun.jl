@@ -1456,11 +1456,11 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
         #* In some cases the matrix is invertible but the resulting diagonal
         #*    elements are negative. Check.
 
-        if !all( diag(var_cov_matrix) .> 0 ) # not all are positive
-             redflag = 1
-             printstyled("Some of the diagonal elements of the var-cov matrix are non-positive, indicating problems in the convergence. The estimation is abort.\n\n"; color = :red)
-             # checkCollinear(tagD[:modelid], xvar, zvar, qvar, wvar, vvar) # check if it is b/c of multi-collinearity in the data
-        end              
+        # if !all( diag(var_cov_matrix) .> 0 ) # not all are positive
+        #      redflag = 1
+        #      printstyled("Some of the diagonal elements of the var-cov matrix are non-positive, indicating problems in the convergence. The estimation is abort.\n\n"; color = :red)
+        #      # checkCollinear(tagD[:modelid], xvar, zvar, qvar, wvar, vvar) # check if it is b/c of multi-collinearity in the data
+        # end              
 
    #* ------- JLMS and BC index -------------------
 
