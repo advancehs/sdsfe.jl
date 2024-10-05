@@ -1617,9 +1617,11 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
 
     row_indices = setdiff(1:size(table, 1), pos.begphi+1:pos.endphi+1)
     table_show = table[row_indices, :]
+    _coevec_adj_show = _coevec_adj[row_indices]
 
   else
     table_show = table
+    _coevec_adj_show = _coevec_adj
   end
 
    # * ------ Print Results ----------- *#
@@ -1719,6 +1721,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
     _dicRES[:table]           = [table][1]
     _dicRES[:table_show]      = [table_show][1]
     _dicRES[:coeff]           = _coevec_adj
+    _dicRES[:coeff_show]      = _coevec_adj_show
     _dicRES[:std_err]         = stddev_adj
     _dicRES[:var_cov_mat]     = [var_cov_matrix][1]
     _dicRES[:jlms]            = _jlms
