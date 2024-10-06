@@ -121,7 +121,7 @@ end #  if length(Wy)==1
 
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -230,7 +230,7 @@ end #  if length(Wy)==1
 
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -335,7 +335,7 @@ end #  if length(Wy)==1
 
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -431,7 +431,7 @@ end #  if length(Wy)==1
 
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -540,7 +540,7 @@ end #  if length(Wu)==1
 
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -646,7 +646,7 @@ end #  if length(Wu)==1
 
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -754,7 +754,7 @@ end #  if length(Wv)==1
 
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -819,7 +819,7 @@ try
 
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -955,7 +955,7 @@ end # length(Wy)==1
     return -lik-likx
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -1087,7 +1087,7 @@ end # length(Wy)==1
     return -lik-likx
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -1219,7 +1219,7 @@ end # length(Wy)==1
     return -lik-likx
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -1346,7 +1346,7 @@ end # length(Wy)==1
     return -lik-likx
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -1480,7 +1480,7 @@ end # length(Wu)==1
     return -lik-likx
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -1610,7 +1610,7 @@ end # length(Wu)==1
     return -lik-likx
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -1738,7 +1738,7 @@ end # length(Wv)==1
     return -lik-likx
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -1828,7 +1828,7 @@ end # @floop begin
     return -lik-likx
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -1983,7 +1983,7 @@ end #  if length(Wy)==1
 
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -2094,7 +2094,7 @@ end #  if length(Wy)==1
 
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -2201,7 +2201,7 @@ end #  if length(Wy)==1
 
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -2299,7 +2299,7 @@ end #  if length(Wy)==1
 
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -2409,7 +2409,7 @@ end #  if length(Wu)==1
 
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -2516,7 +2516,7 @@ end #  if length(Wu)==1
 
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -2624,7 +2624,7 @@ end #  if length(Wv)==1
 
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -2689,7 +2689,7 @@ try
 
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -2827,7 +2827,7 @@ end # length(Wy)==1
     return -lik-likx
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -2959,7 +2959,7 @@ end # length(Wy)==1
     return -lik-likx
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -3089,7 +3089,7 @@ end # length(Wy)==1
     return -lik-likx
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -3216,7 +3216,7 @@ end # length(Wy)==1
     return -lik-likx
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -3350,7 +3350,7 @@ end # length(Wu)==1
     return -lik-likx
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -3481,7 +3481,7 @@ end # length(Wu)==1
     return -lik-likx
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -3612,7 +3612,7 @@ end # length(Wv)==1
     return -lik-likx
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -3702,7 +3702,7 @@ end # @floop begin
     return -lik-likx
 catch e
 # 处理异常的代码
-println("操作失败，发生错误：$e")
+# println("操作失败，发生错误：$e")
     return 1e100
 end
 end
@@ -4356,7 +4356,7 @@ function ssdkuhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
         return -lik-likx-lndetIrhoWt
     catch e
     # 处理异常的代码
-    println("操作失败，发生错误：$e")
+    # println("操作失败，发生错误：$e")
         return 1e100
     end
 end
@@ -4447,7 +4447,7 @@ function ssdkuh( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
         return -lll
     catch e
     # 处理异常的代码
-    println("操作失败，发生错误：$e")
+    # println("操作失败，发生错误：$e")
         return 1e100
     end
 
@@ -4590,7 +4590,7 @@ function ssdkute( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
         return -lll
     catch e
     # 处理异常的代码
-    println("操作失败，发生错误：$e")
+    # println("操作失败，发生错误：$e")
         return 1e100
     end
 end
@@ -4682,7 +4682,7 @@ function ssdkut( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
         return -lll
     catch e
     # 处理异常的代码
-    println("操作失败，发生错误：$e")
+    # println("操作失败，发生错误：$e")
         return 1e100
     end
 
@@ -4793,7 +4793,7 @@ function ssdkkhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
     return -lik-likx
     catch e
     # 处理异常的代码
-    println("操作失败，发生错误：$e")
+    # println("操作失败，发生错误：$e")
         return 1e100
     end
 end
@@ -4853,7 +4853,7 @@ function ssdkkh( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
     return -lik
     catch e
     # 处理异常的代码
-    println("操作失败，发生错误：$e")
+    # println("操作失败，发生错误：$e")
         return 1e100
     end
 end
@@ -4960,7 +4960,7 @@ function ssdkkte( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
     return -lik-likx
     catch e
     # 处理异常的代码
-    println("操作失败，发生错误：$e")
+    # println("操作失败，发生错误：$e")
         return 1e100
     end
 end
@@ -5019,7 +5019,7 @@ function ssdkkt( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
     return -lik
     catch e
     # 处理异常的代码
-    println("操作失败，发生错误：$e")
+    # println("操作失败，发生错误：$e")
         return 1e100
     end
 end

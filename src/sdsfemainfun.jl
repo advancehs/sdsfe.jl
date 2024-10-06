@@ -507,11 +507,11 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
     @isdefined(_dicOPT) || sfmodel_opt()  
     
 
-   if _dicOPT[:banner] 
-      printstyled("\n###------------------------------------###\n"; color=:yellow)
-      printstyled("###  Estimating SF models using Julia  ###\n"; color=:yellow)
-      printstyled("###------------------------------------###\n\n"; color=:yellow)
-    end  
+  #  if _dicOPT[:banner] 
+  #     printstyled("\n###------------------------------------###\n"; color=:yellow)
+  #     printstyled("###  Estimating SF models using Julia  ###\n"; color=:yellow)
+  #     printstyled("###------------------------------------###\n\n"; color=:yellow)
+  #   end  
 
 
 #* ##### Get variables from dataset #######
