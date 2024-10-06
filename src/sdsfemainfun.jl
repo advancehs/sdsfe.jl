@@ -231,9 +231,9 @@ function sfmodel_spec(arg::Vararg; message::Bool=false)
       # SFrontiers.checksyn(tagD[:modelid])!!!!!!!!!!!!!!!!!!!!!!!!
 
       #* ----- make return ----------- 
-      if message 
-        printstyled("A dictionary from sfmodel_spec() is generated.\n"; color = :green)  
-      end  
+      # if message 
+      #   printstyled("A dictionary from sfmodel_spec() is generated.\n"; color = :green)  
+      # end  
       return _dicM # for debugging purpose
 
 end  # end of sfmodel_spec()
@@ -1446,7 +1446,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
         # 如果矩阵不对称，则将其转换为对称矩阵
         var_cov_matrix = Symmetric(var_cov_matrix)
     end
-  println("############################################################")
+  # println("############################################################")
 
   
   #* ------ Check if the matrix is invertible. ----
@@ -1617,7 +1617,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
 
     row_indices = setdiff(1:size(table, 1), pos.begphi+1:pos.endphi+1)
     table_show = table[row_indices, :]
-    println(_coevec_adj,"ssssssssssss")
+    # println(_coevec_adj,"ssssssssssss")
 
     coef_indices = setdiff(1:size(_coevec_adj, 1), pos.begphi:pos.endphi)
 
