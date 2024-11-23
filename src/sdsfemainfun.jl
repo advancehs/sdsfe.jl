@@ -242,6 +242,7 @@ end  # end of sfmodel_spec()
 
 
 
+
 ########################################################
 ####                sfmodel_init()                  ####
 ########################################################
@@ -1605,6 +1606,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
     stas[6,3] = (-2)* (llkkkk)+log(log(num.nofobs))*2*(num.nofpara-num.nofphi-num.nofeta)
 
   else
+    llkkkk = -Optim.minimum(mfun)
     stas[3,3] = -Optim.minimum(mfun)
     stas[4,3] = (-2)* (-Optim.minimum(mfun))+2*num.nofpara
     stas[5,3] = (-2)* (-Optim.minimum(mfun))+log(num.nofobs)*num.nofpara
@@ -1721,7 +1723,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
     _dicRES[:iter_limit_reached] = Optim.iteration_limit_reached(mfun)
     _dicRES[:_______________] = "___________________"  #33
     _dicRES[:n_observations]  = num.nofobs
-    _dicRES[:loglikelihood]   = -Optim.minimum(mfun)
+    _dicRES[:loglikelihood]   = llkkkk
     _dicRES[:table]           = [table][1]
     _dicRES[:table_show]      = [table_show][1]
     _dicRES[:coeff]           = _coevec_adj
