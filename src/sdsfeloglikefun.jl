@@ -4740,7 +4740,7 @@ function ssdkkhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
     @inbounds for iitt =1:num.nofobs
                 tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
                 if simple_check(tempx)
-                    likx += -1e19
+                    likx += -1e9
                 else
                     likx += tempx
                 end # simple_check(tempx)
@@ -4783,7 +4783,7 @@ function ssdkkhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
                             0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                             0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                     if simple_check(temp)
-                        lik += -1e19
+                        lik += -1e9
                     else
                         lik += temp
                     end # simple_check(temp)
@@ -4843,7 +4843,7 @@ function ssdkkh( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
                             0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                             0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                     if simple_check(temp)
-                        lik += -1e19
+                        lik += -1e9
                     else
                         lik += temp
                     end # simple_check(temp)
@@ -4906,7 +4906,7 @@ function ssdkkte( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
     @inbounds for iitt =1:num.nofobs
                 tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
                 if simple_check(tempx)
-                    likx += -1e19
+                    likx += -1e9
                 else
                     likx += tempx
                 end # simple_check(tempx)
@@ -4950,7 +4950,7 @@ function ssdkkte( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
                             0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                             0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                     if simple_check(temp)
-                        lik += -1e19
+                        lik += -1e9
                     else
                         lik += temp
                     end # simple_check(temp)
@@ -5009,7 +5009,7 @@ function ssdkkt( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
                             0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
                             0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
                     if simple_check(temp)
-                        lik += -1e19
+                        lik += -1e9
                     else
                         lik += temp
                     end # simple_check(temp)
