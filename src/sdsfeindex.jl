@@ -9599,7 +9599,7 @@ function  jlmsbckuhe(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix,
    μ   = 0.0
    ϵ = PorC*(y - x * β )
    T = size(rowIDT,1)
-   
+   println("yy",y)
    # sigs2 = zeros(eltype(y),T,1);
    # mus = zeros(eltype(y),T,1);
    # bc = zeros(eltype(y),size(hi,1),1);
@@ -9618,8 +9618,11 @@ function  jlmsbckuhe(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix,
        @views mus =@. (μ/σᵤ² - ϵ * hi * invPi) * sigs2 ;
 
        @views jlms1 =@. hi *( mus + sqrt(sigs2) * normpdf(mus/sqrt(sigs2))/normcdf(mus/sqrt(sigs2))   ) 
+    #    println(jlms1)
        @views jlms = Mgammat*jlms1;  
-       @views jlms_direct = Diagonal(diag(Mgammat))*jlms1;  
+    #    println(jlms)
+
+       @views jlms_direct = (diag(Mgammat)).*jlms1;  
        @views jlms_indirect = jlms - jlms_direct;
    elseif length(Wy)>1
    
@@ -9639,7 +9642,7 @@ function  jlmsbckuhe(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix,
 
        @views jlms1 =@. hi *( mus + sqrt(sigs2) * normpdf(mus/sqrt(sigs2))/normcdf(mus/sqrt(sigs2))   ) 
        @views jlms = Mgammat*jlms1;  
-       @views jlms_direct = Diagonal(diag(Mgammat))*jlms1;  
+       @views jlms_direct = (diag(Mgammat)).*jlms1;  
        @views jlms_indirect = jlms - jlms_direct;
    end  #    if length(Wy)==1 
 
@@ -9690,7 +9693,7 @@ function  jlmsbckuhe(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix,
 
           @views jlms1 =@. hi *( mus + sqrt(sigs2) * normpdf(mus/sqrt(sigs2))/normcdf(mus/sqrt(sigs2))   ) 
           @views jlms = Mgammat*jlms1;  
-          @views jlms_direct = Diagonal(diag(Mgammat))*jlms1;  
+          @views jlms_direct = (diag(Mgammat)).*jlms1;  
           @views jlms_indirect = jlms - jlms_direct;
       elseif length(Wy)>1
       
@@ -9710,7 +9713,7 @@ function  jlmsbckuhe(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix,
     
           @views jlms1 =@. hi *( mus + sqrt(sigs2) * normpdf(mus/sqrt(sigs2))/normcdf(mus/sqrt(sigs2))   ) 
           @views jlms = Mgammat*jlms1;  
-          @views jlms_direct = Diagonal(diag(Mgammat))*jlms1;  
+          @views jlms_direct = (diag(Mgammat)).*jlms1;  
           @views jlms_indirect = jlms - jlms_direct;
         end  #    if length(Wy)==1 
 
