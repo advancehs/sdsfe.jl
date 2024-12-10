@@ -9599,7 +9599,6 @@ function  jlmsbckuhe(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix,
    μ   = 0.0
    ϵ = PorC*(y - x * β )
    T = size(rowIDT,1)
-   println("yy",y)
    # sigs2 = zeros(eltype(y),T,1);
    # mus = zeros(eltype(y),T,1);
    # bc = zeros(eltype(y),size(hi,1),1);

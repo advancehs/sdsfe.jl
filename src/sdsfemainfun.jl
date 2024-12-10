@@ -496,8 +496,18 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
   (_dicM[:hasDF] || _dicM[:transfer])  || throw("You provided matrix in `sfmodel_spec()` so you cannot specify a DataFrame in `sfmodel_fit()`. Leave it blank.")
 
   sfdat[!, :_consssssss] .= 1.0;
+  Wy = _dicM[:wy];
+  Wu = _dicM[:wu];
+  Wv = _dicM[:wv];
+  Wx = _dicM[:wx];
+  if (Wy!=Nothing) | (Wu!=Nothing) | (Wv!=Nothing) | (Wx!=Nothing)
+    sfdat = sort(sfdat,  [_dicM[:timevar][1], _dicM[:idvar][1]])
+  else
+    sfdat = sort(sfdat,  [_dicM[:idvar][1], _dicM[:timevar][1]])
 
-  
+  end
+
+  # println(sfdat)
  #* for simulation, add a flag
  redflag::Bool = 0
 
@@ -549,9 +559,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
 
 #* ########## Process initial value dictionary  #####
    #* --- Get OLS results and other auxiliary values. --- #
-     Wy = _dicM[:wy];
-     Wu = _dicM[:wu];
-     Wv = _dicM[:wv];
+
   
     β0 = xvar \ yvar;  # OLS estiamte, uses a pivoted QR factorization;
 

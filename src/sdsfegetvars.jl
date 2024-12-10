@@ -1939,15 +1939,18 @@ function getvar(::Type{SSFKUEH}, dat::DataFrame)
            
                 xx = Matrix(dat[!, _dicM[:frontierWx]])
                 @views wxvar[rowIDT[ttt,1], :] .= Wx[1] * xx[rowIDT[ttt,1], :]
+                
+
             elseif length(wx) > 1
       
                 xx = Matrix(dat[!, _dicM[:frontierWx]])
-                @views wxvar[rowIDT[ttt,1], :] .= Wx[1] * xx[rowIDT[ttt,1], :]
+                @views wxvar[rowIDT[ttt,1], :] .= Wx[ttt] * xx[rowIDT[ttt,1], :]
                
             end	
         end
     end
-    
+
+
     #* --- retrieve and generate important parameters -----
     
     #*   number of obs and number of variables
