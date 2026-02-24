@@ -453,31 +453,13 @@ end
 # ============================================================
 
 """
-    sfmodel_henderson45_y(res; dat, target_var, frontier_deriv, wx_deriv,
-                          Wy_mat, save_dir, B, confidence_level, dpi)
+    sfmodel_henderson45_y(res; dat, target_var, frontier_deriv, ...)
 
 Henderson & Parmeter (2012) 45度诊断图 — 前沿（因变量）边际效应。
 用于 translog 成本/生产函数中 ∂lnC/∂lnL、∂lnC/∂lnK 等观测层面变化的边际效应。
 
-# 参数
-- `res`: sfmodel_fit 返回的结果
-- `dat::DataFrame`: 按 [year, city_code] 排序后的 DataFrame
-- `target_var::String`: 目标经济变量名称（用于图标题，如 "lnL"）
-- `frontier_deriv::Dict{Symbol, Any}`: 前沿变量对目标变量的导数。
-  键=前沿变量名, 值=导数（`Real` 表示常数, `Symbol` 表示 dat 中的列名）。
-- `wx_deriv::Dict{Symbol, Any}`: WX 变量对目标变量的导数（同上格式，默认空）。
-- `Wy_mat=nothing`: Wy 空间权重矩阵（默认从模型规格中获取）
-- `save_dir::String`: 图片保存目录
-- `B::Int=499`: MC 模拟次数
-- `confidence_level::Float64=0.95`: 置信水平
-- `dpi::Int=600`: 图片分辨率
-
-# 示例 — translog 成本函数 ∂lnC/∂lnL
+# 示例
 ```julia
-# 前沿: constant, lnl22, lnk22, lny22, lnl_lnk22, lnl_lny22, lnk_lny22,
-#        lnl2_05, lnk2_05, lny2_05, agg2
-# ∂lnC/∂lnL = β_lnl22 + β_lnl_lnk22*lnK + β_lnl_lny22*lnY + β_lnl2_05*lnL
-
 sfmodel_henderson45_y(res; dat=Td22, target_var="lnL",
     frontier_deriv = Dict(
         :lnl22     => 1.0,      # ∂lnl22/∂lnL = 1
@@ -487,12 +469,23 @@ sfmodel_henderson45_y(res; dat=Td22, target_var="lnL",
     ),
     save_dir="result/henderson_45_y/lnL", B=499)
 ```
+
+# 参数
+- `res`: sfmodel_fit 返回的结果
+- `dat::DataFrame`: 按 [year, city_code] 排序后的 DataFrame
+- `target_var::String`: 目标变量名称（用于图标题）
+- `frontier_deriv::Dict{Symbol,Any}`: 每个前沿变量对目标的偏导数
+  - 值为 `Float64` 表示常数导数（如线性项 = 1.0）
+  - 值为 `Symbol` 表示导数等于该变量的观测值（如交叉项、平方项）
+  - 值为 `AbstractVector` 表示直接传入导数向量
+- `wx_deriv::Dict{Symbol,Any}`: WX 变量的导数（格式同上，key 为去掉 "W*" 前缀的变量名）
+- `Wy_mat`, `save_dir`, `B`, `confidence_level`, `dpi`: 同 sfmodel_henderson45
 """
 function sfmodel_henderson45_y(res;
     dat::DataFrame,
     target_var::String,
     frontier_deriv::Dict{Symbol, <:Any},
-    wx_deriv::Dict{Symbol, <:Any} = Dict{Symbol, Any}(),
+    wx_deriv::Dict{Symbol, <:Any}=Dict{Symbol, Any}(),
     Wy_mat=nothing,
     save_dir::String="result/henderson_45_y",
     B::Int=499, confidence_level::Float64=0.95, dpi::Int=600)
