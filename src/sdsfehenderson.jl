@@ -736,10 +736,14 @@ end
 # ============================================================
 
 """
-    sfmodel_counterfactual(res; dat, depvar, scenarios, Wy_mat, Wu_mat, Wv_mat, envar, ivvar)
+    sfmodel_counterfactual(res; dat, depvar, scenarios, Wy_mat, Wu_mat, Wv_mat, envar, ivvar, C_level)
 
 反事实分析：支持按变量名指定、多种场景，适配 KU/KK/OA 全部模型类型。
 WH 模型暂不支持（原始 sdsfe 也未实现）。
+
+自动进行两通道分解：当反事实变量同时出现在 @frontier 和 @hscale 中时，
+返回前沿通道 (delta_lnC_frontier) 和效率通道 (delta_lnC_efficiency) 的分解结果。
+若提供 C_level，还会计算水平值的 ΔC 分解。
 
 # 支持的模型
 - KU 系列 (SSFKUH, SSFKUT, SSFKUEH, SSFKUET): 逐观测计算，含 Wy
@@ -761,17 +765,32 @@ WH 模型暂不支持（原始 sdsfe 也未实现）。
 - `Wv_mat`: Wv 空间权重矩阵（OA 模型，预留）
 - `envar`: 内生变量名（如 "agg2"），有内生性模型必须提供
 - `ivvar`: 工具变量名（如 "ivkind22" 或 ["ivkind22"]），有内生性模型必须提供
+- `C_level::Union{Nothing, AbstractVector}=nothing`: 碳排放水平值向量（注意：传入水平值，
+  非对数值，如 `dat.emission`）。提供后自动计算 ΔC 前沿/效率/总计分解（单位与传入值一致）。
+
+# 返回值（新增字段）
+- `delta_lnC_frontier`: 前沿通道的 ΔlnC（对数变化）
+- `delta_lnC_efficiency`: 效率通道的 ΔlnC（对数变化）
+- `delta_lnC_total`: 总 ΔlnC = frontier + efficiency
+- `ΔC_frontier`: 前沿通道的 ΔC 水平值（仅当提供 C_level 时）
+- `ΔC_efficiency`: 效率通道的 ΔC 水平值（仅当提供 C_level 时）
+- `ΔC_total`: 总 ΔC 水平值（仅当提供 C_level 时）
+- `C_cf`: 反事实碳排放水平值 = C_level + ΔC_total（仅当提供 C_level 时）
 
 # 示例
 ```julia
-# KU 无内生性模型
+# KU 无内生性模型（仅对数分解）
 r1 = sfmodel_counterfactual(res; dat=Td22, depvar="lnc2",
     scenarios=Dict("agg2" => 0.0))
 
-# KU 有内生性模型
+# KU 有内生性模型 + CO2 水平值分解
 r2 = sfmodel_counterfactual(res; dat=Td22, depvar="lnc2",
     scenarios=Dict("agg2" => :quantile => 0.75),
-    envar="agg2", ivvar="ivkind22")
+    envar="agg2", ivvar="ivkind22",
+    C_level=Td22.emission)
+# r2.ΔC_frontier   — 前沿通道导致的碳排放变化（万吨）
+# r2.ΔC_efficiency  — 效率通道导致的碳排放变化（万吨）
+# r2.C_cf           — 反事实碳排放水平值
 
 # KK 模型（无空间权重）
 r3 = sfmodel_counterfactual(res_kk; dat=Td22, depvar="lnc2",
@@ -786,7 +805,8 @@ function sfmodel_counterfactual(res;
     Wu_mat=nothing,
     Wv_mat=nothing,
     envar=nothing,
-    ivvar=nothing)
+    ivvar=nothing,
+    C_level::Union{Nothing, AbstractVector}=nothing)
 
     modelid = res[:modelid]
     # --- 模型名称字符串检测（兼容 JLD2.UnknownType）---
@@ -1222,6 +1242,24 @@ function sfmodel_counterfactual(res;
         println("    CEE 变化 (反事实-原始): 均值=$(round(mean(diff_total), digits=4))")
     end
 
+    # --- CO2 分解（如果提供了 C_level）---
+    ΔC_frontier = nothing
+    ΔC_efficiency = nothing
+    ΔC_total = nothing
+    C_cf = nothing
+    if C_level !== nothing
+        length(C_level) == length(delta_lnC_total) ||
+            error("C_level 长度 $(length(C_level)) ≠ 观测数 $(length(delta_lnC_total))")
+        C = Float64.(C_level)
+        ΔC_frontier   = C .* (exp.(delta_lnC_frontier) .- 1)
+        ΔC_efficiency = C .* exp.(delta_lnC_frontier) .* (exp.(delta_lnC_efficiency) .- 1)
+        ΔC_total      = ΔC_frontier .+ ΔC_efficiency
+        C_cf          = C .+ ΔC_total
+        println("    ΔC 前沿通道 (水平值):  总量=$(round(sum(ΔC_frontier), digits=2)), 均值=$(round(mean(ΔC_frontier), digits=4))")
+        println("    ΔC 效率通道 (水平值):  总量=$(round(sum(ΔC_efficiency), digits=2)), 均值=$(round(mean(ΔC_efficiency), digits=4))")
+        println("    ΔC 总计 (水平值):      总量=$(round(sum(ΔC_total), digits=2)), 均值=$(round(mean(ΔC_total), digits=4))")
+    end
+
     return (counterfacttotal=vec(jlms_total),
             counterfactdire=vec(jlms_direct),
             counterfactindire=vec(jlms_indirect),
@@ -1231,5 +1269,9 @@ function sfmodel_counterfactual(res;
             delta_lnC_frontier=vec(delta_lnC_frontier),
             delta_lnC_efficiency=vec(delta_lnC_efficiency),
             delta_lnC_total=vec(delta_lnC_total),
+            ΔC_frontier=ΔC_frontier,
+            ΔC_efficiency=ΔC_efficiency,
+            ΔC_total=ΔC_total,
+            C_cf=C_cf,
             scenarios=scenarios)
 end
