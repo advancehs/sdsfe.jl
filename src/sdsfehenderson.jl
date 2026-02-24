@@ -993,6 +993,51 @@ function sfmodel_counterfactual(res;
             error("不支持的场景类型: $(typeof(scenario))")
         end
     end
+
+    # --- 计算前沿变化 (两通道分解: 前沿通道) ---
+    delta_frontier_raw = zeros(nobs)
+
+    # 提取 WX 变量名和对应系数位置
+    wx_var_base_names = Symbol[]   # WX 变量的基础名（去掉 W* 前缀）
+    wx_coef_local_idx = Int[]      # WX 系数在 β 中的局部位置
+    if n_frontier_total > n_base
+        ts = res[:table_show]
+        wx_cnt = 0
+        for r in 1:size(ts, 1)
+            nm_str = string(ts[r, 2])
+            if startswith(nm_str, "W*")
+                wx_cnt += 1
+                if wx_cnt <= n_frontier_total - n_base
+                    push!(wx_var_base_names, Symbol(nm_str[3:end]))
+                    push!(wx_coef_local_idx, n_base + wx_cnt)
+                end
+            end
+        end
+    end
+
+    for (var_name, _) in scenarios
+        var_sym = Symbol(var_name)
+        k_hscale = findfirst(==(var_sym), hscale_names)
+        delta_var = Q_cf[:, k_hscale] .- Q_orig[:, k_hscale]
+
+        # 基础前沿系数 (非 WX 部分)
+        j_base = findfirst(==(var_sym), frontier_names)
+        if j_base !== nothing
+            delta_frontier_raw .+= β[j_base] .* delta_var
+        end
+
+        # WX 前沿系数: θ × W × Δvar (按时间块)
+        j_wx = findfirst(==(var_sym), wx_var_base_names)
+        if j_wx !== nothing && cfg.has_Wy && Wy_mat !== nothing
+            β_wx = β[wx_coef_local_idx[j_wx]]
+            for tt in 1:T
+                idx_t = rowIDT[tt, 1]
+                delta_frontier_raw[idx_t] .+= β_wx .* (Wy_mat * delta_var[idx_t])
+            end
+        end
+    end
+    println("    前沿变化 (structural): 均值=$(round(mean(delta_frontier_raw), digits=6))")
+
     # --- 计算反事实 JLMS ---
     depvar_sym = Symbol(depvar)
     hi_cf = exp.(Q_cf * τ)
@@ -1124,6 +1169,25 @@ function sfmodel_counterfactual(res;
         jlms_direct = jlms_total
         jlms_indirect = zeros(nobs)
     end
+
+    # --- 前沿变化: 应用空间乘数 (I-ρW)⁻¹ ---
+    has_spatial_wy = cfg.has_Wy && gamma !== nothing && Wy_mat !== nothing
+    if has_spatial_wy
+        Mgamma_f = inv(I(N) - gamma * Wy_mat)
+        delta_lnC_frontier = zeros(nobs)
+        for tt in 1:T
+            ind = rowIDT[tt, 1]
+            delta_lnC_frontier[ind] = Mgamma_f * delta_frontier_raw[ind]
+        end
+    else
+        delta_lnC_frontier = copy(delta_frontier_raw)
+    end
+
+    # --- 效率变化: Δu = u_cf - u_orig ---
+    jlms_orig = vec(Float64.(res[:jlms]))
+    delta_lnC_efficiency = vec(jlms_total) .- jlms_orig
+    delta_lnC_total = delta_lnC_frontier .+ delta_lnC_efficiency
+
     # --- 计算 CEE ---
     te_cf_total = exp.(-jlms_total)
     te_cf_direct = exp.(-jlms_direct)
@@ -1137,12 +1201,18 @@ function sfmodel_counterfactual(res;
         te_cf_total = te_cf_total[unsort_perm]
         te_cf_direct = te_cf_direct[unsort_perm]
         te_cf_indirect = te_cf_indirect[unsort_perm]
+        delta_lnC_frontier = delta_lnC_frontier[unsort_perm]
+        delta_lnC_efficiency = delta_lnC_efficiency[unsort_perm]
+        delta_lnC_total = delta_lnC_total[unsort_perm]
     end
 
     # --- 汇总 ---
     println(">>> 反事实分析完成")
     println("    反事实 CEE (total):    均值=$(round(mean(te_cf_total), digits=4)), 中位数=$(round(median(te_cf_total), digits=4))")
     println("    反事实 CEE (direct):   均值=$(round(mean(te_cf_direct), digits=4)), 中位数=$(round(median(te_cf_direct), digits=4))")
+    println("    ΔlnC 前沿通道:        均值=$(round(mean(delta_lnC_frontier), digits=6))")
+    println("    ΔlnC 效率通道:        均值=$(round(mean(delta_lnC_efficiency), digits=6))")
+    println("    ΔlnC 总计:            均值=$(round(mean(delta_lnC_total), digits=6))")
 
     # --- 与原始 CEE 对比（如果 res 中有）---
     if haskey(res, :te)
@@ -1158,5 +1228,8 @@ function sfmodel_counterfactual(res;
             te_cf_total=vec(te_cf_total),
             te_cf_direct=vec(te_cf_direct),
             te_cf_indirect=vec(te_cf_indirect),
+            delta_lnC_frontier=vec(delta_lnC_frontier),
+            delta_lnC_efficiency=vec(delta_lnC_efficiency),
+            delta_lnC_total=vec(delta_lnC_total),
             scenarios=scenarios)
 end
