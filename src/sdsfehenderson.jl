@@ -447,3 +447,293 @@ function sfmodel_henderson45(res;
             mc_direct=mc_direct, mc_indirect=mc_indirect, mc_total=mc_total,
             config=cfg)
 end
+
+# ============================================================
+# 6. 前沿（因变量）边际效应 Henderson 45度图
+# ============================================================
+
+"""
+    sfmodel_henderson45_y(res; dat, target_var, frontier_deriv, wx_deriv,
+                          Wy_mat, save_dir, B, confidence_level, dpi)
+
+Henderson & Parmeter (2012) 45度诊断图 — 前沿（因变量）边际效应。
+用于 translog 成本/生产函数中 ∂lnC/∂lnL、∂lnC/∂lnK 等观测层面变化的边际效应。
+
+# 参数
+- `res`: sfmodel_fit 返回的结果
+- `dat::DataFrame`: 按 [year, city_code] 排序后的 DataFrame
+- `target_var::String`: 目标经济变量名称（用于图标题，如 "lnL"）
+- `frontier_deriv::Dict{Symbol, Any}`: 前沿变量对目标变量的导数。
+  键=前沿变量名, 值=导数（`Real` 表示常数, `Symbol` 表示 dat 中的列名）。
+- `wx_deriv::Dict{Symbol, Any}`: WX 变量对目标变量的导数（同上格式，默认空）。
+- `Wy_mat=nothing`: Wy 空间权重矩阵（默认从模型规格中获取）
+- `save_dir::String`: 图片保存目录
+- `B::Int=499`: MC 模拟次数
+- `confidence_level::Float64=0.95`: 置信水平
+- `dpi::Int=600`: 图片分辨率
+
+# 示例 — translog 成本函数 ∂lnC/∂lnL
+```julia
+# 前沿: constant, lnl22, lnk22, lny22, lnl_lnk22, lnl_lny22, lnk_lny22,
+#        lnl2_05, lnk2_05, lny2_05, agg2
+# ∂lnC/∂lnL = β_lnl22 + β_lnl_lnk22*lnK + β_lnl_lny22*lnY + β_lnl2_05*lnL
+
+sfmodel_henderson45_y(res; dat=Td22, target_var="lnL",
+    frontier_deriv = Dict(
+        :lnl22     => 1.0,      # ∂lnl22/∂lnL = 1
+        :lnl_lnk22 => :lnk22,   # ∂(lnL*lnK)/∂lnL = lnK
+        :lnl_lny22 => :lny22,   # ∂(lnL*lnY)/∂lnL = lnY
+        :lnl2_05   => :lnl22,   # ∂(0.5*lnL²)/∂lnL = lnL
+    ),
+    save_dir="result/henderson_45_y/lnL", B=499)
+```
+"""
+function sfmodel_henderson45_y(res;
+    dat::DataFrame,
+    target_var::String,
+    frontier_deriv::Dict{Symbol, <:Any},
+    wx_deriv::Dict{Symbol, <:Any} = Dict{Symbol, Any}(),
+    Wy_mat=nothing,
+    save_dir::String="result/henderson_45_y",
+    B::Int=499, confidence_level::Float64=0.95, dpi::Int=600)
+
+    modelid = res[:modelid]
+    cfg = _h45_detect(modelid)
+    coef = res[:coeff]
+    vcov = res[:var_cov_mat]
+    eqpo = res[:eqpo]
+
+    println(">>> Henderson 45度图 (前沿) — 模型: $modelid, 目标: $target_var")
+
+    # --- 前沿系数和变量名 ---
+    idx_frontier = eqpo[:coeff_frontier]
+    β_frontier = coef[idx_frontier]
+    nf = length(idx_frontier)  # 总前沿系数数（含 WX）
+
+    # 构建完整的前沿变量名列表（res[:frontier] 不含 WX 变量名）
+    frontier_base_names = Symbol.(res[:frontier])
+    n_base = length(frontier_base_names)
+    n_wx_coefs = nf - n_base
+
+    frontier_names = Vector{Symbol}(undef, nf)
+    frontier_names[1:n_base] .= frontier_base_names
+    # 从 table_show 中提取 WX 变量名（以 "W*" 前缀存储）
+    if n_wx_coefs > 0
+        ts = res[:table_show]
+        wx_count = 0
+        for r in 1:size(ts, 1)
+            nm_str = string(ts[r, 2])
+            if startswith(nm_str, "W*")
+                wx_count += 1
+                if wx_count <= n_wx_coefs
+                    frontier_names[n_base + wx_count] = Symbol(nm_str)
+                end
+            end
+        end
+    end
+
+    # --- 识别 WX 和非 WX 变量 ---
+    wx_names = Symbol[]
+    wx_indices_in_frontier = Int[]
+    non_wx_names = Symbol[]
+    non_wx_indices = Int[]
+    for (k, nm) in enumerate(frontier_names)
+        s = string(nm)
+        if startswith(s, "W*") || startswith(s, "Wx")
+            push!(wx_names, nm)
+            push!(wx_indices_in_frontier, k)
+        else
+            push!(non_wx_names, nm)
+            push!(non_wx_indices, k)
+        end
+    end
+    println("    前沿变量($n_base): $non_wx_names")
+    println("    WX变量($n_wx_coefs): $wx_names")
+
+    # --- 面板结构 ---
+    idvar = Symbol(res[:idvar][1])
+    city_codes = sort(unique(dat[!, idvar]))
+    city_map = Dict(c => i for (i,c) in enumerate(city_codes))
+    obs_ci = [city_map[c] for c in dat[!, idvar]]
+    N_cities = length(city_codes)
+    nobs = nrow(dat)
+
+    # --- 获取空间权重矩阵 ---
+    if Wy_mat === nothing && cfg.has_Wy
+        Wy_raw = _dicM[:wy]
+        Wy_mat = (Wy_raw !== nothing && Wy_raw !== Nothing) ? Wy_raw[1] : nothing
+    end
+    # --- 空间参数 ---
+    rho_y = nothing; idx_gamma = nothing
+    if cfg.has_Wy && haskey(eqpo, :coeff_γ)
+        idx_gamma = eqpo[:coeff_γ]
+        rho_y = coef[first(idx_gamma)]
+    end
+
+    # --- 特征值边界 ---
+    rymin = 0.0; rymax = 1.0
+    if haskey(res, :eigvalu) && res[:eigvalu] !== nothing
+        ev = res[:eigvalu]
+        hasfield(typeof(ev), :rymin) && (rymin = ev.rymin)
+        hasfield(typeof(ev), :rymax) && (rymax = ev.rymax)
+    elseif cfg.has_Wy && Wy_mat !== nothing
+        rymin, rymax = _h45_eigbounds(Wy_mat)
+    end
+
+    # --- 构建导数向量 ---
+    # frontier_deriv: Dict(:lnl22 => 1.0, :lnl_lnk22 => :lnk22, ...)
+    # 对每个前沿变量，构建 nobs 长度的导数向量
+    deriv_mat = zeros(nobs, nf)  # deriv_mat[i, k] = ∂x_k/∂z for obs i
+    for (k, nm) in enumerate(frontier_names)
+        s = string(nm)
+        # 检查是否是 WX 变量，去掉 "W*" 前缀后查找
+        base_nm = startswith(s, "W*") ? Symbol(s[3:end]) : nm
+        d = nothing
+        if haskey(frontier_deriv, nm)
+            d = frontier_deriv[nm]
+        elseif startswith(s, "W*") && haskey(wx_deriv, base_nm)
+            d = wx_deriv[base_nm]
+        end
+        if d !== nothing
+            if d isa Real
+                deriv_mat[:, k] .= Float64(d)
+            elseif d isa Symbol
+                deriv_mat[:, k] .= Float64.(dat[!, d])
+            elseif d isa AbstractVector
+                deriv_mat[:, k] .= Float64.(d)
+            end
+        end
+    end
+
+    # --- 计算观测级别原始边际效应 ---
+    println(">>> 计算观测级别前沿边际效应...")
+    raw_me = zeros(nobs)
+    for i in 1:nobs
+        raw_me[i] = sum(β_frontier[k] * deriv_mat[i, k] for k in 1:nf)
+    end
+    println("    原始边际效应均值: $(round(mean(raw_me), digits=6))")
+    # --- 空间分解 ---
+    has_spatial = cfg.has_Wy && rho_y !== nothing && Wy_mat !== nothing
+    if has_spatial
+        println(">>> 空间分解...")
+        A = inv(I(N_cities) - rho_y * Wy_mat)
+        AW = A * Wy_mat
+        A_diag = diag(A); A_colsum = vec(sum(A, dims=1))
+        AW_diag = diag(AW); AW_colsum = vec(sum(AW, dims=1))
+
+        # 分离非WX和WX部分的边际效应
+        raw_me_nonwx = zeros(nobs)
+        raw_me_wx = zeros(nobs)
+        for i in 1:nobs
+            for k in 1:nf
+                if k in wx_indices_in_frontier
+                    raw_me_wx[i] += β_frontier[k] * deriv_mat[i, k]
+                else
+                    raw_me_nonwx[i] += β_frontier[k] * deriv_mat[i, k]
+                end
+            end
+        end
+
+        direct_me  = [A_diag[obs_ci[i]] * raw_me_nonwx[i] + AW_diag[obs_ci[i]] * raw_me_wx[i] for i in 1:nobs]
+        total_me   = [A_colsum[obs_ci[i]] * raw_me_nonwx[i] + AW_colsum[obs_ci[i]] * raw_me_wx[i] for i in 1:nobs]
+        indirect_me = total_me .- direct_me
+    else
+        direct_me = raw_me; indirect_me = zeros(nobs); total_me = raw_me
+    end
+
+    # --- MC 模拟 ---
+    println(">>> MC 模拟 (B=$B)...")
+    Random.seed!(12345)
+    mc_idx = collect(idx_frontier)
+    off_beta = 1:nf
+    n_mc = nf
+    off_gamma = nothing; gammap_raw = nothing
+    if has_spatial && idx_gamma !== nothing
+        append!(mc_idx, collect(idx_gamma))
+        off_gamma = n_mc + 1
+        gammap_raw = _h45_recover_raw(rho_y, rymin, rymax)
+        n_mc += 1
+    end
+
+    sub_vcov = vcov[mc_idx, mc_idx]
+    L = cholesky(Symmetric(sub_vcov)).L
+    mc_direct = zeros(nobs, B); mc_indirect = zeros(nobs, B); mc_total = zeros(nobs, B)
+    for b in 1:B
+        perturb = L * randn(size(L,1))
+        β_b = β_frontier .+ perturb[off_beta]
+
+        # 空间参数扰动
+        A_diag_b = ones(N_cities); A_colsum_b = ones(N_cities)
+        AW_diag_b = zeros(N_cities); AW_colsum_b = zeros(N_cities)
+        if has_spatial && off_gamma !== nothing
+            g_b = gammap_raw + perturb[off_gamma]
+            rho_b = _h45_transform(g_b, rymin, rymax)
+            A_b = inv(I(N_cities) - rho_b * Wy_mat)
+            AW_b = A_b * Wy_mat
+            A_diag_b = diag(A_b); A_colsum_b = vec(sum(A_b, dims=1))
+            AW_diag_b = diag(AW_b); AW_colsum_b = vec(sum(AW_b, dims=1))
+        end
+
+        for i in 1:nobs
+            ci = obs_ci[i]
+            me_nonwx = 0.0; me_wx = 0.0
+            for k in 1:nf
+                if k in wx_indices_in_frontier
+                    me_wx += β_b[k] * deriv_mat[i, k]
+                else
+                    me_nonwx += β_b[k] * deriv_mat[i, k]
+                end
+            end
+            if has_spatial
+                mc_direct[i,b]   = A_diag_b[ci] * me_nonwx + AW_diag_b[ci] * me_wx
+                mc_total[i,b]    = A_colsum_b[ci] * me_nonwx + AW_colsum_b[ci] * me_wx
+                mc_indirect[i,b] = mc_total[i,b] - mc_direct[i,b]
+            else
+                mc_direct[i,b] = me_nonwx + me_wx
+                mc_total[i,b]  = me_nonwx + me_wx
+            end
+        end
+        b % 100 == 0 && println("  MC draw $b / $B")
+    end
+    println(">>> MC 模拟完成")
+    # --- 生成 Henderson 45度图 ---
+    println(">>> 生成 Henderson 45度图...")
+    mkpath(save_dir)
+    results = Dict{String, Any}()
+
+    if has_spatial
+        for (eff_name, eff_vec, mc_mat) in [
+            ("direct", direct_me, mc_direct),
+            ("indirect", indirect_me, mc_indirect),
+            ("total", total_me, mc_total)]
+
+            se_vec = vec(std(mc_mat, dims=2))
+            path = joinpath(save_dir, "henderson_y_$(target_var)_$(eff_name).png")
+            r = henderson_45degree(Float64.(eff_vec), se_vec;
+                save_path=path, parametric_mean=mean(eff_vec),
+                confidence_level=confidence_level, dpi=dpi,
+                title="45° Diagnostic: ∂lnC/∂$(target_var) $(titlecase(eff_name)) Effect")
+            results[eff_name] = r
+        end
+    else
+        se_vec = vec(std(mc_direct, dims=2))
+        path = joinpath(save_dir, "henderson_y_$(target_var).png")
+        r = henderson_45degree(Float64.(raw_me), se_vec;
+            save_path=path, parametric_mean=mean(raw_me),
+            confidence_level=confidence_level, dpi=dpi,
+            title="45° Diagnostic: ∂lnC/∂$(target_var) Marginal Effect")
+        results["total"] = r
+    end
+
+    println("\n", "="^60)
+    println("Henderson 45度图汇总 — ∂lnC/∂$(target_var) 前沿边际效应")
+    println("模型: $modelid | 空间: Wy=$(cfg.has_Wy)")
+    println("direct均值: $(round(mean(direct_me), digits=6))")
+    println("indirect均值: $(round(mean(indirect_me), digits=6))")
+    println("total均值: $(round(mean(total_me), digits=6))")
+    println("="^60)
+
+    return (results=results, raw_margeff=raw_me,
+            direct=direct_me, indirect=indirect_me, total=total_me,
+            mc_direct=mc_direct, mc_indirect=mc_indirect, mc_total=mc_total)
+end
