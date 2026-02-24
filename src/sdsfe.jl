@@ -4,6 +4,7 @@ export sfmodel_spec, sfmodel_init, sfmodel_opt, counterfact,
        sfmodel_fit, sfmodel_predict, drawTrun,
        genTrun, sf_demean, sfmodel_boot_marginal,
        sfmodel_henderson45, sfmodel_henderson45_y, henderson_45degree,
+       sfmodel_counterfactual,
        # likelihood functions 
         LL_T, simple_check, simple_check2,
        # macros for _spec; 

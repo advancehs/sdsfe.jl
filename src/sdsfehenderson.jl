@@ -730,3 +730,433 @@ function sfmodel_henderson45_y(res;
             direct=direct_me, indirect=indirect_me, total=total_me,
             mc_direct=mc_direct, mc_indirect=mc_indirect, mc_total=mc_total)
 end
+
+# ============================================================
+# 7. 反事实分析（支持变量名 + 多场景）
+# ============================================================
+
+"""
+    sfmodel_counterfactual(res; dat, depvar, scenarios, Wy_mat, Wu_mat, Wv_mat, envar, ivvar)
+
+反事实分析：支持按变量名指定、多种场景，适配 KU/KK/OA 全部模型类型。
+WH 模型暂不支持（原始 sdsfe 也未实现）。
+
+# 支持的模型
+- KU 系列 (SSFKUH, SSFKUT, SSFKUEH, SSFKUET): 逐观测计算，含 Wy
+- KK 系列 (SSFKKH, SSFKKT, SSFKKEH, SSFKKET): 按个体内积计算，无空间权重
+- OA 系列 (SSFOAT, SSFOAH, SSFOADT, SSFOADH): 按时间段计算，含 Wu/Wy
+
+# 参数
+- `res`: sfmodel_fit 返回的结果
+- `dat::DataFrame`: 按 [year, city_code] 排序后的 DataFrame
+- `depvar::Union{String,Symbol}`: 因变量名（必须提供，如 "lnc2"）
+- `scenarios::Dict{String, Any}`: 反事实场景，key 为 hscale 变量名，value 为：
+  - `Float64`: 将该变量设为常数值（如 0.0 表示均值）
+  - `Symbol`: 使用 dat 中另一列的值替换
+  - `Vector`: 直接传入替换向量
+  - `Pair{Symbol,Float64}`: 如 `:quantile => 0.25` 表示设为第25百分位数
+  - `Pair{Symbol,Float64}`: 如 `:shift => 1.0` 表示在原值基础上加一个标准差
+- `Wy_mat`: Wy 空间权重矩阵（KU/OA 模型，默认从模型内部获取）
+- `Wu_mat`: Wu 空间权重矩阵（OA 模型，默认从模型内部获取）
+- `Wv_mat`: Wv 空间权重矩阵（OA 模型，预留）
+- `envar`: 内生变量名（如 "agg2"），有内生性模型必须提供
+- `ivvar`: 工具变量名（如 "ivkind22" 或 ["ivkind22"]），有内生性模型必须提供
+
+# 示例
+```julia
+# KU 无内生性模型
+r1 = sfmodel_counterfactual(res; dat=Td22, depvar="lnc2",
+    scenarios=Dict("agg2" => 0.0))
+
+# KU 有内生性模型
+r2 = sfmodel_counterfactual(res; dat=Td22, depvar="lnc2",
+    scenarios=Dict("agg2" => :quantile => 0.75),
+    envar="agg2", ivvar="ivkind22")
+
+# KK 模型（无空间权重）
+r3 = sfmodel_counterfactual(res_kk; dat=Td22, depvar="lnc2",
+    scenarios=Dict("agg2" => 0.0))
+```
+"""
+function sfmodel_counterfactual(res;
+    dat::DataFrame,
+    depvar::Union{String, Symbol},
+    scenarios::Dict{String, <:Any},
+    Wy_mat=nothing,
+    Wu_mat=nothing,
+    Wv_mat=nothing,
+    envar=nothing,
+    ivvar=nothing)
+
+    modelid = res[:modelid]
+    # --- 模型名称字符串检测（兼容 JLD2.UnknownType）---
+    modelid_str = string(modelid)
+    function _match_model(s, names)
+        for n in names
+            occursin(n, s) && return true
+        end
+        return false
+    end
+    is_ku = _match_model(modelid_str, ["SSFKUH", "SSFKUT", "SSFKUEH", "SSFKUET"])
+    is_kk = _match_model(modelid_str, ["SSFKKH", "SSFKKT", "SSFKKEH", "SSFKKET"])
+    is_oa = _match_model(modelid_str, ["SSFOAH", "SSFOAT", "SSFOADH", "SSFOADT"])
+    is_wh = _match_model(modelid_str, ["SSFWHH", "SSFWHT", "SSFWHEH", "SSFWHET"])
+
+    if is_wh
+        error("WH 模型暂不支持反事实分析（原始 sdsfe 也未实现）")
+    end
+
+    # 检测分布和空间特征（字符串匹配，兼容 JLD2 加载）
+    is_half = _match_model(modelid_str, ["SSFKUH", "SSFKUEH", "SSFKKH", "SSFKKEH", "SSFOAH", "SSFOADH", "SSFWHH", "SSFWHEH"])
+    has_Wu  = _match_model(modelid_str, ["SSFOAH", "SSFOAT", "SSFOADH", "SSFOADT"])
+    has_Wy  = _match_model(modelid_str, ["SSFOAH", "SSFOAT", "SSFOADH", "SSFOADT", "SSFKUH", "SSFKUT", "SSFKUEH", "SSFKUET"])
+    has_mu  = !is_half
+    cfg = (is_half=is_half, has_Wu=has_Wu, has_Wy=has_Wy, has_mu=has_mu)
+
+    coef = res[:coeff]
+    eqpo = res[:eqpo]
+    PorC = res[:PorC]
+
+    println(">>> 反事实分析 — 模型: $modelid_str ($(is_ku ? "KU" : is_kk ? "KK" : "OA"))")
+
+    # --- 提取系数 ---
+    idx_frontier = eqpo[:coeff_frontier]
+    β = coef[idx_frontier]
+    idx_q = eqpo[:coeff_log_hscale]
+    τ = coef[idx_q]
+    idx_w = eqpo[:coeff_log_σᵤ²]
+    δ2 = coef[first(idx_w)]
+    idx_v = eqpo[:coeff_log_σᵥ²]
+    γ_val = coef[first(idx_v)]
+
+    σᵤ² = exp(δ2)
+    σᵥ² = exp(γ_val)
+    μ = 0.0  # 半正态
+    if cfg.has_mu && haskey(eqpo, :coeff_μ)
+        idx_z = eqpo[:coeff_μ]
+        μ = coef[first(idx_z)]
+    end
+
+    # --- 空间参数 ---
+    gamma = nothing
+    if cfg.has_Wy && haskey(eqpo, :coeff_γ)
+        gamma = coef[first(eqpo[:coeff_γ])]
+    end
+
+    # --- Wu 空间参数 (OA 模型) ---
+    tau_u = nothing
+    if cfg.has_Wu && haskey(eqpo, :coeff_τ)
+        tau_u = coef[first(eqpo[:coeff_τ])]
+    end
+
+    # --- 获取 Wy ---
+    if Wy_mat === nothing && cfg.has_Wy
+        Wy_raw = _dicM[:wy]
+        Wy_mat = (Wy_raw !== nothing && Wy_raw !== Nothing) ? Wy_raw[1] : nothing
+    end
+    # 处理 Array{Matrix} 包装类型（用户可能传入 Wx 而非 Wx[1]）
+    if Wy_mat !== nothing && !(Wy_mat isa AbstractMatrix{<:Real})
+        Wy_mat = Wy_mat[1]
+    end
+
+    # --- 获取 Wu (OA 模型) ---
+    if Wu_mat === nothing && cfg.has_Wu
+        Wu_raw = _dicM[:wu]
+        Wu_mat = (Wu_raw !== nothing && Wu_raw !== Nothing) ? Wu_raw[1] : nothing
+    end
+    if Wu_mat !== nothing && !(Wu_mat isa AbstractMatrix{<:Real})
+        Wu_mat = Wu_mat[1]
+    end
+    # --- 面板结构 ---
+    idvar = Symbol(res[:idvar][1])
+    timevar = Symbol(res[:timevar][1])
+
+    # KK 模型内部按 [idvar, timevar] 排序，其他模型按 [timevar, idvar] 排序
+    # 记录原始行顺序，计算完后排回去
+    unsort_perm = nothing
+    if is_kk
+        dat = copy(dat)
+        dat[!, :_orig_row_] = 1:nrow(dat)
+        sort!(dat, [idvar, timevar])
+        unsort_perm = sortperm(dat[!, :_orig_row_])
+        select!(dat, Not(:_orig_row_))
+    end
+
+    tvar = dat[!, timevar]
+    ivar = dat[!, idvar]
+    years = sort(unique(tvar))
+    T = length(years)
+    city_codes = sort(unique(ivar))
+    N = length(city_codes)
+    nobs = nrow(dat)
+
+    # --- 构建 rowIDT（与 sdsfe 内部一致）---
+    rowIDT = Array{Any}(undef, T, 2)
+    for (tt, yr) in enumerate(years)
+        rowIDT[tt, 1] = findall(tvar .== yr)
+        rowIDT[tt, 2] = length(rowIDT[tt, 1])
+    end
+
+    # --- 构建 rowIDI（按个体索引，KK 模型需要）---
+    rowIDI = nothing
+    if is_kk
+        rowIDI = Array{Any}(undef, N, 2)
+        for (ii, cc) in enumerate(city_codes)
+            rowIDI[ii, 1] = findall(ivar .== cc)
+            rowIDI[ii, 2] = length(rowIDI[ii, 1])
+        end
+    end
+
+    # --- 构建变量矩阵 ---
+    hscale_names = Symbol.(res[:hscale])
+    frontier_names = Symbol.(res[:frontier])
+    w_names = Symbol.(res[:σᵤ²])
+    v_names = Symbol.(res[:σᵥ²])
+
+    Q_orig = Float64.(Matrix(dat[!, hscale_names]))
+    # 构建 X 矩阵，处理常数项（sdsfe 内部命名为 _consssssss）
+    X_cols = Matrix{Float64}(undef, nobs, length(frontier_names))
+    for (j, nm) in enumerate(frontier_names)
+        if hasproperty(dat, nm)
+            X_cols[:, j] .= Float64.(dat[!, nm])
+        elseif occursin("cons", string(nm))
+            X_cols[:, j] .= 1.0
+        else
+            error("前沿变量 $nm 不在 DataFrame 中")
+        end
+    end
+    X_mat = X_cols
+    nq = length(hscale_names)
+
+    # --- 处理 WX 变量（如果有）---
+    n_base = length(frontier_names)
+    n_frontier_total = length(idx_frontier)
+    if n_frontier_total > n_base && cfg.has_Wy && Wy_mat !== nothing
+        # 有 WX 变量，需要构建完整的 X 矩阵
+        # 从 table_show 提取 WX 变量并构建
+        ts = res[:table_show]
+        wx_data = zeros(nobs, n_frontier_total - n_base)
+        wx_count = 0
+        for r in 1:size(ts, 1)
+            nm_str = string(ts[r, 2])
+            if startswith(nm_str, "W*")
+                wx_count += 1
+                if wx_count <= n_frontier_total - n_base
+                    base_nm = Symbol(nm_str[3:end])
+                    base_col = Float64.(dat[!, base_nm])
+                    # WX = Wy * X，按时间块计算
+                    for (tt, yr) in enumerate(years)
+                        idx = findall(tvar .== yr)
+                        wx_data[idx, wx_count] = Wy_mat * base_col[idx]
+                    end
+                end
+            end
+        end
+        X_mat = hcat(X_mat, wx_data)
+    end
+    # --- 应用反事实场景：修改 Q 矩阵 ---
+    Q_cf = copy(Q_orig)
+    for (var_name, scenario) in scenarios
+        var_sym = Symbol(var_name)
+        k = findfirst(==(var_sym), hscale_names)
+        k === nothing && error("变量 $var_name 不在 hscale 变量列表 $hscale_names 中")
+
+        orig_col = Q_orig[:, k]
+        if scenario isa Real
+            # 常数替换
+            Q_cf[:, k] .= Float64(scenario)
+            println("    $var_name → 常数 $(scenario)")
+        elseif scenario isa Pair
+            mode, val = scenario
+            if mode == :quantile
+                q_val = quantile(orig_col, val)
+                Q_cf[:, k] .= q_val
+                println("    $var_name → 第$(val*100)百分位数 = $(round(q_val, digits=4))")
+            elseif mode == :shift
+                sd_val = std(orig_col)
+                Q_cf[:, k] .= orig_col .+ val * sd_val
+                println("    $var_name → 原值 + $(val)σ (σ=$(round(sd_val, digits=4)))")
+            elseif mode == :multiply
+                Q_cf[:, k] .= orig_col .* val
+                println("    $var_name → 原值 × $(val)")
+            else
+                error("未知场景模式: $(mode), 支持 :quantile, :shift, :multiply")
+            end
+        elseif scenario isa Symbol
+            Q_cf[:, k] .= Float64.(dat[!, scenario])
+            println("    $var_name → 使用列 $scenario 的值")
+        elseif scenario isa AbstractVector
+            length(scenario) == nobs || error("向量长度 $(length(scenario)) ≠ 观测数 $nobs")
+            Q_cf[:, k] .= Float64.(scenario)
+            println("    $var_name → 自定义向量")
+        else
+            error("不支持的场景类型: $(typeof(scenario))")
+        end
+    end
+    # --- 计算反事实 JLMS ---
+    depvar_sym = Symbol(depvar)
+    hi_cf = exp.(Q_cf * τ)
+    ϵ = PorC * (Float64.(dat[!, depvar_sym]) - X_mat * β)
+
+    # --- 内生性修正（SSFKUEH, SSFKUET 等含 E 的模型）---
+    has_endo = haskey(eqpo, :coeff_ϕ) && haskey(eqpo, :coeff_η) &&
+               length(eqpo[:coeff_ϕ]) > 0 && length(eqpo[:coeff_η]) > 0
+    if has_endo
+        if envar === nothing || ivvar === nothing
+            @warn "模型含内生性但未提供 envar/ivvar，反事实结果可能不准确"
+        else
+            en_names = envar isa AbstractString ? [Symbol(envar)] : Symbol.(envar)
+            iv_names_list = ivvar isa AbstractString ? [Symbol(ivvar)] : Symbol.(ivvar)
+
+            # 构建第一阶段 IV 矩阵: [constant, frontier_excl_EN, hscale_excl_EN, iv_vars]
+            IV_cols = Vector{Vector{Float64}}()
+            for nm in frontier_names
+                nm in en_names && continue
+                if hasproperty(dat, nm)
+                    push!(IV_cols, Float64.(dat[!, nm]))
+                elseif occursin("cons", string(nm))
+                    push!(IV_cols, ones(nobs))
+                end
+            end
+            for nm in hscale_names
+                nm in en_names && continue
+                push!(IV_cols, Float64.(dat[!, nm]))
+            end
+            for nm in iv_names_list
+                push!(IV_cols, Float64.(dat[!, nm]))
+            end
+            IV_mat = hcat(IV_cols...)
+
+            phi_vec = Float64.(coef[eqpo[:coeff_ϕ]])
+            eta_vec = Float64.(coef[eqpo[:coeff_η]])
+            nofeta = length(eta_vec)
+            phi_mat = reshape(phi_vec, :, nofeta)
+
+            EN_mat = hcat([Float64.(dat[!, nm]) for nm in en_names]...)
+            eps_mat = EN_mat - IV_mat * phi_mat
+
+            ϵ .-= PorC * (eps_mat * eta_vec)
+            println("    内生性修正已应用 (EN=$(en_names), IV=$(iv_names_list))")
+        end
+    end
+
+    if is_kk
+        # === KK 模型: 按个体内积计算，无空间权重 ===
+        invPi = 1.0 / σᵥ²
+        jlms_total = zeros(nobs)
+
+        for idid in 1:N
+            ind = rowIDI[idid, 1]
+            hi_ind = hi_cf[ind]
+            eps_ind = ϵ[ind]
+
+            sig2_id = 1.0 / (dot(hi_ind, hi_ind) * invPi + 1.0 / σᵤ²)
+            mu_id = (μ / σᵤ² - dot(eps_ind, hi_ind) * invPi) * sig2_id
+
+            ratio = mu_id / sqrt(sig2_id)
+            jlms_total[ind] .= hi_ind .* (mu_id + sqrt(sig2_id) * normpdf(ratio) / normcdf(ratio))
+        end
+
+        jlms_direct = copy(jlms_total)
+        jlms_indirect = zeros(nobs)
+
+    elseif is_oa
+        # === OA 模型: 按时间段计算，含 Wu/Wy ===
+        Mtau = (cfg.has_Wu && tau_u !== nothing && Wu_mat !== nothing) ?
+               inv(I(N) - tau_u * Wu_mat) : Matrix{Float64}(I, N, N)
+        Mgamma = (cfg.has_Wy && gamma !== nothing && Wy_mat !== nothing) ?
+                 inv(I(N) - gamma * Wy_mat) : Matrix{Float64}(I, N, N)
+        MgammaMtau = Mgamma * Mtau
+        invPi = 1.0 / σᵥ²
+
+        jlms_total = zeros(nobs)
+        jlms_direct = zeros(nobs)
+
+        for tt in 1:T
+            ind = rowIDT[tt, 1]
+            hi_ind = hi_cf[ind]
+            hitau_ind = Mtau * hi_ind
+
+            if cfg.has_Wy && gamma !== nothing && Wy_mat !== nothing
+                y_ind = Float64.(dat[ind, depvar_sym])
+                ϵ[ind] .-= PorC * gamma * Wy_mat * y_ind
+            end
+
+            eps_ind = ϵ[ind]
+            sig2_t = 1.0 / (dot(hitau_ind, hitau_ind) * invPi + 1.0 / σᵤ²)
+            mu_t = (μ / σᵤ² - dot(eps_ind, hitau_ind) * invPi) * sig2_t
+
+            ratio = mu_t / sqrt(sig2_t)
+            base = hi_ind .* (mu_t + sqrt(sig2_t) * normpdf(ratio) / normcdf(ratio))
+
+            jlms_total[ind] .= MgammaMtau * base
+            jlms_direct[ind] .= Diagonal(diag(MgammaMtau)) * base
+        end
+
+        jlms_indirect = jlms_total .- jlms_direct
+
+    elseif cfg.has_Wy && gamma !== nothing && Wy_mat !== nothing
+        # === KU 模型 (空间): 逐观测计算，含 Wy ===
+        Wyt = kron(I(T), Wy_mat)
+        Mgamma = inv(I(N) - gamma * Wy_mat)
+        Mgammat = kron(I(T), Mgamma)
+
+        y_vec = Float64.(dat[!, depvar_sym])
+        ϵ_spatial = ϵ .- PorC * gamma * Wyt * y_vec
+        invPi = 1.0 / σᵥ²
+
+        sigs2 = @. 1.0 / (hi_cf^2 * invPi + 1.0 / σᵤ²)
+        mus = @. (μ / σᵤ² - ϵ_spatial * hi_cf * invPi) * sigs2
+
+        jlms1 = @. hi_cf * (mus + sqrt(sigs2) *
+            normpdf(mus / sqrt(sigs2)) / normcdf(mus / sqrt(sigs2)))
+        jlms_total = Mgammat * jlms1
+        jlms_direct = Diagonal(diag(Mgammat)) * jlms1
+        jlms_indirect = jlms_total - jlms_direct
+    else
+        # === KU 模型 (非空间) 或其他无空间权重情况 ===
+        invPi = 1.0 / σᵥ²
+        sigs2 = @. 1.0 / (hi_cf^2 * invPi + 1.0 / σᵤ²)
+        mus = @. (μ / σᵤ² - ϵ * hi_cf * invPi) * sigs2
+
+        jlms_total = @. hi_cf * (mus + sqrt(sigs2) *
+            normpdf(mus / sqrt(sigs2)) / normcdf(mus / sqrt(sigs2)))
+        jlms_direct = jlms_total
+        jlms_indirect = zeros(nobs)
+    end
+    # --- 计算 CEE ---
+    te_cf_total = exp.(-jlms_total)
+    te_cf_direct = exp.(-jlms_direct)
+    te_cf_indirect = exp.(-jlms_indirect)
+
+    # --- KK 模型：将结果排回原始输入顺序 ---
+    if unsort_perm !== nothing
+        jlms_total = jlms_total[unsort_perm]
+        jlms_direct = jlms_direct[unsort_perm]
+        jlms_indirect = jlms_indirect[unsort_perm]
+        te_cf_total = te_cf_total[unsort_perm]
+        te_cf_direct = te_cf_direct[unsort_perm]
+        te_cf_indirect = te_cf_indirect[unsort_perm]
+    end
+
+    # --- 汇总 ---
+    println(">>> 反事实分析完成")
+    println("    反事实 CEE (total):    均值=$(round(mean(te_cf_total), digits=4)), 中位数=$(round(median(te_cf_total), digits=4))")
+    println("    反事实 CEE (direct):   均值=$(round(mean(te_cf_direct), digits=4)), 中位数=$(round(median(te_cf_direct), digits=4))")
+
+    # --- 与原始 CEE 对比（如果 res 中有）---
+    if haskey(res, :te)
+        te_orig = res[:te]
+        diff_total = te_cf_total .- te_orig
+        println("    原始 CEE (total):      均值=$(round(mean(te_orig), digits=4))")
+        println("    CEE 变化 (反事实-原始): 均值=$(round(mean(diff_total), digits=4))")
+    end
+
+    return (counterfacttotal=vec(jlms_total),
+            counterfactdire=vec(jlms_direct),
+            counterfactindire=vec(jlms_indirect),
+            te_cf_total=vec(te_cf_total),
+            te_cf_direct=vec(te_cf_direct),
+            te_cf_indirect=vec(te_cf_indirect),
+            scenarios=scenarios)
+end
