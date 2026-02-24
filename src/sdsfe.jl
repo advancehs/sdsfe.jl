@@ -1,8 +1,9 @@
 module sdsfe
 
-export sfmodel_spec, sfmodel_init, sfmodel_opt, 
+export sfmodel_spec, sfmodel_init, sfmodel_opt, counterfact,
        sfmodel_fit, sfmodel_predict, drawTrun,
        genTrun, sf_demean, sfmodel_boot_marginal,
+       sfmodel_henderson45, henderson_45degree,
        # likelihood functions 
         LL_T, simple_check, simple_check2,
        # macros for _spec; 
@@ -31,7 +32,7 @@ export sfmodel_spec, sfmodel_init, sfmodel_opt,
        # functions for sfmodel_opt
         warmstart_solver, warmstart_maxIT,
         main_solver, main_maxIT, tolerance, verbose, banner,
-        ineff_index, counterfact,mareffx,margeffu, table_format,autodiff_mode, cfindices,
+        ineff_index, mareffx,margeffu, table_format,autodiff_mode, cfindices,
        # functions for sfmodel_fit
         useData,
         sfmodel_CI,
@@ -54,7 +55,8 @@ export sfmodel_spec, sfmodel_init, sfmodel_opt,
         text, html, latex, forward, finite,
         SSFOAT,SSFOAH, SSFOADT,SSFOADH,
         SSFKUT,SSFKUH,SSFKUET,SSFKUEH, SSFKKT,SSFKKH,SSFKKET,SSFKKEH,        #* export for testing purpose
-        SSF_OA2019,SSF_OAD2024,SSF_KU2020,SSF_KUE2020,SSF_KK2017,SSF_KKE2017,
+        SSF_OA2019,SSF_OAD2024,SSF_KU2020,SSF_KUE2020,SSF_KK2017,SSF_KKE2017,SSF_WH2010,SSF_WHE2010,
+        SSFWHT,SSFWHH,SSFWHET,SSFWHEH,
       # Optim's algorithms  
         NelderMead, SimulatedAnnealing, SAMIN, ParticleSwarm,
         ConjugateGradient, GradientDescent, BFGS, LBFGS,
@@ -89,6 +91,22 @@ using MAT
 using LineSearches
 using Calculus 
 using BlockDiagonals            # for diagnol matrix
+using ADTypes
+using Printf
+using Plots
+
+# Compatibility shim: ft_printf was removed in PrettyTables 3.x
+function ft_printf(fmt_str::String, columns::AbstractVector{Int})
+    fmt = Printf.Format(fmt_str)
+    return (v, i, j) -> begin
+        if j in columns && typeof(v) <: Number
+            return Printf.format(fmt, v)
+        else
+            return v
+        end
+    end
+end
+ft_printf(fmt_str::String, columns::UnitRange{Int}) = ft_printf(fmt_str, collect(columns))
 
 #############################
 ##   Define Model Types    ##
@@ -119,6 +137,11 @@ abstract type Sfmodeltype end
   struct SSFKKEH    <: Sfmodeltype end # panel true random effect model, half normal
   struct SSFKKET   <: Sfmodeltype end # panel true random effect model, truncated normal
 
+  struct SSFWHH    <: Sfmodeltype end # panel true random effect model, half normal
+  struct SSFWHT   <: Sfmodeltype end # panel true random effect model, truncated normal
+  struct SSFWHEH    <: Sfmodeltype end # panel true random effect model, half normal
+  struct SSFWHET   <: Sfmodeltype end # panel true random effect model, truncated normal
+
 abstract type PorC end
   struct production <: PorC end
   struct cost <: PorC end
@@ -130,7 +153,8 @@ abstract type PanelModel end
   struct SSF_KUE2020 <: PanelModel end
   struct SSF_KK2017 <: PanelModel end
   struct SSF_KKE2017 <: PanelModel end
-
+  struct SSF_WH2010 <: PanelModel end
+  struct SSF_WHE2010 <: PanelModel end
 
 
 
@@ -160,6 +184,7 @@ include("sdsfemarginal.jl")
 include("sdsfemainfun.jl")
 include("sdsfepartialloglike.jl")
 include("sdsfecountf.jl")
+include("sdsfehenderson.jl")
 
 
 
