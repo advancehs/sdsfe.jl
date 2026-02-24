@@ -271,8 +271,10 @@ function sfmodel_henderson45(res;
     rymin = 0.0; rymax = 1.0; rumin = 0.0; rumax = 1.0
     if haskey(res, :eigvalu) && res[:eigvalu] !== nothing
         ev = res[:eigvalu]
-        rymin = ev.rymin; rymax = ev.rymax
-        rumin = ev.rumin; rumax = ev.rumax
+        hasfield(typeof(ev), :rymin) && (rymin = ev.rymin)
+        hasfield(typeof(ev), :rymax) && (rymax = ev.rymax)
+        hasfield(typeof(ev), :rumin) && (rumin = ev.rumin)
+        hasfield(typeof(ev), :rumax) && (rumax = ev.rumax)
     else
         if cfg.has_Wy && Wy_mat !== nothing
             rymin, rymax = _h45_eigbounds(Wy_mat)
