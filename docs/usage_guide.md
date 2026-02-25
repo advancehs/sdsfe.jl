@@ -70,10 +70,14 @@ Wx = Array{Matrix}(undef, 1, 1); Wx[1] = w_mat
 本包基于双曲距离函数（Hyperbolic Distance Function）框架。论文中的理论模型为：
 
 ```
--ln(C_it) = Xβ + v_it + u_it,   u_it ≥ 0
+ln(C_it) = Xβ + v_it + u_it
 ```
 
-其中 C 为非期望产出（如碳排放），u 为非效率项。但在实际使用中，因变量直接传入 `ln(C)`（即 `log(emission)`），**不需要手动取负号**。符号方向由 `sftype(cost)` 自动处理：
+其中 C 为非期望产出（如碳排放），u 为非效率项。关于 u 的符号有两种等价写法：
+- 原稿约定：`u_it = ln(D_H) ≤ 0`，非效率使 ln(C) 减小
+- 修订稿约定：`u_it = -ln(D_H) ≥ 0`，非效率使 ln(C) 增大
+
+无论哪种约定，因变量都是 `ln(C)`（正的对数碳排放），**不需要手动取负号**。符号方向由 `sftype(cost)` 在模型内部自动处理：
 
 - `sftype(cost)`: 复合误差 ε = v + u，无效率项使因变量增大
 - `sftype(prod)`: 复合误差 ε = v - u，无效率项使因变量减小
@@ -86,7 +90,7 @@ Wx = Array{Matrix}(undef, 1, 1); Wx[1] = w_mat
 @depvar(lnc2)
 ```
 
-模型内部通过 `PorC` 参数（cost=+1, prod=-1）自动调整方向，等价于论文中 `-ln(C) = Xβ + v + u` 的形式。碳排放效率 CEE = exp(-u) ∈ (0, 1]，u 越大效率越低。
+模型内部通过 `PorC` 参数（cost=+1, prod=-1）自动调整方向。碳排放效率 CEE = exp(-u) ∈ (0, 1]，CEE 越大效率越高。
 
 ## 模型对照表
 
