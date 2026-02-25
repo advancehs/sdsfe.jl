@@ -316,6 +316,13 @@ res_oadh = sfmodel_fit(useData(Td))
 
 支持 KU(4) + KK(4) + OA(4) = 12 种模型。WH 系列暂不支持。
 
+**空间权重矩阵自动获取：** `Wy_mat`、`Wu_mat`、`Wv_mat` 均为可选参数。若不传入，函数会自动从 sdsfe 内部全局变量 `_dicM` 中获取（即 `sfmodel_spec` 时通过 `wy()`/`wu()`/`wv()` 设定的矩阵）。因此：
+
+- 同一 Julia session 中先 `sfmodel_fit` 再调用反事实：可以省略空间矩阵参数
+- 从 JLD2 加载已保存的结果：`_dicM` 中可能没有对应矩阵，建议显式传入
+
+下方示例均显式传入空间矩阵，以兼容 JLD2 加载场景。
+
 ### 2.1 场景类型
 
 `scenarios` 参数为 `Dict{String, Any}`，key 为 hscale 变量名，value 支持：
@@ -331,7 +338,7 @@ res_oadh = sfmodel_fit(useData(Td))
 
 ### 2.2 KU 系列反事实
 
-特点: 含 Wy，需传 `Wy_mat`。有内生性 (E) 版本需额外传 `envar` + `ivvar`。
+特点: 含 Wy（可自动获取，也可显式传入）。有内生性 (E) 版本需额外传 `envar` + `ivvar`。
 
 **SSFKUH — 半正态 + 无内生性:**
 
@@ -411,7 +418,7 @@ cf_kket = sfmodel_counterfactual(res_kket;
 
 ### 2.4 OA 系列反事实
 
-特点: 含 Wy + Wu，需传 `Wy_mat` + `Wu_mat`。OAD 版本额外含 Wv + 内生性，需传 `Wv_mat` + `envar` + `ivvar`。
+特点: 含 Wy + Wu（可自动获取，也可显式传入）。OAD 版本额外含 Wv + 内生性，需传 `envar` + `ivvar`。
 
 **SSFOAH — 半正态 + 无内生性 (Wy+Wu):**
 
@@ -489,8 +496,8 @@ Henderson & Parmeter (2012) 45度诊断图，用于检验 hscale 变量对 E(u) 
 | `res` | NamedTuple | `sfmodel_fit` 返回的结果 |
 | `dat` | DataFrame | 按 `[year, city_code]` 排序后的数据 |
 | `target_var` | String | hscale 中的目标变量名 |
-| `Wy_mat` | Matrix | Wy 空间权重矩阵（KU/OA 需要） |
-| `Wu_mat` | Matrix | Wu 空间权重矩阵（OA 需要） |
+| `Wy_mat` | Matrix | Wy 空间权重矩阵（KU/OA 需要，可自动获取） |
+| `Wu_mat` | Matrix | Wu 空间权重矩阵（OA 需要，可自动获取） |
 | `save_dir` | String | 图片保存目录 |
 | `B` | Int | MC 模拟次数（默认 499） |
 | `confidence_level` | Float64 | 置信水平（默认 0.95） |
@@ -500,7 +507,7 @@ Henderson & Parmeter (2012) 45度诊断图，用于检验 hscale 变量对 E(u) 
 
 ### 3.1 KU 系列 Henderson 图
 
-特点: 含 Wy，需传 `Wy_mat`，输出 direct/indirect/total 三张图。
+特点: 含 Wy（可自动获取，也可显式传入），输出 direct/indirect/total 三张图。
 
 **SSFKUH — 半正态 + 无内生性:**
 
@@ -576,7 +583,7 @@ h45_kket = sfmodel_henderson45(res_kket;
 
 ### 3.3 OA 系列 Henderson 图
 
-特点: 含 Wy + Wu，需传 `Wy_mat` + `Wu_mat`，输出 direct/indirect/total 三张图。Henderson 图不区分内生性，OA 和 OAD 调用方式相同。
+特点: 含 Wy + Wu（可自动获取，也可显式传入），输出 direct/indirect/total 三张图。Henderson 图不区分内生性，OA 和 OAD 调用方式相同。
 
 **SSFOAH — 半正态 + 无内生性 (Wy+Wu):**
 
@@ -657,7 +664,7 @@ translog: `lnC = ... + β_L·lnL + β_LK·lnL·lnK + β_LY·lnL·lnY + 0.5·β_L
 
 ### 4.1 KU 系列前沿 Henderson 图
 
-特点: 含 Wy，输出 direct/indirect/total 三张图。含 `@frontierWx` 时需传 `wx_deriv`。
+特点: 含 Wy（可自动获取，也可显式传入），输出 direct/indirect/total 三张图。含 `@frontierWx` 时需传 `wx_deriv`。
 
 **SSFKUH — 半正态 + 无内生性 (∂lnC/∂lnL):**
 
@@ -765,7 +772,7 @@ sfmodel_henderson45_y(res_kket; dat=Td, target_var="lnL",
 
 ### 4.3 OA 系列前沿 Henderson 图
 
-特点: 含 Wy，输出 direct/indirect/total 三张图。含 `@frontierWx` 时需传 `wx_deriv`。Henderson 图不区分内生性，OA 和 OAD 调用方式相同。
+特点: 含 Wy（可自动获取，也可显式传入），输出 direct/indirect/total 三张图。含 `@frontierWx` 时需传 `wx_deriv`。Henderson 图不区分内生性，OA 和 OAD 调用方式相同。
 
 **SSFOAH — 半正态 + 无内生性 (∂lnC/∂lnL):**
 
