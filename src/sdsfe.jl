@@ -57,7 +57,9 @@ export sfmodel_spec, sfmodel_init, sfmodel_opt, counterfact,
         SSFOAT,SSFOAH, SSFOADT,SSFOADH,
         SSFKUT,SSFKUH,SSFKUET,SSFKUEH, SSFKKT,SSFKKH,SSFKKET,SSFKKEH,        #* export for testing purpose
         SSF_OA2019,SSF_OAD2024,SSF_KU2020,SSF_KUE2020,SSF_KK2017,SSF_KKE2017,SSF_WH2010,SSF_WHE2010,
+        SSF_GI2025,SSF_GIE2025,
         SSFWHT,SSFWHH,SSFWHET,SSFWHEH,
+        SSFGIH,SSFGIT,SSFGIEH,SSFGIET,
       # Optim's algorithms  
         NelderMead, SimulatedAnnealing, SAMIN, ParticleSwarm,
         ConjugateGradient, GradientDescent, BFGS, LBFGS,
@@ -143,6 +145,11 @@ abstract type Sfmodeltype end
   struct SSFWHEH    <: Sfmodeltype end # panel true random effect model, half normal
   struct SSFWHET   <: Sfmodeltype end # panel true random effect model, truncated normal
 
+  struct SSFGIH    <: Sfmodeltype end # Giannini 2025 spatial FD, half normal
+  struct SSFGIT    <: Sfmodeltype end # Giannini 2025 spatial FD, truncated normal
+  struct SSFGIEH   <: Sfmodeltype end # Giannini 2025 spatial FD with endogeneity, half normal
+  struct SSFGIET   <: Sfmodeltype end # Giannini 2025 spatial FD with endogeneity, truncated normal
+
 abstract type PorC end
   struct production <: PorC end
   struct cost <: PorC end
@@ -156,6 +163,8 @@ abstract type PanelModel end
   struct SSF_KKE2017 <: PanelModel end
   struct SSF_WH2010 <: PanelModel end
   struct SSF_WHE2010 <: PanelModel end
+  struct SSF_GI2025 <: PanelModel end
+  struct SSF_GIE2025 <: PanelModel end
 
 
 

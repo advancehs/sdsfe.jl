@@ -11,12 +11,14 @@
   - [1.1 KU 系列](#11-ku-系列--kutlu-2020)
   - [1.2 KK 系列](#12-kk-系列--kutlu-2017)
   - [1.3 OA 系列](#13-oa-系列--orea--álvarez-2019--oad-2024)
+  - [1.4 GI 系列](#14-gi-系列--giannini-2025)
 - [2. sfmodel_counterfactual — 反事实分析](#2-sfmodel_counterfactual--反事实分析)
   - [2.1 场景类型](#21-场景类型)
   - [2.2 KU 系列反事实](#22-ku-系列反事实)
   - [2.3 KK 系列反事实](#23-kk-系列反事实)
   - [2.4 OA 系列反事实](#24-oa-系列反事实)
-  - [2.5 水平值分解 (C_level)](#25-水平值分解)
+  - [2.5 GI 系列反事实](#25-gi-系列反事实)
+  - [2.6 水平值分解 (C_level)](#26-水平值分解)
 - [3. sfmodel_henderson45 — 非效率边际效应 Henderson 图](#3-sfmodel_henderson45--非效率边际效应-henderson-图)
   - [3.1 KU 系列 Henderson 图](#31-ku-系列-henderson-图)
   - [3.2 KK 系列 Henderson 图](#32-kk-系列-henderson-图)
@@ -112,6 +114,10 @@ ln(C_it) = Xβ + v_it + u_it
 | SSFWHT | `SSF_WH2010` | trun | ✗ | ✗ | ✗ | ✗ | 暂不支持反事实 |
 | SSFWHEH | `SSF_WHE2010` | half | ✓ | ✗ | ✗ | ✗ | 暂不支持反事实 |
 | SSFWHET | `SSF_WHE2010` | trun | ✓ | ✗ | ✗ | ✗ | 暂不支持反事实 |
+| SSFGIH | `SSF_GI2025` | half | ✗ | ✓ | ✗ | ✗ | `Dict(1=>0.0)` |
+| SSFGIT | `SSF_GI2025` | trun | ✗ | ✓ | ✗ | ✗ | `Dict(1=>0.0)` |
+| SSFGIEH | `SSF_GIE2025` | half | ✓ | ✓ | ✗ | ✗ | `Dict(1=>0.0)` |
+| SSFGIET | `SSF_GIE2025` | trun | ✓ | ✓ | ✗ | ✗ | `Dict(1=>0.0)` |
 
 **关键区别:**
 - **半正态 (half)**: 不需要 `@μ`
@@ -120,6 +126,7 @@ ln(C_it) = Xβ + v_it + u_it
 - **KK 系列**: 无空间权重，优化器推荐 `NelderMead` + `finite`
 - **KU 系列**: 含 Wy，优化器推荐 `BFGS` + `forward`
 - **OA 系列**: 含 Wy+Wu(+Wv)，优化器推荐 `BFGS` + `forward`
+- **GI 系列**: 空间一阶差分固定效应，含 Wy，数据需按 `[id, time]` 排序，优化器推荐 `BFGS` + `forward`
 
 ---
 
@@ -310,11 +317,70 @@ res_oadh = sfmodel_fit(useData(Td))
 
 > 截断正态变体 (SSFOAT / SSFOADT): 将 `sfdist(half)` 改为 `sfdist(trun)` 并添加 `@μ(_cons)` 即可。
 
+### 1.4 GI 系列 — Giannini (2025)
+
+特点: 空间一阶差分固定效应模型，含 Wy，通过一阶差分消除个体固定效应。利用 Toeplitz 矩阵结构处理差分后的误差协方差。
+
+**重要:** GI 系列数据需按 `[id, time]` 排序（与其他系列按 `[time, id]` 排序不同）。
+
+**SSFGIH — 半正态 + 无内生性:**
+
+```julia
+# 数据按 [id, time] 排序！
+dat_gi = sort(dat, [:city_code, :year])
+
+sfmodel_spec(sfpanel(SSF_GI2025), sftype(cost), sfdist(half),
+    wy(Wx),
+    @timevar(tt), @idvar(id),
+    @depvar(lnc2),
+    @frontier(constant, lnl22, lnk22, lny22,
+              lnl_lnk22, lnl_lny22, lnk_lny22,
+              lnl2_05, lnk2_05, lny2_05, agg2),
+    @hscale(agg2, indus2, lagfdi2, human2, lnpgdp2, roadpc2),
+    @σᵤ²(_cons), @σᵥ²(_cons), message=true)
+
+sfmodel_opt(warmstart_solver(NelderMead()),
+    warmstart_maxIT(600),
+    main_solver(BFGS(linesearch=LineSearches.BackTracking())),
+    main_maxIT(1000),
+    tolerance(1e-6), autodiff_mode(forward),
+    cfindices(Dict(1 => 0.0)))
+
+res_gih = sfmodel_fit(useData(dat_gi))
+```
+
+**SSFGIEH — 半正态 + 有内生性:**
+
+```julia
+sfmodel_spec(sfpanel(SSF_GIE2025), sftype(cost), sfdist(half),
+    wy(Wx),
+    @timevar(tt), @idvar(id),
+    @depvar(lnc2),
+    @frontier(constant, lnl22, lnk22, lny22,
+              lnl_lnk22, lnl_lny22, lnk_lny22,
+              lnl2_05, lnk2_05, lny2_05, agg2),
+    @hscale(agg2, indus2, lagfdi2, human2, lnpgdp2, roadpc2),
+    @envar(agg2),          # 内生变量
+    @ivvar(ivkind22),      # 工具变量
+    @σᵤ²(_cons), @σᵥ²(_cons), message=true)
+
+sfmodel_opt(warmstart_solver(NelderMead()),
+    warmstart_maxIT(1000),
+    main_solver(BFGS(linesearch=LineSearches.BackTracking())),
+    main_maxIT(1000),
+    tolerance(1e-6), autodiff_mode(forward),
+    cfindices(Dict(1 => 0.0)))
+
+res_gieh = sfmodel_fit(useData(dat_gi))
+```
+
+> 截断正态变体 (SSFGIT / SSFGIET): 将 `sfdist(half)` 改为 `sfdist(trun)` 并添加 `@μ(_cons)` 即可。
+
 ---
 
 ## 2. sfmodel_counterfactual — 反事实分析
 
-支持 KU(4) + KK(4) + OA(4) = 12 种模型。WH 系列暂不支持。
+支持 KU(4) + KK(4) + OA(4) + GI(4) = 16 种模型。WH 系列暂不支持。
 
 **空间权重矩阵自动获取：** `Wy_mat`、`Wu_mat`、`Wv_mat` 均为可选参数。若不传入，函数会自动从 sdsfe 内部全局变量 `_dicM` 中获取（即 `sfmodel_spec` 时通过 `wy()`/`wu()`/`wv()` 设定的矩阵）。因此：
 
@@ -460,7 +526,49 @@ cf_oadt = sfmodel_counterfactual(res_oadt;
     envar="agg2", ivvar="ivkind22")
 ```
 
-### 2.5 水平值分解
+### 2.5 GI 系列反事实
+
+特点: 含 Wy（可自动获取，也可显式传入）。数据需按 `[id, time]` 排序。有内生性 (E) 版本需额外传 `envar` + `ivvar`。
+
+**SSFGIH — 半正态 + 无内生性:**
+
+```julia
+cf_gih = sfmodel_counterfactual(res_gih;
+    dat=dat_gi, depvar="lnc2",
+    scenarios=Dict("agg2" => 0.0),
+    Wy_mat=Wx[1])
+```
+
+**SSFGIT — 截断正态 + 无内生性:**
+
+```julia
+cf_git = sfmodel_counterfactual(res_git;
+    dat=dat_gi, depvar="lnc2",
+    scenarios=Dict("agg2" => 0.0),
+    Wy_mat=Wx[1])
+```
+
+**SSFGIEH — 半正态 + 有内生性:**
+
+```julia
+cf_gieh = sfmodel_counterfactual(res_gieh;
+    dat=dat_gi, depvar="lnc2",
+    scenarios=Dict("agg2" => 0.0),
+    Wy_mat=Wx[1],
+    envar="agg2", ivvar="ivkind22")
+```
+
+**SSFGIET — 截断正态 + 有内生性:**
+
+```julia
+cf_giet = sfmodel_counterfactual(res_giet;
+    dat=dat_gi, depvar="lnc2",
+    scenarios=Dict("agg2" => 0.0),
+    Wy_mat=Wx[1],
+    envar="agg2", ivvar="ivkind22")
+```
+
+### 2.6 水平值分解
 
 传入 `C_level` 参数可获得水平值（非对数）的前沿/效率通道分解：
 

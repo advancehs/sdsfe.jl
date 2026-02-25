@@ -843,6 +843,8 @@ function ssdoadh_yuv( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN
     @views eps = EN- IV*phi
 
     @views LL = ((eps .- mean(eps, dims=1))' * (eps .- mean(eps, dims=1)) )/ num.nofobs
+
+
     @views logdetll = log(det(LL))
     @views invll = LL\I(num.nofeta)
     likx = zero(eltype(y));
@@ -5040,6 +5042,798 @@ function LL_T(::Type{SSFKKT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, 
     return llt
 end
 
+
+
+
+
+#############   WH2010  ################
+
+function ssdwhhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
+    PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any} )
+    β  = rho[1:po.endx]
+    τ  = rho[po.begq:po.endq]
+    phi = rho[po.begphi:po.endphi]
+    ## calculate lkx
+    nofiv = num.nofphi/num.nofeta
+    eps = zeros(eltype(EN),num.nofobs,num.nofeta);
+
+    # %%%%%%%%%%%%%%
+    # @inbounds  for ii=1:num.nofeta
+    #      eps[:,ii]=EN[:,ii]-IV*phi[((Int(ii)-1)*Int(nofiv)+1):(Int(ii)*Int(nofiv))];
+    #  end
+    @views phi = reshape(phi, :, num.nofeta)
+    @views eps = EN- IV*phi
+
+    # @views LL = ((eps .- mean(eps, dims=1))' * (eps .- mean(eps, dims=1)) )/ num.nofobs
+    @views LL = cov(eps);
+    @views logdetll = log(det(LL))
+    @views invll = LL\I(num.nofeta)
+    likx = zero(eltype(y));
+
+   try
+    @floop begin
+    @inbounds for iitt =1:num.nofobs
+                tempx=-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+                if simple_check(tempx)
+                    likx += -1e9
+                else
+                    likx += tempx
+                end # simple_check(tempx)
+    
+        end # iitt =1:num.nofobs
+    end # @floop begin
+
+    ID = size(rowIDT,1)
+    @floop begin
+        @inbounds for iidd=1:ID 
+            @views T = rowIDT[iidd,2];
+                    tempx2= (T-1) * (-0.5*num.nofeta*log(2*π)-0.5*logdetll);
+                    if simple_check(tempx2)
+                        likx += -1e99
+                    else
+                        likx += tempx2
+                    end # simple_check(tempx2)
+        
+                 end # iidd=1:ID 
+        end # @floop begin
+
+    ## calculate lky
+    
+    eta = rho[po.begeta:po.endeta]
+    δ2 = rho[po.begw]  
+    γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
+    # δ1 = rho[po.begz]
+
+
+    hi  = exp.(Q*τ)
+    σᵤ²= exp(δ2) 
+    σᵤ= exp(0.5*δ2) 
+    σᵥ² = exp(γ)            # todo: 重新换一下字母 
+    σᵥ = exp(0.5*γ)  
+    μ   = 0.0
+    ϵ = PorC*(y - x*β)
+    ID = size(rowIDT,1)
+
+    @floop begin  
+        lik = zero(eltype(y));
+    @inbounds  for iidd=1:ID  
+        @views T = rowIDT[iidd,2];
+        @views onecol = ones(T, 1);
+        @views IMT = (I(T)-onecol*pinv(onecol'*onecol)*onecol');
+        @views invPi = 1/σᵥ²;
+
+        @views lndetPi = log(σᵥ²);
+            @views ind = rowIDT[iidd,1];
+            @views his = IMT*(hi[ind]);
+            @views ϵs  = ϵ[ind] - PorC*(eps[ind,:]*eta) ;
+            @views sigs2 = 1.0 / ((his'*his*invPi) + 1/σᵤ²) ;
+            @views mus = (μ/σᵤ² - (ϵs'*his*invPi))*sigs2 ;
+            @views es2 = -0.5*(ϵs'*ϵs*invPi );
+            @views KK = -0.5*(T-1)*log(2 * π)-0.5*(T-1)*lndetPi;
+
+            @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
+                            0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
+                            0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                    if simple_check(temp)
+                        lik += -1e99
+                    else
+                        lik += temp
+                    end # simple_check(temp)
+                end # for ttt=1:ID
+        end # begin
+
+    return -lik-likx
+    catch e
+    # 处理异常的代码
+    # println("操作失败，发生错误：$e")
+        return 1e100
+    end
+end
+    
+    
+    
+
+
+    
+function ssdwhh( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  
+     PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any} )
+    β  = rho[1:po.endx]
+    τ  = rho[po.begq:po.endq]
+
+    δ2 = rho[po.begw]  
+    γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
+    # δ1 = rho[po.begz]
+
+
+    hi  = exp.(Q*τ)
+    σᵤ²= exp(δ2) 
+    σᵤ= exp(0.5*δ2) 
+    σᵥ² = exp(γ)            # todo: 重新换一下字母 
+    σᵥ = exp(0.5*γ)  
+    μ   = 0.0
+    ϵ = PorC*(y - x*β)
+
+
+    ID = size(rowIDT,1)
+
+    try
+    @floop begin  
+        lik = zero(eltype(y));
+    @inbounds  for iidd=1:ID  
+        @views T = rowIDT[iidd,2];
+        @views onecol = ones(T, 1);
+        @views IMT = (I(T)-onecol*pinv(onecol'*onecol)*onecol');
+        @views invPi = 1/σᵥ²;
+        @views lndetPi = log(σᵥ²);
+        @views ind = rowIDT[iidd,1];
+        @views his = IMT*(hi[ind]);
+        @views ϵs  = ϵ[ind]   ;
+        @views sigs2 = 1.0 / ((his'*his*invPi) + 1/σᵤ²) ;
+        @views mus = (μ/σᵤ² - (ϵs'*his*invPi))*sigs2 ;
+        @views es2 = -0.5*(ϵs'*ϵs*invPi );
+        @views KK = -0.5*(T-1)*log(2 * π)-0.5*(T-1)*lndetPi;
+
+        @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
+                            0.5 * log(sigs2) + (normlogcdf(mus / sqrt(sigs2))) -
+                            0.5 * log(σᵤ²) - (normlogcdf(μ / σᵤ))
+                    if simple_check(temp)
+                        lik += -1e99
+                    else
+                        lik += temp
+                    end # simple_check(temp)
+                end # for ttt=1:ID
+        end # begin
+
+    return -lik
+    catch e
+    # 处理异常的代码
+    # println("操作失败，发生错误：$e")
+        return 1e100
+    end
+end
+    
+    
+
+
+function LL_T(::Type{SSFWHEH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,IV, 
+    PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
+
+    llt = ssdwhhe(y, x, Q, EN, IV, PorC, num, po, rho,  eigvalu, rowIDT )  
+
+    return llt
+end
+    
+function LL_T(::Type{SSFWHH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,IV, 
+    PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
+
+    llt = ssdwhh(y, x, Q, PorC, num, po, rho,  eigvalu, rowIDT ) 
+
+    return llt
+end
+
+
+
+    
+    
+function ssdwhte( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
+        PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any} )
+        β  = rho[1:po.endx]
+        τ  = rho[po.begq:po.endq]
+        phi = rho[po.begphi:po.endphi]
+        ## calculate lkx
+        nofiv = num.nofphi/num.nofeta
+        eps = zeros(eltype(EN),num.nofobs,num.nofeta);
+    
+        # %%%%%%%%%%%%%%
+        # @inbounds  for ii=1:num.nofeta
+        #      eps[:,ii]=EN[:,ii]-IV*phi[((Int(ii)-1)*Int(nofiv)+1):(Int(ii)*Int(nofiv))];
+        #  end
+        @views phi = reshape(phi, :, num.nofeta)
+        @views eps = EN- IV*phi
+    
+        # @views LL = ((eps .- mean(eps, dims=1))' * (eps .- mean(eps, dims=1)) )/ num.nofobs
+        @views LL = cov(eps);
+        @views logdetll = log(det(LL))
+        @views invll = LL\I(num.nofeta)
+        likx = zero(eltype(y));
+    
+       try
+        @floop begin
+        @inbounds for iitt =1:num.nofobs
+                    tempx=-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+                    if simple_check(tempx)
+                        likx += -1e9
+                    else
+                        likx += tempx
+                    end # simple_check(tempx)
+        
+            end # iitt =1:num.nofobs
+        end # @floop begin
+    
+        ID = size(rowIDT,1)
+        @floop begin
+            @inbounds for iidd=1:ID 
+                @views T = rowIDT[iidd,2];
+                        tempx2= (T-1) * (-0.5*num.nofeta*log(2*π)-0.5*logdetll);
+                        if simple_check(tempx2)
+                            likx += -1e99
+                        else
+                            likx += tempx2
+                        end # simple_check(tempx2)
+            
+                     end # iidd=1:ID 
+            end # @floop begin
+    
+        ## calculate lky
+        
+        eta = rho[po.begeta:po.endeta]
+        δ2 = rho[po.begw]  
+        γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
+        δ1 = rho[po.begz]
+    
+    
+        hi  = exp.(Q*τ)
+        σᵤ²= exp(δ2) 
+        σᵤ= exp(0.5*δ2) 
+        σᵥ² = exp(γ)            # todo: 重新换一下字母 
+        σᵥ = exp(0.5*γ)  
+        μ   = δ1
+        ϵ = PorC*(y - x*β)
+        ID = size(rowIDT,1)
+    
+        @floop begin  
+            lik = zero(eltype(y));
+        @inbounds  for iidd=1:ID  
+            @views T = rowIDT[iidd,2];
+            @views onecol = ones(T, 1);
+            @views IMT = (I(T)-onecol*pinv(onecol'*onecol)*onecol');
+            @views invPi = 1/σᵥ²;
+            @views lndetPi = log(σᵥ²);
+    
+                @views ind = rowIDT[iidd,1];
+                @views his = IMT*(hi[ind]);
+                @views ϵs  = ϵ[ind] - PorC*(eps[ind,:]*eta) ;
+                @views sigs2 = 1.0 / ((his'*his*invPi) + 1/σᵤ²) ;
+                @views mus = (μ/σᵤ² - (ϵs'*his*invPi))*sigs2 ;
+                @views es2 = -0.5*(ϵs'*ϵs*invPi );
+                @views KK = -0.5*(T-1)*log(2 * π)-0.5*(T-1)*lndetPi;
+    
+                @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
+                                0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
+                                0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                        if simple_check(temp)
+                            lik += -1e99
+                        else
+                            lik += temp
+                        end # simple_check(temp)
+                    end # for ttt=1:ID
+            end # begin
+    
+        return -lik-likx
+        catch e
+        # 处理异常的代码
+        # println("操作失败，发生错误：$e")
+            return 1e100
+        end
+    end
+        
+        
+        
+    
+    
+        
+function ssdwht( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  
+        PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any} )
+    β  = rho[1:po.endx]
+    τ  = rho[po.begq:po.endq]
+
+    δ2 = rho[po.begw]  
+    γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
+    δ1 = rho[po.begz]
+
+
+    hi  = exp.(Q*τ)
+    σᵤ²= exp(δ2) 
+    σᵤ= exp(0.5*δ2) 
+    σᵥ² = exp(γ)            # todo: 重新换一下字母 
+    σᵥ = exp(0.5*γ)  
+    μ   = δ1
+    ϵ = PorC*(y - x*β)
+
+
+    ID = size(rowIDT,1)
+
+    try
+    @floop begin  
+        lik = zero(eltype(y));
+    @inbounds  for iidd=1:ID  
+        @views T = rowIDT[iidd,2];
+        @views onecol = ones(T, 1);
+        @views IMT = (I(T)-onecol*pinv(onecol'*onecol)*onecol');
+        @views invPi = 1/σᵥ²;
+        @views lndetPi = log(σᵥ²);
+
+            @views ind = rowIDT[iidd,1];
+            @views his = IMT*(hi[ind]);
+            @views ϵs  = ϵ[ind]   ;
+            @views sigs2 = 1.0 / ((his'*his*invPi) + 1/σᵤ²) ;
+            @views mus = (μ/σᵤ² - (ϵs'*his*invPi))*sigs2 ;
+            @views es2 = -0.5*(ϵs'*ϵs*invPi );
+            @views KK = -0.5*(T-1)*log(2 * π)-0.5*(T-1)*lndetPi;
+
+
+            @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
+                            0.5 * log(sigs2) + (normlogcdf(mus / sqrt(sigs2))) -
+                            0.5 * log(σᵤ²) - (normlogcdf(μ / σᵤ))
+                    if simple_check(temp)
+                        lik += -1e99
+                    else
+                        lik += temp
+                    end # simple_check(temp)
+                end # for ttt=1:ID
+        end # begin
+
+    return -lik
+    catch e
+    # 处理异常的代码
+    # println("操作失败，发生错误：$e")
+        return 1e100
+    end
+end
+        
+
+function LL_T(::Type{SSFWHET}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,IV, 
+    PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
+
+    llt = ssdwhte(y, x, Q, EN, IV, PorC, num, po, rho,  eigvalu, rowIDT )  
+
+    return llt
+end
+    
+function LL_T(::Type{SSFWHT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,IV,
+    PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing)
+
+    llt = ssdwht(y, x, Q, PorC, num, po, rho,  eigvalu, rowIDT )
+    return llt
+end
+
+
+#* ============================================================
+#*  Giannini (2025) Spatial First-Difference SFA
+#* ============================================================
+
+function ssdgih(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, Q_lag::Matrix,
+    Wy::Matrix, PorC::Int64, num::NamedTuple, po::NamedTuple, rho,
+    eigvalu::NamedTuple, rowIDT::Matrix{Any})
+
+    β  = rho[1:po.endx]
+    τ  = rho[po.begq:po.endq]
+    δ2 = rho[po.begw]
+    γ  = rho[po.begv]
+    gammap = rho[po.beggamma]
+    gamma  = eigvalu.rymin/(1.0+exp(gammap)) + eigvalu.rymax*exp(gammap)/(1.0+exp(gammap))
+
+    hi_cur = exp.(Q*τ)
+    hi_lag = exp.(Q_lag*τ)
+    dhi    = hi_cur - hi_lag
+
+    σᵤ² = exp(δ2)
+    σᵤ  = exp(0.5*δ2)
+    σᵥ² = exp(γ)
+    μ   = 0.0
+    ϵ   = PorC*(y - x*β)
+
+    ID   = size(rowIDT, 1)
+    T_fd = rowIDT[1, 2]
+    T_orig = T_fd + 1
+
+  try
+    # spatial filtering: kron(W, I(T_fd)) for data sorted by [id, time]
+    lndetIrhoWt = 0.0
+    if length(Wy) == 1
+        N = ID
+        Wyt = kron(Wy[1], I(T_fd))
+        ϵ = ϵ - PorC*gamma*Wyt*y
+        lndetIrhoW = log(det(I(N) - gamma*Wy[1]))
+        lndetIrhoWt = lndetIrhoW * T_fd
+    end
+
+    # Toeplitz inverse: A^{-1}_{jk} = min(j,k)*(T-max(j,k))/T
+    Ainv = zeros(T_fd, T_fd)
+    for j = 1:T_fd, k = 1:T_fd
+        Ainv[j,k] = min(j,k) * (T_orig - max(j,k)) / T_orig
+    end
+    invPi = Ainv / σᵥ²
+    lndetA = log(T_orig)
+
+    lik = zero(eltype(y))
+    @inbounds for iidd = 1:ID
+        ind = rowIDT[iidd, 1]
+        T_i_fd = rowIDT[iidd, 2]
+
+        @views dhis = dhi[ind]
+        @views ϵs   = ϵ[ind]
+
+        sigs2 = 1.0 / (dhis'*invPi*dhis + 1.0/σᵤ²)
+        mus   = (μ/σᵤ² - ϵs'*invPi*dhis) * sigs2
+        es2   = -0.5 * ϵs'*invPi*ϵs
+        KK    = -0.5*T_i_fd*log(2π) - 0.5*T_i_fd*log(σᵥ²) - 0.5*lndetA
+
+        temp = KK + es2 + 0.5*((mus^2)/sigs2 - μ^2/σᵤ²) +
+               0.5*log(sigs2) + log(normcdf(mus/sqrt(sigs2))) -
+               0.5*log(σᵤ²) - log(normcdf(μ/σᵤ))
+
+        if simple_check(temp)
+            lik += -1e99
+        else
+            lik += temp
+        end
+    end
+
+    return -(lik + lndetIrhoWt)
+  catch e
+    return 1e100
+  end
+end
+
+# __SSDGIHE_START__
+
+function ssdgihe(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, Q_lag::Matrix,
+    EN, IV, Wy::Matrix, PorC::Int64, num::NamedTuple, po::NamedTuple, rho,
+    eigvalu::NamedTuple, rowIDT::Matrix{Any})
+
+    β   = rho[1:po.endx]
+    τ   = rho[po.begq:po.endq]
+    phi = rho[po.begphi:po.endphi]
+
+    # endogeneity part (likx)
+    nofiv = num.nofphi / num.nofeta
+    @views phi = reshape(phi, :, num.nofeta)
+    @views eps = EN - IV*phi
+
+    @views LL = cov(eps)
+    @views logdetll = log(det(LL))
+    @views invll = LL \ I(num.nofeta)
+    likx = zero(eltype(y))
+
+  try
+    @floop begin
+    @inbounds for iitt = 1:num.nofobs
+        tempx = -0.5*tr(invll*eps[iitt,:]'*eps[iitt,:])
+        if simple_check(tempx)
+            likx += -1e9
+        else
+            likx += tempx
+        end
+    end
+    end
+
+    ID = size(rowIDT, 1)
+    @floop begin
+    @inbounds for iidd = 1:ID
+        @views T_i_fd = rowIDT[iidd, 2]
+        tempx2 = T_i_fd * (-0.5*num.nofeta*log(2π) - 0.5*logdetll)
+        if simple_check(tempx2)
+            likx += -1e99
+        else
+            likx += tempx2
+        end
+    end
+    end
+
+    # efficiency part
+    eta = rho[po.begeta:po.endeta]
+    δ2  = rho[po.begw]
+    γ   = rho[po.begv]
+    gammap = rho[po.beggamma]
+    gamma  = eigvalu.rymin/(1.0+exp(gammap)) + eigvalu.rymax*exp(gammap)/(1.0+exp(gammap))
+
+    hi_cur = exp.(Q*τ)
+    hi_lag = exp.(Q_lag*τ)
+    dhi    = hi_cur - hi_lag
+
+    σᵤ² = exp(δ2)
+    σᵤ  = exp(0.5*δ2)
+    σᵥ² = exp(γ)
+    μ   = 0.0
+    ϵ   = PorC*(y - x*β)
+
+    T_fd   = rowIDT[1, 2]
+    T_orig = T_fd + 1
+
+    # spatial filtering
+    lndetIrhoWt = 0.0
+    if length(Wy) == 1
+        N = ID
+        Wyt = kron(Wy[1], I(T_fd))
+        ϵ = ϵ - PorC*gamma*Wyt*y - PorC*(eps*eta)
+        lndetIrhoW = log(det(I(N) - gamma*Wy[1]))
+        lndetIrhoWt = lndetIrhoW * T_fd
+    end
+
+    # __SSDGIHE_PART2__
+
+    # Toeplitz inverse
+    Ainv = zeros(T_fd, T_fd)
+    for j = 1:T_fd, k = 1:T_fd
+        Ainv[j,k] = min(j,k) * (T_orig - max(j,k)) / T_orig
+    end
+    invPi = Ainv / σᵥ²
+    lndetA = log(T_orig)
+
+    lik = zero(eltype(y))
+    @inbounds for iidd = 1:ID
+        ind = rowIDT[iidd, 1]
+        T_i_fd = rowIDT[iidd, 2]
+
+        @views dhis = dhi[ind]
+        @views ϵs   = ϵ[ind]
+
+        sigs2 = 1.0 / (dhis'*invPi*dhis + 1.0/σᵤ²)
+        mus   = (μ/σᵤ² - ϵs'*invPi*dhis) * sigs2
+        es2   = -0.5 * ϵs'*invPi*ϵs
+        KK    = -0.5*T_i_fd*log(2π) - 0.5*T_i_fd*log(σᵥ²) - 0.5*lndetA
+
+        temp = KK + es2 + 0.5*((mus^2)/sigs2 - μ^2/σᵤ²) +
+               0.5*log(sigs2) + log(normcdf(mus/sqrt(sigs2))) -
+               0.5*log(σᵤ²) - log(normcdf(μ/σᵤ))
+
+        if simple_check(temp)
+            lik += -1e99
+        else
+            lik += temp
+        end
+    end
+
+    return -(lik + lndetIrhoWt) - likx
+  catch e
+    return 1e100
+  end
+end
+
+
+# __SSDGIT_START__
+
+function ssdgit(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, Q_lag::Matrix,
+    Wy::Matrix, PorC::Int64, num::NamedTuple, po::NamedTuple, rho,
+    eigvalu::NamedTuple, rowIDT::Matrix{Any})
+
+    β  = rho[1:po.endx]
+    τ  = rho[po.begq:po.endq]
+    δ2 = rho[po.begw]
+    γ  = rho[po.begv]
+    δ1 = rho[po.begz]
+    gammap = rho[po.beggamma]
+    gamma  = eigvalu.rymin/(1.0+exp(gammap)) + eigvalu.rymax*exp(gammap)/(1.0+exp(gammap))
+
+    hi_cur = exp.(Q*τ)
+    hi_lag = exp.(Q_lag*τ)
+    dhi    = hi_cur - hi_lag
+
+    σᵤ² = exp(δ2)
+    σᵤ  = exp(0.5*δ2)
+    σᵥ² = exp(γ)
+    μ   = δ1
+    ϵ   = PorC*(y - x*β)
+
+    ID   = size(rowIDT, 1)
+    T_fd = rowIDT[1, 2]
+    T_orig = T_fd + 1
+
+  try
+    lndetIrhoWt = 0.0
+    if length(Wy) == 1
+        N = ID
+        Wyt = kron(Wy[1], I(T_fd))
+        ϵ = ϵ - PorC*gamma*Wyt*y
+        lndetIrhoW = log(det(I(N) - gamma*Wy[1]))
+        lndetIrhoWt = lndetIrhoW * T_fd
+    end
+
+    Ainv = zeros(T_fd, T_fd)
+    for j = 1:T_fd, k = 1:T_fd
+        Ainv[j,k] = min(j,k) * (T_orig - max(j,k)) / T_orig
+    end
+    invPi = Ainv / σᵥ²
+    lndetA = log(T_orig)
+
+    lik = zero(eltype(y))
+    @inbounds for iidd = 1:ID
+        ind = rowIDT[iidd, 1]
+        T_i_fd = rowIDT[iidd, 2]
+
+        @views dhis = dhi[ind]
+        @views ϵs   = ϵ[ind]
+
+        sigs2 = 1.0 / (dhis'*invPi*dhis + 1.0/σᵤ²)
+        mus   = (μ/σᵤ² - ϵs'*invPi*dhis) * sigs2
+        es2   = -0.5 * ϵs'*invPi*ϵs
+        KK    = -0.5*T_i_fd*log(2π) - 0.5*T_i_fd*log(σᵥ²) - 0.5*lndetA
+
+        temp = KK + es2 + 0.5*((mus^2)/sigs2 - μ^2/σᵤ²) +
+               0.5*log(sigs2) + log(normcdf(mus/sqrt(sigs2))) -
+               0.5*log(σᵤ²) - log(normcdf(μ/σᵤ))
+
+        if simple_check(temp)
+            lik += -1e99
+        else
+            lik += temp
+        end
+    end
+
+    return -(lik + lndetIrhoWt)
+  catch e
+    return 1e100
+  end
+end
+
+
+# __SSDGITE_START__
+
+function ssdgite(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, Q_lag::Matrix,
+    EN, IV, Wy::Matrix, PorC::Int64, num::NamedTuple, po::NamedTuple, rho,
+    eigvalu::NamedTuple, rowIDT::Matrix{Any})
+
+    β   = rho[1:po.endx]
+    τ   = rho[po.begq:po.endq]
+    phi = rho[po.begphi:po.endphi]
+
+    nofiv = num.nofphi / num.nofeta
+    @views phi = reshape(phi, :, num.nofeta)
+    @views eps = EN - IV*phi
+
+    @views LL = cov(eps)
+    @views logdetll = log(det(LL))
+    @views invll = LL \ I(num.nofeta)
+    likx = zero(eltype(y))
+
+  try
+    @floop begin
+    @inbounds for iitt = 1:num.nofobs
+        tempx = -0.5*tr(invll*eps[iitt,:]'*eps[iitt,:])
+        if simple_check(tempx)
+            likx += -1e9
+        else
+            likx += tempx
+        end
+    end
+    end
+
+    ID = size(rowIDT, 1)
+    @floop begin
+    @inbounds for iidd = 1:ID
+        @views T_i_fd = rowIDT[iidd, 2]
+        tempx2 = T_i_fd * (-0.5*num.nofeta*log(2π) - 0.5*logdetll)
+        if simple_check(tempx2)
+            likx += -1e99
+        else
+            likx += tempx2
+        end
+    end
+    end
+
+    eta = rho[po.begeta:po.endeta]
+    δ2  = rho[po.begw]
+    γ   = rho[po.begv]
+    δ1  = rho[po.begz]
+    gammap = rho[po.beggamma]
+    gamma  = eigvalu.rymin/(1.0+exp(gammap)) + eigvalu.rymax*exp(gammap)/(1.0+exp(gammap))
+
+    hi_cur = exp.(Q*τ)
+    hi_lag = exp.(Q_lag*τ)
+    dhi    = hi_cur - hi_lag
+
+    σᵤ² = exp(δ2)
+    σᵤ  = exp(0.5*δ2)
+    σᵥ² = exp(γ)
+    μ   = δ1
+    ϵ   = PorC*(y - x*β)
+
+    T_fd   = rowIDT[1, 2]
+    T_orig = T_fd + 1
+
+    lndetIrhoWt = 0.0
+    if length(Wy) == 1
+        N = ID
+        Wyt = kron(Wy[1], I(T_fd))
+        ϵ = ϵ - PorC*gamma*Wyt*y - PorC*(eps*eta)
+        lndetIrhoW = log(det(I(N) - gamma*Wy[1]))
+        lndetIrhoWt = lndetIrhoW * T_fd
+    end
+
+    # __SSDGITE_PART2__
+
+    Ainv = zeros(T_fd, T_fd)
+    for j = 1:T_fd, k = 1:T_fd
+        Ainv[j,k] = min(j,k) * (T_orig - max(j,k)) / T_orig
+    end
+    invPi = Ainv / σᵥ²
+    lndetA = log(T_orig)
+
+    lik = zero(eltype(y))
+    @inbounds for iidd = 1:ID
+        ind = rowIDT[iidd, 1]
+        T_i_fd = rowIDT[iidd, 2]
+
+        @views dhis = dhi[ind]
+        @views ϵs   = ϵ[ind]
+
+        sigs2 = 1.0 / (dhis'*invPi*dhis + 1.0/σᵤ²)
+        mus   = (μ/σᵤ² - ϵs'*invPi*dhis) * sigs2
+        es2   = -0.5 * ϵs'*invPi*ϵs
+        KK    = -0.5*T_i_fd*log(2π) - 0.5*T_i_fd*log(σᵥ²) - 0.5*lndetA
+
+        temp = KK + es2 + 0.5*((mus^2)/sigs2 - μ^2/σᵤ²) +
+               0.5*log(sigs2) + log(normcdf(mus/sqrt(sigs2))) -
+               0.5*log(σᵤ²) - log(normcdf(μ/σᵤ))
+
+        if simple_check(temp)
+            lik += -1e99
+        else
+            lik += temp
+        end
+    end
+
+    return -(lik + lndetIrhoWt) - likx
+  catch e
+    return 1e100
+  end
+end
+
+
+#* --- LL_T dispatches for Giannini 2025 ---
+
+function LL_T(::Type{SSFGIH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN, IV,
+    PorC::Int64, num::NamedTuple, po::NamedTuple, rho, eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing)
+    Wy = _dicM[:wy]
+    Q_lag = _dicM[:qvar_lag]
+    llt = ssdgih(y, x, Q, Q_lag, Wy, PorC, num, po, rho, eigvalu, rowIDT)
+    return llt
+end
+
+function LL_T(::Type{SSFGIEH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN, IV,
+    PorC::Int64, num::NamedTuple, po::NamedTuple, rho, eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing)
+    Wy = _dicM[:wy]
+    Q_lag = _dicM[:qvar_lag]
+    llt = ssdgihe(y, x, Q, Q_lag, EN, IV, Wy, PorC, num, po, rho, eigvalu, rowIDT)
+    return llt
+end
+
+function LL_T(::Type{SSFGIT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN, IV,
+    PorC::Int64, num::NamedTuple, po::NamedTuple, rho, eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing)
+    Wy = _dicM[:wy]
+    Q_lag = _dicM[:qvar_lag]
+    llt = ssdgit(y, x, Q, Q_lag, Wy, PorC, num, po, rho, eigvalu, rowIDT)
+    return llt
+end
+
+function LL_T(::Type{SSFGIET}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN, IV,
+    PorC::Int64, num::NamedTuple, po::NamedTuple, rho, eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing)
+    Wy = _dicM[:wy]
+    Q_lag = _dicM[:qvar_lag]
+    llt = ssdgite(y, x, Q, Q_lag, EN, IV, Wy, PorC, num, po, rho, eigvalu, rowIDT)
+    return llt
+end
 
 
 

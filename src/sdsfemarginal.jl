@@ -397,7 +397,7 @@ function IrhoW(gamma::Float64, rowIDT::Matrix{Any} )
 		NN=0.0
 		dire=0.0
 		indire=0.0
-		for ttt=1:T
+		for ttt=i:T
         @views N = rowIDT[ttt,2];
 
 		 NN = NN +N
@@ -435,7 +435,7 @@ function IrhoWW(gamma::Float64, rowIDT::Matrix{Any} )
 		NN=0.0
 		dire=0.0
 		indire=0.0
-		for ttt=1:T
+		for ttt=i:T
 			
         @views N = rowIDT[1,2];
 
@@ -468,7 +468,7 @@ function IrhoWWIrhoW(gamma::Float64,dgamma::Float64, rowIDT::Matrix{Any} )
         NN=0.0
         dire=0.0
         indire=0.0
-        for ttt=1:T
+        for ttt=i:T
         @views N = rowIDT[1,2];
     
          NN = NN +N
@@ -503,7 +503,7 @@ function IrhoWWIrhoWW(gamma::Float64,dgamma::Float64, rowIDT::Matrix{Any} )
 		NN=0.0
 		dire=0.0
 		indire=0.0
-		for ttt=1:T
+		for ttt=i:T
             @views N = rowIDT[1,2];
     		 NN = NN +N
     		 wirho = (I(N)-gamma*Wy[ttt])\I(N)*Wy[ttt]*(I(N)-gamma*Wy[ttt])*Wx[ttt]*dgamma

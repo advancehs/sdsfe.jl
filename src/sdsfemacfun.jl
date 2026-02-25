@@ -822,7 +822,7 @@ function sfpanel(arg::Vararg)
      
     (length(arg)==1) || throw("`sfpanel()` in sfmodel_spec should have one single string.")
     
-    if !(arg[1] ∈ (SSF_OA2019,SSF_OAD2024,SSF_KU2020,SSF_KUE2020,SSF_KK2017,SSF_KKE2017))
+    if !(arg[1] ∈ (SSF_OA2019,SSF_OAD2024,SSF_KU2020,SSF_KUE2020,SSF_KK2017,SSF_KKE2017,SSF_WH2010,SSF_WHE2010))
          throw("The keyword of `sfpanel` in sfmodel_spec is specified incorrectly.")
     end 
     
@@ -1293,10 +1293,24 @@ counterfact(arg::Bool)
  sfmodel_opt( counterfact(false), ...)
  ```
 """ 
- function counterfact(arg::Bool=true)
-    return (:counterfact, arg)
- end
+#  function counterfact(arg::Bool=true)
+#     return (:counterfact, arg)
+#  end
 
+
+
+#  function counterfact(arg::Vararg;) 
+#     global _cfdicM 
+#     _cfdicM = Dict{Symbol, Any}()
+
+#     for k in ( :depvar, :frontier,:frontierWx, :μ, :hscale,  :σᵤ², :σᵥ²,  ) 
+#         _cfdicM[k] = nothing
+#     end
+#     for d in :($(arg))
+#         _cfdicM[d[1]] = d[2]
+#     end 
+#     return _cfdicM # for debugging purpose
+#  end
   # -------------------------
 
 
