@@ -1963,6 +1963,58 @@ end
    
  
    
+
+
+
+function prtlloglikewhhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix, IV::Matrix,
+  PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any} )
+
+ β  = rho[1:po.endx]
+ τ  = rho[po.begq:po.endq]
+ phi = rho[po.begphi:po.endphi]
+ @views phi = reshape(phi, :, num.nofeta)
+ @views eps = EN- IV*phi
+
+ eta = rho[po.begeta:po.endeta]
+ δ2 = rho[po.begw]
+ γ  = rho[po.begv]
+
+ hi  = exp.(Q*τ)
+ σᵤ²= exp(δ2)
+ σᵤ= exp(0.5*δ2)
+ σᵥ² = exp(γ)
+ σᵥ = exp(0.5*γ)
+ μ   = 0.0
+ ϵ = PorC*(y - x*β)
+ ID = size(rowIDT,1)
+
+ @floop begin
+  lik = zero(eltype(y));
+  @inbounds  for iidd=1:ID
+  @views T = rowIDT[iidd,2];
+      onecol = ones(T, 1);
+      IMT = (I(T)-onecol*pinv(onecol'*onecol)*onecol');
+  @views invPi = 1/σᵥ²;
+  @views lndetPi = log(σᵥ²);
+      @views ind = rowIDT[iidd,1];
+      @views his = IMT*(hi[ind]);
+      @views ϵs  = ϵ[ind]   ;
+      sigs2 = 1.0 / ((his'*his*invPi) + 1/σᵤ²) ;
+      @views mus = (μ/σᵤ² - (ϵs'*his*invPi))*sigs2 ;
+      @views es2 = -0.5*(ϵs'*ϵs*invPi );
+      @views KK = -0.5*(T-1)*log(2 * π)-0.5*(T-1)*lndetPi;
+      @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
+                      0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
+                      0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                  lik += temp
+          end
+  end
+
+ return -lik
+
+end
+
+
 function prtlloglike(::Type{SSFWHEH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN::Matrix, IV::Matrix,
  PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
 
