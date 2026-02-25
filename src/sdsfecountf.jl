@@ -4292,9 +4292,9 @@ function  cfindexwht(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
 function counterfactindex(::Type{SSFWHET}, 
     PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any},dat::DataFrame)
     
-    yvar = dat[:, _cfdicM[:depvar]]   
-    xvar = dat[:, _cfdicM[:frontier]] 
-    qvar = dat[:, _cfdicM[:hscale]]  
+    yvar = dat[:, _dicM[:depvar]]   
+    xvar = dat[:, _dicM[:frontier]] 
+    qvar = dat[:, _dicM[:hscale]]  
 
     envar = dat[:, _dicM[:envar]]   
     name_xuvar = unique(union(_dicM[:frontier], _dicM[:hscale]), dims=1)  #  frontier + h (xu) 中的变量
@@ -4318,9 +4318,9 @@ end
 function counterfactindex(::Type{SSFWHT}, 
     PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any},dat::DataFrame)
 
-    yvar = dat[:, _cfdicM[:depvar]]   
-    xvar = dat[:, _cfdicM[:frontier]] 
-    qvar = dat[:, _cfdicM[:hscale]]  
+    yvar = dat[:, _dicM[:depvar]]   
+    xvar = dat[:, _dicM[:frontier]] 
+    qvar = dat[:, _dicM[:hscale]]  
 
 
     y  = convert(Array{Float64}, Matrix(yvar))
@@ -4466,9 +4466,9 @@ function  cfindexwhh(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
 function counterfactindex(::Type{SSFWHEH}, 
     PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any},dat::DataFrame)
     
-    yvar = dat[:, _cfdicM[:depvar]]   
-    xvar = dat[:, _cfdicM[:frontier]] 
-    qvar = dat[:, _cfdicM[:hscale]]  
+    yvar = dat[:, _dicM[:depvar]]   
+    xvar = dat[:, _dicM[:frontier]] 
+    qvar = dat[:, _dicM[:hscale]]  
  
     envar = dat[:, _dicM[:envar]]   
     name_xuvar = unique(union(_dicM[:frontier], _dicM[:hscale]), dims=1)  #  frontier + h (xu) 中的变量
@@ -4492,9 +4492,9 @@ end
 function counterfactindex(::Type{SSFWHH}, 
     PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any} , dat::DataFrame)
 
-    yvar = dat[:, _cfdicM[:depvar]]   
-    xvar = dat[:, _cfdicM[:frontier]] 
-    qvar = dat[:, _cfdicM[:hscale]]  
+    yvar = dat[:, _dicM[:depvar]]   
+    xvar = dat[:, _dicM[:frontier]] 
+    qvar = dat[:, _dicM[:hscale]]  
 
     y  = convert(Array{Float64}, Matrix(yvar))
     x  = convert(Array{Float64}, Matrix(xvar))
@@ -4502,7 +4502,8 @@ function counterfactindex(::Type{SSFWHH},
 
 
 
-    jlms,jlms_direct,jlms_indirect = cfindexwhh(y, x, Q, PorC, pos, rho,  eigvalu,  rowIDT )  
+    jlms,jlms_direct,jlms_indirect = cfindexwhh(y, x, Q, PorC, pos, rho,  eigvalu,  rowIDT )
 
     return jlms,jlms_direct,jlms_indirect
 
+end
