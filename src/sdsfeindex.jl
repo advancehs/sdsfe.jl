@@ -10308,6 +10308,36 @@ function jlmsbc(::Type{SSFGIET}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, 
     jlms, jlms_direct, jlms_indirect = jlmsbcgite0(y, x, Q, Q_lag, EN, IV, Wy, PorC, num, pos, rho, eigvalu, rowIDT)
     return jlms, jlms_direct, jlms_indirect
 end
+# ============ Giannini 2025 (GI) 系列 — jlmsbc1 ============
+
+function jlmsbc1(::Type{SSFGIH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
+    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+    Wy = _dicM[:wy];  Q_lag = _dicM[:qvar_lag]
+    jlms, _, _ = jlmsbcgih0(y, x, Q, Q_lag, Wy, PorC, pos, rho, eigvalu, rowIDT)
+    return jlms
+end
+
+function jlmsbc1(::Type{SSFGIEH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
+    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+    Wy = _dicM[:wy];  Q_lag = _dicM[:qvar_lag]
+    jlms, _, _ = jlmsbcgihe0(y, x, Q, Q_lag, EN, IV, Wy, PorC, num, pos, rho, eigvalu, rowIDT)
+    return jlms
+end
+
+function jlmsbc1(::Type{SSFGIT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
+    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+    Wy = _dicM[:wy];  Q_lag = _dicM[:qvar_lag]
+    jlms, _, _ = jlmsbcgit0(y, x, Q, Q_lag, Wy, PorC, pos, rho, eigvalu, rowIDT)
+    return jlms
+end
+
+function jlmsbc1(::Type{SSFGIET}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
+    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+    Wy = _dicM[:wy];  Q_lag = _dicM[:qvar_lag]
+    jlms, _, _ = jlmsbcgite0(y, x, Q, Q_lag, EN, IV, Wy, PorC, num, pos, rho, eigvalu, rowIDT)
+    return jlms
+end
+
 # ============ Wang & Ho 2010 (WH) 系列 — jlmsbc0 ============
 
 
