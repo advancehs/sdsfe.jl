@@ -1129,20 +1129,19 @@ function sfmodel_counterfactual(res;
             EN_mat = hcat([Float64.(dat[!, nm]) for nm in en_names]...)
             eps_mat = EN_mat - IV_mat * phi_mat
 
-            # OA+Wv 时内生性修正需要 Mrho，延迟到 OA 分支内按时间块处理
-            if has_wv_active
-                endo_eps_mat = eps_mat
-                endo_eta_vec = eta_vec
-                println("    内生性修正将在 OA 分支内应用 (含 Wv/Mrho)")
-            else
-                ϵ .-= PorC * (eps_mat * eta_vec)
-                println("    内生性修正已应用 (EN=$(en_names), IV=$(iv_names_list))")
-            end
+            # 内生性修正统一延迟到各模型分支内按需处理
+            endo_eps_mat = eps_mat
+            endo_eta_vec = eta_vec
+            println("    内生性修正将在模型分支内应用 (EN=$(en_names), IV=$(iv_names_list))")
         end
     end
 
     if is_kk
         # === KK 模型: 按个体内积计算，无空间权重 ===
+        # 内生性修正 (KK 无空间权重，全局修正)
+        if has_endo && endo_eps_mat !== nothing
+            ϵ .-= PorC * (endo_eps_mat * endo_eta_vec)
+        end
         invPi = 1.0 / σᵥ²
         jlms_total = zeros(nobs)
 
@@ -1194,10 +1193,15 @@ function sfmodel_counterfactual(res;
                 ϵ[ind] .-= PorC * gamma * Wy_mat * y_ind
             end
 
-            # 内生性修正 (OA+Wv): ϵ -= PorC·Mrho·(eps·η)
-            # 内生性修正 (OA-Wv): ϵ -= PorC·(eps·η) (已在全局处理)
-            if has_wv_active && endo_eps_mat !== nothing
-                ϵ[ind] .-= PorC * Mrho_oa * (endo_eps_mat[ind, :] * endo_eta_vec)
+            # 内生性修正 (在时间循环内，Wy 修正之后)
+            if endo_eps_mat !== nothing
+                if has_wv_active
+                    # OA+Wv: ϵ -= PorC·Mrho·(eps·η)
+                    ϵ[ind] .-= PorC * Mrho_oa * (endo_eps_mat[ind, :] * endo_eta_vec)
+                else
+                    # OA-Wv: ϵ -= PorC·(eps·η)
+                    ϵ[ind] .-= PorC * (endo_eps_mat[ind, :] * endo_eta_vec)
+                end
             end
 
             eps_ind = ϵ[ind]
@@ -1223,6 +1227,10 @@ function sfmodel_counterfactual(res;
 
         y_vec = Float64.(dat[!, depvar_sym])
         ϵ_spatial = ϵ .- PorC * gamma * Wyt * y_vec
+        # 内生性修正: ϵ -= PorC·(eps·η)
+        if has_endo && endo_eps_mat !== nothing
+            ϵ_spatial .-= PorC * (endo_eps_mat * endo_eta_vec)
+        end
         invPi = 1.0 / σᵥ²
 
         sigs2 = @. 1.0 / (hi_cf^2 * invPi + 1.0 / σᵤ²)
@@ -1235,6 +1243,10 @@ function sfmodel_counterfactual(res;
         jlms_indirect = jlms_total - jlms_direct
     else
         # === KU 模型 (非空间) 或其他无空间权重情况 ===
+        # 内生性修正: ϵ -= PorC·(eps·η)
+        if has_endo && endo_eps_mat !== nothing
+            ϵ .-= PorC * (endo_eps_mat * endo_eta_vec)
+        end
         invPi = 1.0 / σᵥ²
         sigs2 = @. 1.0 / (hi_cf^2 * invPi + 1.0 / σᵤ²)
         mus = @. (μ / σᵤ² - ϵ * hi_cf * invPi) * sigs2
