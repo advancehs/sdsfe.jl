@@ -4180,3 +4180,329 @@ function cfindexgit(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
 
     return jlms, jlms_direct, jlms_indirect
 end
+# ============ Wang & Ho 2010 (WH) 系列 ============
+
+
+ 
+function  cfindexwhte(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix, IV::Matrix, 
+    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+   
+    β  = rho[1:pos.endx]
+    τ  = rho[pos.begq:pos.endq]
+    phi = rho[pos.begphi:pos.endphi]
+    phi = reshape(phi,:,num.nofeta)
+    eps = EN-IV*phi
+    eta = rho[pos.begeta:pos.endeta]
+    δ2 = rho[pos.begw]  
+    γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
+    δ1 = rho[pos.begz]
+    
+    hi  = exp.(Q*τ)
+    σᵤ²= exp(δ2) 
+    σᵤ= exp(0.5*δ2) 
+    σᵥ² = exp(γ)  
+    σᵥ = exp(0.5*γ)    
+    μ   = δ1
+    ϵ = PorC*(y - x * β )
+    ID = size(rowIDT,1)
+    
+    sigs2 = zeros(eltype(y),ID,1);
+    mus = zeros(eltype(y),ID,1);
+ 
+    jlms = zeros(eltype(y),size(hi,1),1);
+    jlms_direct = zeros(eltype(y),size(hi,1),1);
+    jlms_indirect = zeros(eltype(y),size(hi,1),1);
+
+
+    @views invPi = 1.0 /σᵥ²  ;
+    @floop begin
+    @inbounds for iidd=1:ID 
+         @views T = rowIDT[iidd,2];
+         @views onecol = ones(T, 1);
+         @views IMT = (I(T)-onecol*pinv(onecol'*onecol)*onecol');
+         @views ind = rowIDT[iidd,1];
+         @views his = IMT*(hi[ind]);
+         @views ϵ[ind] = ϵ[ind] - PorC*(eps[ind,:]*eta) ;
+         @views sigs2[iidd] = 1.0 / ((his'*his*invPi) + 1/σᵤ²) ;
+         @views mus[iidd] = (μ/σᵤ² - (ϵ[ind]'*his*invPi))*sigs2[iidd] ;
+         @views jlms[ind] = @. hi[ind] *( mus[iidd] + sqrt(sigs2[iidd])* normpdf(
+                                mus[iidd]/sqrt(sigs2[iidd]))/normcdf(mus[iidd]/sqrt(sigs2[iidd]))   ) ;  
+         @views jlms_direct[ind] = jlms[ind]
+         @views jlms_indirect[ind] = jlms[ind] - jlms_direct[ind];
+
+     end # for iidd=1:ID
+    end # begin
+
+    return jlms,jlms_direct,jlms_indirect
+    end
+    
+    
+   
+function  cfindexwht(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,   
+       PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+
+
+       β  = rho[1:pos.endx]
+       τ  = rho[pos.begq:pos.endq]
+       δ2 = rho[pos.begw]  
+       γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
+       δ1 = rho[pos.begz]
+       hi  = exp.(Q*τ)
+       σᵤ²= exp(δ2) 
+       σᵤ= exp(0.5*δ2) 
+       σᵥ² = exp(γ)  
+       σᵥ = exp(0.5*γ)    
+       μ   = δ1
+       ϵ = PorC*(y - x * β )
+       ID = size(rowIDT,1)
+       sigs2 = zeros(eltype(y),ID,1);
+       mus = zeros(eltype(y),ID,1);
+ 
+       jlms = zeros(eltype(y),size(hi,1),1);
+       jlms_direct = zeros(eltype(y),size(hi,1),1);
+       jlms_indirect = zeros(eltype(y),size(hi,1),1);
+
+
+       @views invPi = 1.0 /σᵥ²  ;
+       @floop begin
+       @inbounds for iidd=1:ID 
+            @views T = rowIDT[iidd,2];
+            @views onecol = ones(T, 1);
+            @views IMT = (I(T)-onecol*pinv(onecol'*onecol)*onecol');
+            @views ind = rowIDT[iidd,1];
+            @views his = IMT*(hi[ind]);
+            @views ϵ[ind] = ϵ[ind] ;
+            @views sigs2[iidd] = 1.0 / ((his'*his*invPi) + 1/σᵤ²) ;
+            @views mus[iidd] = (μ/σᵤ² - (ϵ[ind]'*his*invPi))*sigs2[iidd] ;
+            @views jlms[ind] = @. hi[ind] *( mus[iidd] + sqrt(sigs2[iidd])* normpdf(
+                                   mus[iidd]/sqrt(sigs2[iidd]))/normcdf(mus[iidd]/sqrt(sigs2[iidd]))   ) ;  
+            @views jlms_direct[ind] = jlms[ind]
+            @views jlms_indirect[ind] = jlms[ind] - jlms_direct[ind];
+   
+        end # for iidd=1:ID
+       end # begin
+
+       return jlms,jlms_direct,jlms_indirect
+    end    
+      
+      
+      
+      
+    
+function counterfactindex(::Type{SSFWHET}, 
+    PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any},dat::DataFrame)
+    
+    yvar = dat[:, _cfdicM[:depvar]]   
+    xvar = dat[:, _cfdicM[:frontier]] 
+    qvar = dat[:, _cfdicM[:hscale]]  
+
+    envar = dat[:, _dicM[:envar]]   
+    name_xuvar = unique(union(_dicM[:frontier], _dicM[:hscale]), dims=1)  #  frontier + h (xu) 中的变量
+    name_exovar = unique(setdiff(name_xuvar, _dicM[:envar]), dims=1)  # xu中的所以外生变量
+    name_new_ivvar = union(name_exovar, _dicM[:ivvar])  # xu中的所以外生变量 + iv
+    ivvar = dat[:, name_new_ivvar]   
+
+    y  = convert(Array{Float64}, Matrix(yvar))
+    x  = convert(Array{Float64}, Matrix(xvar))
+    Q  = convert(Array{Float64}, Matrix(qvar))
+    IV  = convert(Array{Float64}, Matrix(ivvar))
+    EN  = convert(Array{Float64}, Matrix(envar))
+
+
+    jlms,jlms_direct,jlms_indirect = cfindexwhte(y, x, Q, EN, IV, PorC, num, pos, rho,  eigvalu, rowIDT )  
+
+    return jlms,jlms_direct,jlms_indirect
+
+end
+
+function counterfactindex(::Type{SSFWHT}, 
+    PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any},dat::DataFrame)
+
+    yvar = dat[:, _cfdicM[:depvar]]   
+    xvar = dat[:, _cfdicM[:frontier]] 
+    qvar = dat[:, _cfdicM[:hscale]]  
+
+
+    y  = convert(Array{Float64}, Matrix(yvar))
+    x  = convert(Array{Float64}, Matrix(xvar))
+    Q  = convert(Array{Float64}, Matrix(qvar))
+
+
+
+    jlms,jlms_direct,jlms_indirect = cfindexwht(y, x, Q, PorC, pos, rho,  eigvalu,  rowIDT )  
+
+    return jlms,jlms_direct,jlms_indirect
+
+end
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+function  cfindexwhhe(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix, IV::Matrix, 
+    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple,  rowIDT::Matrix{Any})
+   
+    β  = rho[1:pos.endx]
+    τ  = rho[pos.begq:pos.endq]
+
+    phi = rho[pos.begphi:pos.endphi]
+    
+    phi = reshape(phi,:,num.nofeta)
+    eps = EN-IV*phi
+    eta = rho[pos.begeta:pos.endeta]
+    
+    δ2 = rho[pos.begw]  
+    γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
+    # δ1 = rho[pos.begz]
+    
+    hi  = exp.(Q*τ)
+    σᵤ²= exp(δ2) 
+    σᵤ= exp(0.5*δ2) 
+    σᵥ² = exp(γ)  
+    σᵥ = exp(0.5*γ)    
+    μ   = 0.0
+    ϵ = PorC*(y - x * β )
+    ID = size(rowIDT,1)
+    
+    sigs2 = zeros(eltype(y),ID,1);
+    mus = zeros(eltype(y),ID,1);
+ 
+    jlms = zeros(eltype(y),size(hi,1),1);
+    jlms_direct = zeros(eltype(y),size(hi,1),1);
+    jlms_indirect = zeros(eltype(y),size(hi,1),1);
+
+
+    @views invPi = 1.0 /σᵥ²  ;
+    @floop begin
+    @inbounds for iidd=1:ID 
+         @views T = rowIDT[iidd,2];
+         @views onecol = ones(T, 1);
+         @views IMT = (I(T)-onecol*pinv(onecol'*onecol)*onecol');
+         @views ind = rowIDT[iidd,1];
+         @views his = IMT*(hi[ind]);
+         @views ϵ[ind] = ϵ[ind] - PorC*(eps[ind,:]*eta) ;
+         @views sigs2[iidd] = 1.0 / ((his'*his*invPi) + 1/σᵤ²) ;
+         @views mus[iidd] = (μ/σᵤ² - (ϵ[ind]'*his*invPi))*sigs2[iidd] ;
+         @views jlms[ind] = @. hi[ind] *( mus[iidd] + sqrt(sigs2[iidd])* normpdf.(
+                                mus[iidd]/sqrt.(sigs2[iidd]))./normcdf.(mus[iidd]/sqrt.(sigs2[iidd]))   ) ;  
+         @views jlms_direct[ind] = jlms[ind]
+         @views jlms_indirect[ind] = jlms[ind] - jlms_direct[ind];
+
+     end # for iidd=1:ID
+    end # begin
+   
+
+    return jlms,jlms_direct,jlms_indirect
+    end
+    
+    
+   
+   
+   
+function  cfindexwhh(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,   
+       PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+
+
+       β  = rho[1:pos.endx]
+       τ  = rho[pos.begq:pos.endq]
+       δ2 = rho[pos.begw]  
+       γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
+    #    δ1 = rho[pos.begz]
+
+       hi  = exp.(Q*τ)
+       σᵤ²= exp(δ2) 
+       σᵤ= exp(0.5*δ2) 
+       σᵥ² = exp(γ)  
+       σᵥ = exp(0.5*γ)    
+       μ   = 0.0
+       ϵ = PorC*(y - x * β )
+       ID = size(rowIDT,1)
+       
+       sigs2 = zeros(eltype(y),ID,1);
+       mus = zeros(eltype(y),ID,1);
+ 
+       jlms = zeros(eltype(y),size(hi,1),1);
+       jlms_direct = zeros(eltype(y),size(hi,1),1);
+       jlms_indirect = zeros(eltype(y),size(hi,1),1);
+
+
+       @views invPi = 1.0 /σᵥ²  ;
+       @floop begin
+       @inbounds for iidd=1:ID 
+            # @views T = rowIDT[iidd,2];
+            # @views onecol = ones(T, 1);
+            # @views IMT = (I(T)-onecol*pinv(onecol'*onecol)*onecol');
+            @views ind = rowIDT[iidd,1];
+            @views his = sf_demean(hi[ind]);
+
+            @views ϵs = ϵ[ind]   ;
+            @views sigs2 = 1.0 / ((his'*his*invPi) + 1/σᵤ²) ;
+            @views mus = (μ/σᵤ² - (ϵs'*his*invPi))*sigs2 ;
+            @views jlms[ind] = @. hi[ind] *( mus + sqrt(sigs2)* normpdf(
+                                                    mus/sqrt(sigs2))/normcdf(mus/sqrt(sigs2))   ) ;  
+            @views jlms_direct[ind] = jlms[ind]
+            @views jlms_indirect[ind] = jlms[ind] - jlms_direct[ind];
+
+        end # for iidd=1:ID
+       end # begin
+
+       return jlms,jlms_direct,jlms_indirect
+    end    
+      
+      
+
+
+      
+      
+    
+function counterfactindex(::Type{SSFWHEH}, 
+    PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any},dat::DataFrame)
+    
+    yvar = dat[:, _cfdicM[:depvar]]   
+    xvar = dat[:, _cfdicM[:frontier]] 
+    qvar = dat[:, _cfdicM[:hscale]]  
+ 
+    envar = dat[:, _dicM[:envar]]   
+    name_xuvar = unique(union(_dicM[:frontier], _dicM[:hscale]), dims=1)  #  frontier + h (xu) 中的变量
+    name_exovar = unique(setdiff(name_xuvar, _dicM[:envar]), dims=1)  # xu中的所以外生变量
+    name_new_ivvar = union(name_exovar, _dicM[:ivvar])  # xu中的所以外生变量 + iv
+    ivvar = dat[:, name_new_ivvar]   
+
+    y  = convert(Array{Float64}, Matrix(yvar))
+    x  = convert(Array{Float64}, Matrix(xvar))
+    Q  = convert(Array{Float64}, Matrix(qvar))
+    IV  = convert(Array{Float64}, Matrix(ivvar))
+    EN  = convert(Array{Float64}, Matrix(envar))
+
+
+    jlms,jlms_direct,jlms_indirect = cfindexwhhe(y, x, Q, EN, IV, PorC, num, pos, rho,  eigvalu, rowIDT )  
+
+    return jlms,jlms_direct,jlms_indirect
+
+end
+
+function counterfactindex(::Type{SSFWHH}, 
+    PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any} , dat::DataFrame)
+
+    yvar = dat[:, _cfdicM[:depvar]]   
+    xvar = dat[:, _cfdicM[:frontier]] 
+    qvar = dat[:, _cfdicM[:hscale]]  
+
+    y  = convert(Array{Float64}, Matrix(yvar))
+    x  = convert(Array{Float64}, Matrix(xvar))
+    Q  = convert(Array{Float64}, Matrix(qvar))
+
+
+
+    jlms,jlms_direct,jlms_indirect = cfindexwhh(y, x, Q, PorC, pos, rho,  eigvalu,  rowIDT )  
+
+    return jlms,jlms_direct,jlms_indirect
+

@@ -5459,3 +5459,211 @@ function LL_T(::Type{SSFGIET}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w,
     return llt
 end
 
+    
+
+
+function LL_T(::Type{SSFWHEH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,IV, 
+    PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
+
+    llt = ssdwhhe(y, x, Q, EN, IV, PorC, num, po, rho,  eigvalu, rowIDT )  
+
+    return llt
+end
+    
+function LL_T(::Type{SSFWHH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,IV, 
+    PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
+
+    llt = ssdwhh(y, x, Q, PorC, num, po, rho,  eigvalu, rowIDT ) 
+
+    return llt
+end
+
+
+
+    
+    
+function ssdwhte( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
+        PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any} )
+        β  = rho[1:po.endx]
+        τ  = rho[po.begq:po.endq]
+        phi = rho[po.begphi:po.endphi]
+        ## calculate lkx
+        nofiv = num.nofphi/num.nofeta
+        eps = zeros(eltype(EN),num.nofobs,num.nofeta);
+    
+        # %%%%%%%%%%%%%%
+        # @inbounds  for ii=1:num.nofeta
+        #      eps[:,ii]=EN[:,ii]-IV*phi[((Int(ii)-1)*Int(nofiv)+1):(Int(ii)*Int(nofiv))];
+        #  end
+        @views phi = reshape(phi, :, num.nofeta)
+        @views eps = EN- IV*phi
+    
+        # @views LL = ((eps .- mean(eps, dims=1))' * (eps .- mean(eps, dims=1)) )/ num.nofobs
+        @views LL = cov(eps);
+        @views logdetll = log(det(LL))
+        @views invll = LL\I(num.nofeta)
+        likx = zero(eltype(y));
+    
+       try
+        @floop begin
+        @inbounds for iitt =1:num.nofobs
+                    tempx=-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+                    if simple_check(tempx)
+                        likx += -1e9
+                    else
+                        likx += tempx
+                    end # simple_check(tempx)
+        
+            end # iitt =1:num.nofobs
+        end # @floop begin
+    
+        ID = size(rowIDT,1)
+        @floop begin
+            @inbounds for iidd=1:ID 
+                @views T = rowIDT[iidd,2];
+                        tempx2= (T-1) * (-0.5*num.nofeta*log(2*π)-0.5*logdetll);
+                        if simple_check(tempx2)
+                            likx += -1e99
+                        else
+                            likx += tempx2
+                        end # simple_check(tempx2)
+            
+                     end # iidd=1:ID 
+            end # @floop begin
+    
+        ## calculate lky
+        
+        eta = rho[po.begeta:po.endeta]
+        δ2 = rho[po.begw]  
+        γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
+        δ1 = rho[po.begz]
+    
+    
+        hi  = exp.(Q*τ)
+        σᵤ²= exp(δ2) 
+        σᵤ= exp(0.5*δ2) 
+        σᵥ² = exp(γ)            # todo: 重新换一下字母 
+        σᵥ = exp(0.5*γ)  
+        μ   = δ1
+        ϵ = PorC*(y - x*β)
+        ID = size(rowIDT,1)
+    
+        @floop begin  
+            lik = zero(eltype(y));
+        @inbounds  for iidd=1:ID  
+            @views T = rowIDT[iidd,2];
+            @views onecol = ones(T, 1);
+            @views IMT = (I(T)-onecol*pinv(onecol'*onecol)*onecol');
+            @views invPi = 1/σᵥ²;
+            @views lndetPi = log(σᵥ²);
+    
+                @views ind = rowIDT[iidd,1];
+                @views his = IMT*(hi[ind]);
+                @views ϵs  = ϵ[ind] - PorC*(eps[ind,:]*eta) ;
+                @views sigs2 = 1.0 / ((his'*his*invPi) + 1/σᵤ²) ;
+                @views mus = (μ/σᵤ² - (ϵs'*his*invPi))*sigs2 ;
+                @views es2 = -0.5*(ϵs'*ϵs*invPi );
+                @views KK = -0.5*(T-1)*log(2 * π)-0.5*(T-1)*lndetPi;
+    
+                @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
+                                0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
+                                0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                        if simple_check(temp)
+                            lik += -1e99
+                        else
+                            lik += temp
+                        end # simple_check(temp)
+                    end # for ttt=1:ID
+            end # begin
+    
+        return -lik-likx
+        catch e
+        # 处理异常的代码
+        # println("操作失败，发生错误：$e")
+            return 1e100
+        end
+    end
+        
+        
+        
+    
+    
+        
+function ssdwht( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  
+        PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any} )
+    β  = rho[1:po.endx]
+    τ  = rho[po.begq:po.endq]
+
+    δ2 = rho[po.begw]  
+    γ  = rho[po.begv]  # May rho[po.begw : po.endw][1]
+    δ1 = rho[po.begz]
+
+
+    hi  = exp.(Q*τ)
+    σᵤ²= exp(δ2) 
+    σᵤ= exp(0.5*δ2) 
+    σᵥ² = exp(γ)            # todo: 重新换一下字母 
+    σᵥ = exp(0.5*γ)  
+    μ   = δ1
+    ϵ = PorC*(y - x*β)
+
+
+    ID = size(rowIDT,1)
+
+    try
+    @floop begin  
+        lik = zero(eltype(y));
+    @inbounds  for iidd=1:ID  
+        @views T = rowIDT[iidd,2];
+        @views onecol = ones(T, 1);
+        @views IMT = (I(T)-onecol*pinv(onecol'*onecol)*onecol');
+        @views invPi = 1/σᵥ²;
+        @views lndetPi = log(σᵥ²);
+
+            @views ind = rowIDT[iidd,1];
+            @views his = IMT*(hi[ind]);
+            @views ϵs  = ϵ[ind]   ;
+            @views sigs2 = 1.0 / ((his'*his*invPi) + 1/σᵤ²) ;
+            @views mus = (μ/σᵤ² - (ϵs'*his*invPi))*sigs2 ;
+            @views es2 = -0.5*(ϵs'*ϵs*invPi );
+            @views KK = -0.5*(T-1)*log(2 * π)-0.5*(T-1)*lndetPi;
+
+
+            @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
+                            0.5 * log(sigs2) + (normlogcdf(mus / sqrt(sigs2))) -
+                            0.5 * log(σᵤ²) - (normlogcdf(μ / σᵤ))
+                    if simple_check(temp)
+                        lik += -1e99
+                    else
+                        lik += temp
+                    end # simple_check(temp)
+                end # for ttt=1:ID
+        end # begin
+
+    return -lik
+    catch e
+    # 处理异常的代码
+    # println("操作失败，发生错误：$e")
+        return 1e100
+    end
+end
+        
+
+function LL_T(::Type{SSFWHET}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,IV, 
+    PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
+
+    llt = ssdwhte(y, x, Q, EN, IV, PorC, num, po, rho,  eigvalu, rowIDT )  
+
+    return llt
+end
+    
+function LL_T(::Type{SSFWHT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,IV, 
+    PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any}, ::Nothing) 
+
+    llt = ssdwht(y, x, Q, PorC, num, po, rho,  eigvalu, rowIDT )  
+    return llt
+end
+
+
+
+

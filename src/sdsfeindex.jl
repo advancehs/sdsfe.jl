@@ -10308,3 +10308,785 @@ function jlmsbc(::Type{SSFGIET}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, 
     jlms, jlms_direct, jlms_indirect = jlmsbcgite0(y, x, Q, Q_lag, EN, IV, Wy, PorC, num, pos, rho, eigvalu, rowIDT)
     return jlms, jlms_direct, jlms_indirect
 end
+# ============ Wang & Ho 2010 (WH) 系列 — jlmsbc0 ============
+
+
+
+function  jlmsbcwhte0(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix, IV::Matrix, 
+    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+   
+    β  = rho[1:pos.endx]
+    τ  = rho[pos.begq:pos.endq]
+    phi = rho[pos.begphi:pos.endphi]
+    
+    phi = reshape(phi,:,num.nofeta)
+    eps = EN-IV*phi
+    eta = rho[pos.begeta:pos.endeta]
+    
+    δ2 = rho[pos.begw]  
+    γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
+    δ1 = rho[pos.begz]
+    
+    hi  = exp.(Q*τ)
+    σᵤ²= exp(δ2) 
+    σᵤ= exp(0.5*δ2) 
+    σᵥ² = exp(γ)  
+    σᵥ = exp(0.5*γ)    
+    μ   = δ1
+    ϵ = PorC*(y - x * β )
+    ID = size(rowIDT,1)
+    
+    sigs2 = zeros(eltype(y),ID,1);
+    mus = zeros(eltype(y),ID,1);
+    bc = zeros(eltype(y),size(hi,1),1);
+    jlms = zeros(eltype(y),size(hi,1),1);
+    
+    @views invPi = 1.0 /σᵥ²  ;
+
+    @floop begin
+    @inbounds for iidd=1:ID 
+
+         @views T = rowIDT[iidd,2];
+         @views onecol = ones(T, 1);
+         @views IMT = (I(T)-onecol*pinv(onecol'*onecol)*onecol');
+         @views ind = rowIDT[iidd,1];
+         @views his = IMT*(hi[ind]);
+        @views ϵ[ind] = ϵ[ind] - PorC*(eps[ind,:]*eta) ;
+        @views sigs2 = 1.0 /(his'*his*invPi  +1.0/σᵤ²);
+        @views mus = (μ/σᵤ² - ϵ[ind]'*his *invPi )*sigs2 ;
+        @views jlms[ind] = hi[ind] .*( mus + sqrt(sigs2)* normpdf(mus/sqrt(sigs2))/normcdf(mus/sqrt(sigs2))   ) ;  
+    end # for idid=1:ID
+    end # begin
+   
+    return jlms
+    end
+    
+    
+   
+   
+   
+function  jlmsbcwht0(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,   
+       PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+      
+       β  = rho[1:pos.endx]
+       τ  = rho[pos.begq:pos.endq]
+       
+       δ2 = rho[pos.begw]  
+       γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
+       δ1 = rho[pos.begz]
+       
+       hi  = exp.(Q*τ)
+       σᵤ²= exp(δ2) 
+       σᵤ= exp(0.5*δ2) 
+       σᵥ² = exp(γ)  
+       σᵥ = exp(0.5*γ)    
+       μ   = δ1
+       ϵ = PorC*(y - x * β )
+       ID = size(rowIDT,1)
+       
+       sigs2 = zeros(eltype(y),ID,1);
+       mus = zeros(eltype(y),ID,1);
+       bc = zeros(eltype(y),size(hi,1),1);
+       jlms = zeros(eltype(y),size(hi,1),1);
+       
+       @views invPi = 1.0 /σᵥ²  ;
+
+       @floop begin
+       @inbounds for iidd=1:ID 
+   
+            @views T = rowIDT[iidd,2];
+            @views onecol = ones(T, 1);
+            @views IMT = (I(T)-onecol*pinv(onecol'*onecol)*onecol');
+            @views ind = rowIDT[iidd,1];
+            @views his = IMT*(hi[ind]);
+           @views ϵ[ind] = ϵ[ind] ;
+           @views sigs2 = 1.0 /(his'*his*invPi  +1.0/σᵤ²);
+           @views mus = (μ/σᵤ² - ϵ[ind]'*his *invPi )*sigs2 ;
+           @views jlms[ind] = hi[ind] .*( mus + sqrt(sigs2)* normpdf(mus/sqrt(sigs2))/normcdf(mus/sqrt(sigs2))   ) ;  
+       end # for idid=1:ID
+       end # begin
+       
+   
+
+       return jlms
+    end    
+      
+      
+    
+function jlmsbc0(::Type{SSFWHET}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
+    PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+
+    jlms = jlmsbcwhte0(y, x, Q, EN, IV, PorC, num, pos, rho,  eigvalu, rowIDT )  
+
+    return jlms
+
+end
+
+function jlmsbc0(::Type{SSFWHT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
+    PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+
+    jlms = jlmsbcwht0(y, x, Q, PorC, pos, rho,  eigvalu, rowIDT )  
+
+    return jlms
+
+end
+   
+
+
+
+ 
+function  jlmsbcwhhe0(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix, IV::Matrix, 
+    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+   
+    β  = rho[1:pos.endx]
+    τ  = rho[pos.begq:pos.endq]
+    phi = rho[pos.begphi:pos.endphi]
+    
+    phi = reshape(phi,:,num.nofeta)
+    eps = EN-IV*phi
+    eta = rho[pos.begeta:pos.endeta]
+    
+    δ2 = rho[pos.begw]  
+    γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
+    # δ1 = rho[pos.begz]
+    
+    hi  = exp.(Q*τ)
+    σᵤ²= exp(δ2) 
+    σᵤ= exp(0.5*δ2) 
+    σᵥ² = exp(γ)  
+    σᵥ = exp(0.5*γ)    
+    μ   = 0.0
+    ϵ = PorC*(y - x * β )
+    ID = size(rowIDT,1)
+    
+    sigs2 = zeros(eltype(y),ID,1);
+    mus = zeros(eltype(y),ID,1);
+    bc = zeros(eltype(y),size(hi,1),1);
+    jlms = zeros(eltype(y),size(hi,1),1);
+    
+    @views invPi = 1.0 /σᵥ²  ;
+
+    @floop begin
+    @inbounds for iidd=1:ID 
+
+         @views T = rowIDT[iidd,2];
+         @views onecol = ones(T, 1);
+         @views IMT = (I(T)-onecol*pinv(onecol'*onecol)*onecol');
+         @views ind = rowIDT[iidd,1];
+         @views his = IMT*(hi[ind]);
+        @views ϵ[ind] = ϵ[ind] - PorC*(eps[ind,:]*eta) ;
+        @views sigs2 = 1.0 /(his'*his*invPi  +1.0/σᵤ²);
+        @views mus = (μ/σᵤ² - ϵ[ind]'*his *invPi )*sigs2 ;
+        @views jlms[ind] = hi[ind] .*( mus + sqrt(sigs2)* normpdf(mus/sqrt(sigs2))/normcdf(mus/sqrt(sigs2))   ) ;  
+    end # for idid=1:ID
+    end # begin
+    
+
+    return jlms 
+    end
+    
+    
+   
+   
+   
+function  jlmsbcwhh0(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,   
+       PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+      
+       β  = rho[1:pos.endx]
+       τ  = rho[pos.begq:pos.endq]
+       
+       δ2 = rho[pos.begw]  
+       γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
+    #    δ1 = rho[pos.begz]
+       
+       hi  = exp.(Q*τ)
+       σᵤ²= exp(δ2) 
+       σᵤ= exp(0.5*δ2) 
+       σᵥ² = exp(γ)  
+       σᵥ = exp(0.5*γ)    
+       μ   = 0.0
+       ϵ = PorC*(y - x * β )
+       ID = size(rowIDT,1)
+       
+       sigs2 = zeros(eltype(y),ID,1);
+       mus = zeros(eltype(y),ID,1);
+       bc = zeros(eltype(y),size(hi,1),1);
+       jlms = zeros(eltype(y),size(hi,1),1);
+       
+
+       @views invPi = 1.0 /σᵥ²  ;
+
+       @floop begin
+       @inbounds for iidd=1:ID 
+
+            @views T = rowIDT[iidd,2];
+            @views onecol = ones(T, 1);
+            @views IMT = (I(T)-onecol*pinv(onecol'*onecol)*onecol');
+            @views ind = rowIDT[iidd,1];
+            @views his = IMT*(hi[ind]);
+           @views ϵ[ind] = ϵ[ind]  ;
+           @views sigs2 = 1.0 /(his'*his*invPi  +1.0/σᵤ²);
+           @views mus = (μ/σᵤ² - ϵ[ind]'*his *invPi )*sigs2 ;
+           @views jlms[ind] = hi[ind] .*( mus + sqrt(sigs2)* normpdf(mus/sqrt(sigs2))/normcdf(mus/sqrt(sigs2))   ) ;  
+       end # for idid=1:ID
+       end # begin
+
+       return jlms  
+    end    
+      
+   
+function jlmsbc0(::Type{SSFWHEH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
+    PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+
+    jlms = jlmsbcwhhe0(y, x, Q, EN, IV, PorC, num, pos, rho,  eigvalu, rowIDT )  
+
+    return jlms
+
+end
+
+function jlmsbc0(::Type{SSFWHH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
+    PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+
+    jlms = jlmsbcwhh0(y, x, Q, PorC, pos, rho,  eigvalu, rowIDT )  
+
+    return jlms
+
+end
+
+
+### get barely inefficiency  code 0 i.e. hsale * ut
+### get  inefficiency  code 1 i.e. (I-wtau)^-1 * hsale * ut   if has
+### get  inefficiency  code 2 i.e. (I-wrho)^-1 * (I-wtau)^-1 * hsale * ut,decompostion at (I-wrho)^-1 * (I-wtau)^-1 
+#########################################
+####        JLMS and BC index        ####
+#########################################
+
+#? --------------- Truncated Normal --------------
+
+# ============ Wang & Ho 2010 (WH) 系列 — jlmsbc1 ============
+
+
+ 
+function  jlmsbcwhte1(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix, IV::Matrix, 
+    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+   
+    β  = rho[1:pos.endx]
+    τ  = rho[pos.begq:pos.endq]
+    phi = rho[pos.begphi:pos.endphi]
+    
+    phi = reshape(phi,:,num.nofeta)
+    eps = EN-IV*phi
+    eta = rho[pos.begeta:pos.endeta]
+    
+    δ2 = rho[pos.begw]  
+    γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
+    δ1 = rho[pos.begz]
+    
+    hi  = exp.(Q*τ)
+    σᵤ²= exp(δ2) 
+    σᵤ= exp(0.5*δ2) 
+    σᵥ² = exp(γ)  
+    σᵥ = exp(0.5*γ)    
+    μ   = δ1
+    ϵ = PorC*(y - x * β )
+    ID = size(rowIDT,1)
+    
+    sigs2 = zeros(eltype(y),ID,1);
+    mus = zeros(eltype(y),ID,1);
+    bc = zeros(eltype(y),size(hi,1),1);
+    jlms = zeros(eltype(y),size(hi,1),1);
+    
+    @views invPi = 1.0 /σᵥ²  ;
+
+    @floop begin
+    @inbounds for iidd=1:ID 
+
+         @views T = rowIDT[iidd,2];
+         @views onecol = ones(T, 1);
+         @views IMT = (I(T)-onecol*pinv(onecol'*onecol)*onecol');
+         @views ind = rowIDT[iidd,1];
+         @views his = IMT*(hi[ind]);
+        @views ϵ[ind] = ϵ[ind] - PorC*(eps[ind,:]*eta) ;
+        @views sigs2 = 1.0 /(his'*his*invPi  +1.0/σᵤ²);
+        @views mus = (μ/σᵤ² - ϵ[ind]'*his *invPi )*sigs2 ;
+        @views jlms[ind] = hi[ind] .*( mus + sqrt(sigs2)* normpdf(mus/sqrt(sigs2))/normcdf(mus/sqrt(sigs2))   ) ;  
+    end # for idid=1:ID
+    end # begin
+   
+
+    return jlms
+    end
+    
+    
+   
+   
+   
+function  jlmsbcwht1(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,   
+       PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+      
+       β  = rho[1:pos.endx]
+       τ  = rho[pos.begq:pos.endq]
+       
+       δ2 = rho[pos.begw]  
+       γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
+       δ1 = rho[pos.begz]
+       
+       hi  = exp.(Q*τ)
+       σᵤ²= exp(δ2) 
+       σᵤ= exp(0.5*δ2) 
+       σᵥ² = exp(γ)  
+       σᵥ = exp(0.5*γ)    
+       μ   = δ1
+       ϵ = PorC*(y - x * β )
+       ID = size(rowIDT,1)
+       
+       sigs2 = zeros(eltype(y),ID,1);
+       mus = zeros(eltype(y),ID,1);
+       bc = zeros(eltype(y),size(hi,1),1);
+       jlms = zeros(eltype(y),size(hi,1),1);
+       
+
+       @views invPi = 1.0 /σᵥ²  ;
+
+       @floop begin
+       @inbounds for iidd=1:ID 
+   
+            @views T = rowIDT[iidd,2];
+            @views onecol = ones(T, 1);
+            @views IMT = (I(T)-onecol*pinv(onecol'*onecol)*onecol');
+            @views ind = rowIDT[iidd,1];
+            @views his = IMT*(hi[ind]);
+           @views ϵ[ind] = ϵ[ind] - PorC*(eps[ind,:]*eta) ;
+           @views sigs2 = 1.0 /(his'*his*invPi  +1.0/σᵤ²);
+           @views mus = (μ/σᵤ² - ϵ[ind]'*his *invPi )*sigs2 ;
+           @views jlms[ind] = hi[ind] .*( mus + sqrt(sigs2)* normpdf(mus/sqrt(sigs2))/normcdf(mus/sqrt(sigs2))   ) ;  
+       end # for idid=1:ID
+       end # begin
+
+       return jlms
+    end    
+      
+      
+    
+function jlmsbc1(::Type{SSFWHET}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
+    PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+
+    jlms = jlmsbcwhte1(y, x, Q, EN, IV, PorC, num, pos, rho,  eigvalu, rowIDT )  
+
+    return jlms
+
+end
+
+function jlmsbc1(::Type{SSFWHT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
+    PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+
+    jlms = jlmsbcwht1(y, x, Q, PorC, pos, rho,  eigvalu, rowIDT )  
+
+    return jlms
+
+end
+   
+   
+
+ 
+function  jlmsbcwhhe1(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix, IV::Matrix, 
+    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+   
+    β  = rho[1:pos.endx]
+    τ  = rho[pos.begq:pos.endq]
+    phi = rho[pos.begphi:pos.endphi]
+    
+    phi = reshape(phi,:,num.nofeta)
+    eps = EN-IV*phi
+    eta = rho[pos.begeta:pos.endeta]
+    
+    δ2 = rho[pos.begw]  
+    γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
+    # δ1 = rho[pos.begz]
+    
+    hi  = exp.(Q*τ)
+    σᵤ²= exp(δ2) 
+    σᵤ= exp(0.5*δ2) 
+    σᵥ² = exp(γ)  
+    σᵥ = exp(0.5*γ)    
+    μ   = 0.0
+    ϵ = PorC*(y - x * β )
+    ID = size(rowIDT,1)
+    
+    sigs2 = zeros(eltype(y),ID,1);
+    mus = zeros(eltype(y),ID,1);
+    bc = zeros(eltype(y),size(hi,1),1);
+    jlms = zeros(eltype(y),size(hi,1),1);
+    
+    @views invPi = 1.0 /σᵥ²  ;
+
+    @floop begin
+    @inbounds for iidd=1:ID 
+
+         @views T = rowIDT[iidd,2];
+         @views onecol = ones(T, 1);
+         @views IMT = (I(T)-onecol*pinv(onecol'*onecol)*onecol');
+         @views ind = rowIDT[iidd,1];
+         @views his = IMT*(hi[ind]);
+        @views ϵ[ind] = ϵ[ind] - PorC*(eps[ind,:]*eta) ;
+        @views sigs2 = 1.0 /(his'*his*invPi  +1.0/σᵤ²);
+        @views mus = (μ/σᵤ² - ϵ[ind]'*his *invPi )*sigs2 ;
+        @views jlms[ind] = hi[ind] .*( mus + sqrt(sigs2)* normpdf(mus/sqrt(sigs2))/normcdf(mus/sqrt(sigs2))   ) ;  
+    end # for idid=1:ID
+    end # begin
+   
+    return jlms  
+    end
+    
+    
+   
+   
+   
+function  jlmsbcwhh1(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,   
+       PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+      
+       β  = rho[1:pos.endx]
+       τ  = rho[pos.begq:pos.endq]
+       
+       δ2 = rho[pos.begw]  
+       γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
+    #    δ1 = rho[pos.begz]
+       
+       hi  = exp.(Q*τ)
+       σᵤ²= exp(δ2) 
+       σᵤ= exp(0.5*δ2) 
+       σᵥ² = exp(γ)  
+       σᵥ = exp(0.5*γ)    
+       μ   = 0.0
+       ϵ = PorC*(y - x * β )
+       ID = size(rowIDT,1)
+       
+       sigs2 = zeros(eltype(y),ID,1);
+       mus = zeros(eltype(y),ID,1);
+       bc = zeros(eltype(y),size(hi,1),1);
+       jlms = zeros(eltype(y),size(hi,1),1);
+       
+       @views invPi = 1.0 /σᵥ²  ;
+
+       @floop begin
+       @inbounds for iidd=1:ID 
+   
+            @views T = rowIDT[iidd,2];
+            @views onecol = ones(T, 1);
+            @views IMT = (I(T)-onecol*pinv(onecol'*onecol)*onecol');
+            @views ind = rowIDT[iidd,1];
+            @views his = IMT*(hi[ind]);
+           @views ϵ[ind] = ϵ[ind]  ;
+           @views sigs2 = 1.0 /(his'*his*invPi  +1.0/σᵤ²);
+           @views mus = (μ/σᵤ² - ϵ[ind]'*his *invPi )*sigs2 ;
+           @views jlms[ind] = hi[ind] .*( mus + sqrt(sigs2)* normpdf(mus/sqrt(sigs2))/normcdf(mus/sqrt(sigs2))   ) ;  
+       end # for idid=1:ID
+       end # begin
+
+       return jlms
+    end    
+      
+      
+    
+function jlmsbc1(::Type{SSFWHEH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
+    PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+
+    jlms_, bc_ = jlmsbcwhhe1(y, x, Q, EN, IV, PorC, num, pos, rho,  eigvalu, rowIDT )  
+
+    return jlms_, bc_
+
+end
+
+function jlmsbc1(::Type{SSFWHH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
+    PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+
+    jlms = jlmsbcwhh1(y, x, Q, PorC, pos, rho,  eigvalu, rowIDT )  
+
+    return jlms
+
+end
+
+# ============ Wang & Ho 2010 (WH) 系列 — jlmsbc ============
+
+
+ 
+function  jlmsbcwhte(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix, IV::Matrix, 
+    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+   
+    β  = rho[1:pos.endx]
+    τ  = rho[pos.begq:pos.endq]
+    phi = rho[pos.begphi:pos.endphi]
+    
+    phi = reshape(phi,:,num.nofeta)
+    eps = EN-IV*phi
+    eta = rho[pos.begeta:pos.endeta]
+    
+    δ2 = rho[pos.begw]  
+    γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
+    δ1 = rho[pos.begz]
+    
+    hi  = exp.(Q*τ)
+    σᵤ²= exp(δ2) 
+    σᵤ= exp(0.5*δ2) 
+    σᵥ² = exp(γ)  
+    σᵥ = exp(0.5*γ)    
+    μ   = δ1
+    ϵ = PorC*(y - x * β )
+    ID = size(rowIDT,1)
+    
+    sigs2 = zeros(eltype(y),size(hi,1),1);
+    mus = zeros(eltype(y),size(hi,1),1);
+
+    jlms = zeros(eltype(y),size(hi,1),1);
+    jlms_direct = zeros(eltype(y),size(hi,1),1);
+    jlms_indirect = zeros(eltype(y),size(hi,1),1);
+
+
+    @views invPi = 1.0 /σᵥ²  ;
+    @floop begin
+    @inbounds for iidd=1:ID 
+         @views T = rowIDT[iidd,2];
+         @views onecol = ones(T, 1);
+         @views IMT = (I(T)-onecol*pinv(onecol'*onecol)*onecol');
+         @views ind = rowIDT[iidd,1];
+         @views his = IMT*(hi[ind]);
+         @views ϵs = ϵ[ind] - PorC*(eps[ind,:]*eta) ;
+         @views sigs2 = 1.0 / ((his'*his*invPi) + 1/σᵤ²) ;
+         @views mus = (μ/σᵤ² - (ϵs'*his*invPi))*sigs2 ;
+         @views jlms[ind] = @. hi[ind] *( mus + sqrt(sigs2)* normpdf(
+                                                 mus/sqrt(sigs2))/normcdf(mus/sqrt(sigs2))   ) ;  
+         @views jlms_direct[ind] = jlms[ind]
+         @views jlms_indirect[ind] = jlms[ind] - jlms_direct[ind];
+
+     end # for iidd=1:ID
+    end # begin
+   
+    return jlms,jlms_direct,jlms_indirect
+    end
+    
+    
+   
+   
+   
+function  jlmsbcwht(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,   
+       PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+      
+       β  = rho[1:pos.endx]
+       τ  = rho[pos.begq:pos.endq]
+       
+       δ2 = rho[pos.begw]  
+       γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
+       δ1 = rho[pos.begz]
+       
+       hi  = exp.(Q*τ)
+       σᵤ²= exp(δ2) 
+       σᵤ= exp(0.5*δ2) 
+       σᵥ² = exp(γ)  
+       σᵥ = exp(0.5*γ)    
+       μ   = δ1
+       ϵ = PorC*(y - x * β )
+       ID = size(rowIDT,1)
+       
+       sigs2 = zeros(eltype(y),size(hi,1),1);
+       mus = zeros(eltype(y),size(hi,1),1);
+
+       jlms = zeros(eltype(y),size(hi,1),1);
+       jlms_direct = zeros(eltype(y),size(hi,1),1);
+       jlms_indirect = zeros(eltype(y),size(hi,1),1);
+
+
+       @views invPi = 1.0 /σᵥ²  ;
+       @floop begin
+       @inbounds for iidd=1:ID 
+            @views T = rowIDT[iidd,2];
+            @views onecol = ones(T, 1);
+            @views IMT = (I(T)-onecol*pinv(onecol'*onecol)*onecol');
+            @views ind = rowIDT[iidd,1];
+            @views his = IMT*(hi[ind]);
+            @views ϵs = ϵ[ind]   ;
+            @views sigs2 = 1.0 / ((his'*his*invPi) + 1/σᵤ²) ;
+            @views mus = (μ/σᵤ² - (ϵs'*his*invPi))*sigs2 ;
+            @views jlms[ind] = @. hi[ind] *( mus + sqrt(sigs2)* normpdf(
+                                                    mus/sqrt(sigs2))/normcdf(mus/sqrt(sigs2))   ) ;  
+            @views jlms_direct[ind] = jlms[ind]
+            @views jlms_indirect[ind] = jlms[ind] - jlms_direct[ind];
+
+        end # for iidd=1:ID
+       end # begin
+      
+
+       return jlms,jlms_direct,jlms_indirect
+    end    
+      
+      
+    
+function jlmsbc(::Type{SSFWHET}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
+    PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+
+    jlms,jlms_direct,jlms_indirect = jlmsbcwhte(y, x, Q, EN, IV, PorC, num, pos, rho,  eigvalu, rowIDT )  
+
+    return jlms,jlms_direct,jlms_indirect
+
+end
+
+function jlmsbc(::Type{SSFWHT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
+    PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+
+    jlms,jlms_direct,jlms_indirect = jlmsbcwht(y, x, Q, PorC, pos, rho,  eigvalu, rowIDT )  
+
+    return jlms,jlms_direct,jlms_indirect
+
+end
+   
+   
+
+ 
+function  jlmsbcwhhe(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Matrix, IV::Matrix, 
+    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+   
+    β  = rho[1:pos.endx]
+    τ  = rho[pos.begq:pos.endq]
+    phi = rho[pos.begphi:pos.endphi]
+    
+    phi = reshape(phi,:,num.nofeta)
+    eps = EN-IV*phi
+    eta = rho[pos.begeta:pos.endeta]
+    
+    δ2 = rho[pos.begw]  
+    γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
+    # δ1 = rho[pos.begz]
+    
+    hi  = exp.(Q*τ)
+    σᵤ²= exp(δ2) 
+    σᵤ= exp(0.5*δ2) 
+    σᵥ² = exp(γ)  
+    σᵥ = exp(0.5*γ)    
+    μ   = 0.0
+    ϵ = PorC*(y - x * β )
+    ID = size(rowIDT,1)
+    
+    sigs2 = zeros(eltype(y),ID,1);
+    mus = zeros(eltype(y),ID,1);
+
+    jlms = zeros(eltype(y),size(hi,1),1);
+    jlms_direct = zeros(eltype(y),size(hi,1),1);
+    jlms_indirect = zeros(eltype(y),size(hi,1),1);
+
+
+    @views invPi = 1.0 /σᵥ²  ;
+    @floop begin
+    @inbounds for iidd=1:ID 
+         @views T = rowIDT[iidd,2];
+         @views onecol = ones(T, 1);
+         @views IMT = (I(T)-onecol*pinv(onecol'*onecol)*onecol');
+         @views ind = rowIDT[iidd,1];
+         @views his = IMT*(hi[ind]);
+         @views ϵ[ind] = ϵ[ind] - PorC*(eps[ind,:]*eta) ;
+         @views sigs2[iidd] = 1.0 / ((his'*his*invPi) + 1/σᵤ²) ;
+         @views mus[iidd] = (μ/σᵤ² - (ϵ[ind]'*his*invPi))*sigs2[iidd] ;
+         @views jlms[ind] = @. hi[ind] *( mus[iidd] + sqrt(sigs2[iidd])* normpdf.(
+                                mus[iidd]/sqrt.(sigs2[iidd]))./normcdf.(mus[iidd]/sqrt.(sigs2[iidd]))   ) ;  
+         @views jlms_direct[ind] = jlms[ind]
+         @views jlms_indirect[ind] = jlms[ind] - jlms_direct[ind];
+
+     end # for iidd=1:ID
+    end # begin
+   
+
+    return jlms,jlms_direct,jlms_indirect
+    end
+    
+    
+   
+   
+   
+function  jlmsbcwhh(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,   
+       PorC::Int64,  pos::NamedTuple, rho::Array{Float64, 1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+      
+       β  = rho[1:pos.endx]
+       τ  = rho[pos.begq:pos.endq]
+       
+       δ2 = rho[pos.begw]  
+       γ  = rho[pos.begv]  # May rho[po.begw : po.endw][1]
+    #    δ1 = rho[pos.begz]
+       
+       hi  = exp.(Q*τ)
+       σᵤ²= exp(δ2) 
+       σᵤ= exp(0.5*δ2) 
+       σᵥ² = exp(γ)  
+       σᵥ = exp(0.5*γ)    
+       μ   = 0.0
+       ϵ = PorC*(y - x * β )
+       ID = size(rowIDT,1)
+       
+       sigs2 = zeros(eltype(y),ID,1);
+       mus = zeros(eltype(y),ID,1);
+
+       jlms = zeros(eltype(y),size(hi,1),1);
+       jlms_direct = zeros(eltype(y),size(hi,1),1);
+       jlms_indirect = zeros(eltype(y),size(hi,1),1);
+
+
+       @views invPi = 1.0 /σᵥ²  ;
+       @floop begin
+       @inbounds for iidd=1:ID 
+            # @views T = rowIDT[iidd,2];
+            # @views onecol = ones(T, 1);
+            # @views IMT = (I(T)-onecol*pinv(onecol'*onecol)*onecol');
+            @views ind = rowIDT[iidd,1];
+            @views his = sf_demean(hi[ind]);
+           
+            @views ϵs = ϵ[ind]   ;
+            @views sigs2 = 1.0 / ((his'*his*invPi) + 1/σᵤ²) ;
+            @views mus = (μ/σᵤ² - (ϵs'*his*invPi))*sigs2 ;
+            @views jlms[ind] = @. hi[ind] *( mus + sqrt(sigs2)* normpdf(
+                                                    mus/sqrt(sigs2))/normcdf(mus/sqrt(sigs2))   ) ;  
+            @views jlms_direct[ind] = jlms[ind]
+            @views jlms_indirect[ind] = jlms[ind] - jlms_direct[ind];
+
+        end # for iidd=1:ID
+    # his = zeros(eltype(y),size(hi,1),1);
+
+
+    # @views invPi = 1.0 /σᵥ²  ;
+    # @floop begin
+    # @inbounds for iidd=1:ID 
+    #      @views T = rowIDT[iidd,2];
+    #      @views onecol = ones(T, 1);
+    #      @views IMT = (I(T)-onecol*pinv(onecol'*onecol)*onecol');
+    #      @views ind = rowIDT[iidd,1];
+    #      @views his[ind] = IMT*(hi[ind]);
+    #      @views ϵ[ind] = ϵ[ind]  ;
+    #      @views sigs2[iidd] = 1.0 / ((his[ind]'*his[ind]*invPi) + 1/σᵤ²) ;
+    #      @views mus[iidd] = (μ/σᵤ² - (ϵ[ind]'*his[ind]*invPi))*sigs2[iidd] ;
+    #      @views jlms[ind] = @. hi[ind] *( mus[iidd] + sqrt(sigs2[iidd])* normpdf.(
+    #                             mus[iidd]/sqrt.(sigs2[iidd]))./normcdf.(mus[iidd]/sqrt.(sigs2[iidd]))   ) ;  
+    #      @views jlms_direct[ind] = jlms[ind]
+    #      @views jlms_indirect[ind] = jlms[ind] - jlms_direct[ind];
+
+    #  end # for iidd=1:ID
+
+       end # begin
+
+       return jlms,jlms_direct,jlms_indirect
+    end    
+      
+      
+    
+function jlmsbc(::Type{SSFWHEH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
+    PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+
+    jlms,jlms_direct,jlms_indirect = jlmsbcwhhe(y, x, Q, EN, IV, PorC, num, pos, rho,  eigvalu, rowIDT )  
+
+    return jlms,jlms_direct,jlms_indirect
+
+end
+
+function jlmsbc(::Type{SSFWHH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
+    PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+
+    jlms,jlms_direct,jlms_indirect = jlmsbcwhh(y, x, Q, PorC, pos, rho,  eigvalu, rowIDT )  
+
+    return jlms,jlms_direct,jlms_indirect
+
+end
