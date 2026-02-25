@@ -757,7 +757,7 @@ WH 模型暂不支持（原始 sdsfe 也未实现）。
 # 参数
 - `res`: sfmodel_fit 返回的结果
 - `dat::DataFrame`: 按 [year, city_code] 排序后的 DataFrame
-- `depvar::Union{String,Symbol}`: 因变量名（必须提供，如 "lnc2"）
+- `depvar::Union{String,Symbol,Nothing}`: 因变量名（如 "lnc2"）。默认 `nothing`，自动从 `res[:depvar]` 获取
 - `scenarios::Dict{String, Any}`: 反事实场景，key 为 hscale 变量名，value 为：
   - `Float64`: 将该变量设为常数值（如 0.0 表示均值）
   - `Symbol`: 使用 dat 中另一列的值替换
@@ -803,7 +803,7 @@ r3 = sfmodel_counterfactual(res_kk; dat=Td22, depvar="lnc2",
 """
 function sfmodel_counterfactual(res;
     dat::DataFrame,
-    depvar::Union{String, Symbol},
+    depvar::Union{String, Symbol, Nothing}=nothing,
     scenarios::Dict{String, <:Any},
     Wy_mat=nothing,
     Wu_mat=nothing,
@@ -811,6 +811,11 @@ function sfmodel_counterfactual(res;
     envar=nothing,
     ivvar=nothing,
     C_level::Union{Nothing, AbstractVector}=nothing)
+
+    # --- 自动获取 depvar ---
+    if depvar === nothing
+        depvar = string(res[:depvar][1])
+    end
 
     modelid = res[:modelid]
     # --- 模型名称字符串检测（兼容 JLD2.UnknownType）---

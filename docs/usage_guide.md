@@ -321,6 +321,8 @@ res_oadh = sfmodel_fit(useData(Td))
 - 同一 Julia session 中先 `sfmodel_fit` 再调用反事实：可以省略空间矩阵参数
 - 从 JLD2 加载已保存的结果：`_dicM` 中可能没有对应矩阵，建议显式传入
 
+**因变量自动获取：** `depvar` 为可选参数。若不传入，自动从 `res[:depvar]` 获取。
+
 下方示例均显式传入空间矩阵，以兼容 JLD2 加载场景。
 
 ### 2.1 场景类型
