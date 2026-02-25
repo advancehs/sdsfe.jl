@@ -12,22 +12,26 @@
   - [1.2 KK 系列](#12-kk-系列--kutlu-2017)
   - [1.3 OA 系列](#13-oa-系列--orea--álvarez-2019--oad-2024)
   - [1.4 GI 系列](#14-gi-系列--giannini-2025)
+  - [1.5 WH 系列](#15-wh-系列--wang--ho-2010)
 - [2. sfmodel_counterfactual — 反事实分析](#2-sfmodel_counterfactual--反事实分析)
   - [2.1 场景类型](#21-场景类型)
   - [2.2 KU 系列反事实](#22-ku-系列反事实)
   - [2.3 KK 系列反事实](#23-kk-系列反事实)
   - [2.4 OA 系列反事实](#24-oa-系列反事实)
   - [2.5 GI 系列反事实](#25-gi-系列反事实)
-  - [2.6 水平值分解 (C_level)](#26-水平值分解)
+  - [2.6 WH 系列反事实](#26-wh-系列反事实)
+  - [2.7 水平值分解 (C_level)](#27-水平值分解)
 - [3. sfmodel_henderson45 — 非效率边际效应 Henderson 图](#3-sfmodel_henderson45--非效率边际效应-henderson-图)
   - [3.1 KU 系列 Henderson 图](#31-ku-系列-henderson-图)
   - [3.2 KK 系列 Henderson 图](#32-kk-系列-henderson-图)
   - [3.3 OA 系列 Henderson 图](#33-oa-系列-henderson-图)
-  - [3.4 批量画图](#34-批量画图)
+  - [3.4 WH 系列 Henderson 图](#34-wh-系列-henderson-图)
+  - [3.5 批量画图](#35-批量画图)
 - [4. sfmodel_henderson45_y — 前沿边际效应 Henderson 图](#4-sfmodel_henderson45_y--前沿边际效应-henderson-图)
   - [4.1 KU 系列前沿 Henderson 图](#41-ku-系列前沿-henderson-图)
   - [4.2 KK 系列前沿 Henderson 图](#42-kk-系列前沿-henderson-图)
   - [4.3 OA 系列前沿 Henderson 图](#43-oa-系列前沿-henderson-图)
+  - [4.4 WH 系列前沿 Henderson 图](#44-wh-系列前沿-henderson-图)
 
 ---
 
@@ -110,10 +114,10 @@ ln(C_it) = Xβ + v_it + u_it
 | SSFOAT | `SSF_OA2019` | trun | ✗ | ✓ | ✓ | ✗ | `Dict(1=>0.0)` |
 | SSFOADH | `SSF_OAD2024` | half | ✓ | ✓ | ✓ | ✓ | `Dict(1=>0.0)` |
 | SSFOADT | `SSF_OAD2024` | trun | ✓ | ✓ | ✓ | ✓ | `Dict(1=>0.0)` |
-| SSFWHH | `SSF_WH2010` | half | ✗ | ✗ | ✗ | ✗ | 暂不支持反事实 |
-| SSFWHT | `SSF_WH2010` | trun | ✗ | ✗ | ✗ | ✗ | 暂不支持反事实 |
-| SSFWHEH | `SSF_WHE2010` | half | ✓ | ✗ | ✗ | ✗ | 暂不支持反事实 |
-| SSFWHET | `SSF_WHE2010` | trun | ✓ | ✗ | ✗ | ✗ | 暂不支持反事实 |
+| SSFWHH | `SSF_WH2010` | half | ✗ | ✗ | ✗ | ✗ | 无需 cfindices |
+| SSFWHT | `SSF_WH2010` | trun | ✗ | ✗ | ✗ | ✗ | 无需 cfindices |
+| SSFWHEH | `SSF_WHE2010` | half | ✓ | ✗ | ✗ | ✗ | 无需 cfindices |
+| SSFWHET | `SSF_WHE2010` | trun | ✓ | ✗ | ✗ | ✗ | 无需 cfindices |
 | SSFGIH | `SSF_GI2025` | half | ✗ | ✓ | ✗ | ✗ | `Dict(1=>0.0)` |
 | SSFGIT | `SSF_GI2025` | trun | ✗ | ✓ | ✗ | ✗ | `Dict(1=>0.0)` |
 | SSFGIEH | `SSF_GIE2025` | half | ✓ | ✓ | ✗ | ✗ | `Dict(1=>0.0)` |
@@ -126,6 +130,7 @@ ln(C_it) = Xβ + v_it + u_it
 - **KK 系列**: 无空间权重，优化器推荐 `NelderMead` + `finite`
 - **KU 系列**: 含 Wy，优化器推荐 `BFGS` + `forward`
 - **OA 系列**: 含 Wy+Wu(+Wv)，优化器推荐 `BFGS` + `forward`
+- **WH 系列**: 固定效应（时间去均值），无空间权重，优化器推荐 `NelderMead` + `finite`
 - **GI 系列**: 空间一阶差分固定效应，含 Wy，数据需按 `[id, time]` 排序，优化器推荐 `BFGS` + `forward`
 
 ---
@@ -376,11 +381,60 @@ res_gieh = sfmodel_fit(useData(dat_gi))
 
 > 截断正态变体 (SSFGIT / SSFGIET): 将 `sfdist(half)` 改为 `sfdist(trun)` 并添加 `@μ(_cons)` 即可。
 
+### 1.5 WH 系列 — Wang & Ho (2010)
+
+特点: 固定效应模型（通过时间去均值消除个体固定效应），无空间权重。数据按 `[year, city_code]` 排序。
+
+**SSFWHH — 半正态 + 无内生性:**
+
+```julia
+sfmodel_spec(sfpanel(SSF_WH2010), sftype(cost), sfdist(half),
+    @timevar(tt), @idvar(id),
+    @depvar(lnc2),
+    @frontier(constant, lnl22, lnk22, lny22,
+              lnl_lnk22, lnl_lny22, lnk_lny22,
+              lnl2_05, lnk2_05, lny2_05, agg2),
+    @hscale(agg2, indus2, lagfdi2, human2, lnpgdp2, roadpc2),
+    @σᵤ²(_cons), @σᵥ²(_cons), message=true)
+
+sfmodel_opt(warmstart_solver(NelderMead()),
+    warmstart_maxIT(2000),
+    main_solver(NelderMead()),
+    main_maxIT(3000000),
+    tolerance(1e-6), autodiff_mode(finite))
+
+res_whh = sfmodel_fit(useData(Td))
+```
+
+**SSFWHEH — 半正态 + 有内生性:**
+
+```julia
+sfmodel_spec(sfpanel(SSF_WHE2010), sftype(cost), sfdist(half),
+    @timevar(tt), @idvar(id),
+    @depvar(lnc2),
+    @frontier(constant, lnl22, lnk22, lny22,
+              lnl_lnk22, lnl_lny22, lnk_lny22,
+              lnl2_05, lnk2_05, lny2_05, agg2),
+    @hscale(agg2, indus2, lagfdi2, human2, lnpgdp2, roadpc2),
+    @envar(agg2), @ivvar(ivkind22),
+    @σᵤ²(_cons), @σᵥ²(_cons), message=true)
+
+sfmodel_opt(warmstart_solver(NelderMead()),
+    warmstart_maxIT(600),
+    main_solver(BFGS(linesearch=LineSearches.BackTracking())),
+    main_maxIT(3000),
+    tolerance(1e-6), autodiff_mode(forward))
+
+res_wheh = sfmodel_fit(useData(Td))
+```
+
+> 截断正态变体 (SSFWHT / SSFWHET): 将 `sfdist(half)` 改为 `sfdist(trun)` 并添加 `@μ(_cons)` 即可。
+
 ---
 
 ## 2. sfmodel_counterfactual — 反事实分析
 
-支持 KU(4) + KK(4) + OA(4) + GI(4) = 16 种模型。WH 系列暂不支持。
+支持 KU(4) + KK(4) + OA(4) + GI(4) + WH(4) = 20 种模型。
 
 **空间权重矩阵自动获取：** `Wy_mat`、`Wu_mat`、`Wv_mat` 均为可选参数。若不传入，函数会自动从 sdsfe 内部全局变量 `_dicM` 中获取（即 `sfmodel_spec` 时通过 `wy()`/`wu()`/`wv()` 设定的矩阵）。因此：
 
@@ -568,7 +622,45 @@ cf_giet = sfmodel_counterfactual(res_giet;
     envar="agg2", ivvar="ivkind22")
 ```
 
-### 2.6 水平值分解
+### 2.6 WH 系列反事实
+
+特点: 无空间权重，不需要传 `Wy_mat`/`Wu_mat`。按个体时间去均值计算。有内生性 (E) 版本需传 `envar` + `ivvar`。
+
+**SSFWHH — 半正态 + 无内生性:**
+
+```julia
+cf_whh = sfmodel_counterfactual(res_whh;
+    dat=Td, depvar="lnc2",
+    scenarios=Dict("agg2" => 0.0))
+```
+
+**SSFWHT — 截断正态 + 无内生性:**
+
+```julia
+cf_wht = sfmodel_counterfactual(res_wht;
+    dat=Td, depvar="lnc2",
+    scenarios=Dict("agg2" => 0.0))
+```
+
+**SSFWHEH — 半正态 + 有内生性:**
+
+```julia
+cf_wheh = sfmodel_counterfactual(res_wheh;
+    dat=Td, depvar="lnc2",
+    scenarios=Dict("agg2" => 0.0),
+    envar="agg2", ivvar="ivkind22")
+```
+
+**SSFWHET — 截断正态 + 有内生性:**
+
+```julia
+cf_whet = sfmodel_counterfactual(res_whet;
+    dat=Td, depvar="lnc2",
+    scenarios=Dict("agg2" => 0.0),
+    envar="agg2", ivvar="ivkind22")
+```
+
+### 2.7 水平值分解
 
 传入 `C_level` 参数可获得水平值（非对数）的前沿/效率通道分解：
 
@@ -731,7 +823,43 @@ h45_oadt = sfmodel_henderson45(res_oadt;
     save_dir="result/henderson_45/oadt", B=499)
 ```
 
-### 3.4 批量画图
+### 3.4 WH 系列 Henderson 图
+
+特点: 无空间权重，不需要传空间矩阵，只输出一张 total 图（同 KK）。Henderson 图不区分内生性，WH 和 WHE 调用方式相同。
+
+**SSFWHH — 半正态 + 无内生性:**
+
+```julia
+h45_whh = sfmodel_henderson45(res_whh;
+    dat=Td, target_var="agg2",
+    save_dir="result/henderson_45/whh", B=499)
+```
+
+**SSFWHT — 截断正态 + 无内生性:**
+
+```julia
+h45_wht = sfmodel_henderson45(res_wht;
+    dat=Td, target_var="agg2",
+    save_dir="result/henderson_45/wht", B=499)
+```
+
+**SSFWHEH — 半正态 + 有内生性:**
+
+```julia
+h45_wheh = sfmodel_henderson45(res_wheh;
+    dat=Td, target_var="agg2",
+    save_dir="result/henderson_45/wheh", B=499)
+```
+
+**SSFWHET — 截断正态 + 有内生性:**
+
+```julia
+h45_whet = sfmodel_henderson45(res_whet;
+    dat=Td, target_var="agg2",
+    save_dir="result/henderson_45/whet", B=499)
+```
+
+### 3.5 批量画图
 
 ```julia
 for var in ["agg2", "indus2", "lagfdi2", "human2", "lnpgdp2", "roadpc2"]
@@ -930,4 +1058,60 @@ sfmodel_henderson45_y(res_oadt; dat=Td, target_var="AGG",
     frontier_deriv = Dict{Symbol,Any}(:agg2 => 1.0),
     wx_deriv = Dict{Symbol,Any}(:agg2 => 1.0),
     save_dir="result/henderson_45_y/oadt_AGG", B=499)
+```
+
+### 4.4 WH 系列前沿 Henderson 图
+
+特点: 无空间权重，只输出一张 total 图（同 KK）。无 `@frontierWx`，不需要 `wx_deriv`。Henderson 图不区分内生性，WH 和 WHE 调用方式相同。
+
+**SSFWHH — 半正态 + 无内生性 (∂lnC/∂lnL):**
+
+```julia
+sfmodel_henderson45_y(res_whh; dat=Td, target_var="lnL",
+    frontier_deriv = Dict{Symbol,Any}(
+        :lnl22     => 1.0,
+        :lnl_lnk22 => :lnk22,
+        :lnl_lny22 => :lny22,
+        :lnl2_05   => :lnl22,
+    ),
+    save_dir="result/henderson_45_y/whh_lnL", B=499)
+```
+
+**SSFWHT — 截断正态 + 无内生性 (∂lnC/∂lnK):**
+
+```julia
+sfmodel_henderson45_y(res_wht; dat=Td, target_var="lnK",
+    frontier_deriv = Dict{Symbol,Any}(
+        :lnk22     => 1.0,
+        :lnl_lnk22 => :lnl22,
+        :lnk_lny22 => :lny22,
+        :lnk2_05   => :lnk22,
+    ),
+    save_dir="result/henderson_45_y/wht_lnK", B=499)
+```
+
+**SSFWHEH — 半正态 + 有内生性 (∂lnC/∂lnY):**
+
+```julia
+sfmodel_henderson45_y(res_wheh; dat=Td, target_var="lnY",
+    frontier_deriv = Dict{Symbol,Any}(
+        :lny22     => 1.0,
+        :lnl_lny22 => :lnl22,
+        :lnk_lny22 => :lnk22,
+        :lny2_05   => :lny22,
+    ),
+    save_dir="result/henderson_45_y/wheh_lnY", B=499)
+```
+
+**SSFWHET — 截断正态 + 有内生性 (∂lnC/∂lnL):**
+
+```julia
+sfmodel_henderson45_y(res_whet; dat=Td, target_var="lnL",
+    frontier_deriv = Dict{Symbol,Any}(
+        :lnl22     => 1.0,
+        :lnl_lnk22 => :lnk22,
+        :lnl_lny22 => :lny22,
+        :lnl2_05   => :lnl22,
+    ),
+    save_dir="result/henderson_45_y/whet_lnL", B=499)
 ```

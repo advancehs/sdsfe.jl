@@ -205,7 +205,6 @@ function sfmodel_henderson45(res;
 
     modelid = res[:modelid]
     cfg = _h45_detect(modelid)
-    cfg.is_wh && error("WH 模型暂不支持 Henderson 45度图（原始 sdsfe 也未实现）")
     eqpo = res[:eqpo]
     coef = res[:coeff]
     vcov = res[:var_cov_mat]
@@ -495,7 +494,6 @@ function sfmodel_henderson45_y(res;
 
     modelid = res[:modelid]
     cfg = _h45_detect(modelid)
-    cfg.is_wh && error("WH 模型暂不支持 Henderson 45度图（原始 sdsfe 也未实现）")
     coef = res[:coeff]
     vcov = res[:var_cov_mat]
     eqpo = res[:eqpo]
@@ -742,8 +740,7 @@ end
 """
     sfmodel_counterfactual(res; dat, depvar, scenarios, Wy_mat, Wu_mat, Wv_mat, envar, ivvar, C_level)
 
-反事实分析：支持按变量名指定、多种场景，适配 KU/KK/OA 全部模型类型。
-WH 模型暂不支持（原始 sdsfe 也未实现）。
+反事实分析：支持按变量名指定、多种场景，适配 KU/KK/OA/WH/GI 全部模型类型。
 
 自动进行两通道分解：当反事实变量同时出现在 @frontier 和 @hscale 中时，
 返回前沿通道 (delta_lnC_frontier) 和效率通道 (delta_lnC_efficiency) 的分解结果。
@@ -753,6 +750,7 @@ WH 模型暂不支持（原始 sdsfe 也未实现）。
 - KU 系列 (SSFKUH, SSFKUT, SSFKUEH, SSFKUET): 逐观测计算，含 Wy
 - KK 系列 (SSFKKH, SSFKKT, SSFKKEH, SSFKKET): 按个体内积计算，无空间权重
 - OA 系列 (SSFOAT, SSFOAH, SSFOADT, SSFOADH): 按时间段计算，含 Wu/Wy
+- WH 系列 (SSFWHH, SSFWHT, SSFWHEH, SSFWHET): 按个体时间去均值计算，无空间权重
 
 # 参数
 - `res`: sfmodel_fit 返回的结果
@@ -831,10 +829,6 @@ function sfmodel_counterfactual(res;
     is_oa = _match_model(modelid_str, ["SSFOAH", "SSFOAT", "SSFOADH", "SSFOADT"])
     is_wh = _match_model(modelid_str, ["SSFWHH", "SSFWHT", "SSFWHEH", "SSFWHET"])
 
-    if is_wh
-        error("WH 模型暂不支持反事实分析（原始 sdsfe 也未实现）")
-    end
-
     # 检测分布和空间特征（字符串匹配，兼容 JLD2 加载）
     is_half = _match_model(modelid_str, ["SSFKUH", "SSFKUEH", "SSFKKH", "SSFKKEH", "SSFOAH", "SSFOADH", "SSFWHH", "SSFWHEH"])
     has_Wu  = _match_model(modelid_str, ["SSFOAH", "SSFOAT", "SSFOADH", "SSFOADT"])
@@ -846,7 +840,7 @@ function sfmodel_counterfactual(res;
     eqpo = res[:eqpo]
     PorC = res[:PorC]
 
-    println(">>> 反事实分析 — 模型: $modelid_str ($(is_ku ? "KU" : is_kk ? "KK" : "OA"))")
+    println(">>> 反事实分析 — 模型: $modelid_str ($(is_ku ? "KU" : is_kk ? "KK" : is_oa ? "OA" : is_wh ? "WH" : "其他"))")
 
     # --- 提取系数 ---
     idx_frontier = eqpo[:coeff_frontier]
@@ -948,9 +942,9 @@ function sfmodel_counterfactual(res;
         rowIDT[tt, 2] = length(rowIDT[tt, 1])
     end
 
-    # --- 构建 rowIDI（按个体索引，KK 模型需要）---
+    # --- 构建 rowIDI（按个体索引，KK/WH 模型需要）---
     rowIDI = nothing
-    if is_kk
+    if is_kk || is_wh
         rowIDI = Array{Any}(undef, N, 2)
         for (ii, cc) in enumerate(city_codes)
             rowIDI[ii, 1] = findall(ivar .== cc)
@@ -1141,7 +1135,32 @@ function sfmodel_counterfactual(res;
         end
     end
 
-    if is_kk
+    if is_wh
+        # === WH 模型: 按个体时间去均值计算，无空间权重 ===
+        # 内生性修正 (WH 无空间权重，全局修正)
+        if has_endo && endo_eps_mat !== nothing
+            ϵ .-= PorC * (endo_eps_mat * endo_eta_vec)
+        end
+        invPi = 1.0 / σᵥ²
+        jlms_total = zeros(nobs)
+
+        for idid in 1:N
+            ind = rowIDI[idid, 1]
+            hi_ind = hi_cf[ind]
+            his = sf_demean(hi_ind)       # WH 特有: 时间去均值
+            eps_ind = ϵ[ind]
+
+            sig2_id = 1.0 / (dot(his, his) * invPi + 1.0 / σᵤ²)
+            mu_id = (μ / σᵤ² - dot(eps_ind, his) * invPi) * sig2_id
+
+            ratio = mu_id / sqrt(sig2_id)
+            jlms_total[ind] .= hi_ind .* (mu_id + sqrt(sig2_id) * normpdf(ratio) / normcdf(ratio))
+        end
+
+        jlms_direct = copy(jlms_total)
+        jlms_indirect = zeros(nobs)
+
+    elseif is_kk
         # === KK 模型: 按个体内积计算，无空间权重 ===
         # 内生性修正 (KK 无空间权重，全局修正)
         if has_endo && endo_eps_mat !== nothing
