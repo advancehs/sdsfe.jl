@@ -18,7 +18,14 @@
   - [2.4 OA 系列反事实](#24-oa-系列反事实)
   - [2.5 水平值分解 (C_level)](#25-水平值分解)
 - [3. sfmodel_henderson45 — 非效率边际效应 Henderson 图](#3-sfmodel_henderson45--非效率边际效应-henderson-图)
+  - [3.1 KU 系列 Henderson 图](#31-ku-系列-henderson-图)
+  - [3.2 KK 系列 Henderson 图](#32-kk-系列-henderson-图)
+  - [3.3 OA 系列 Henderson 图](#33-oa-系列-henderson-图)
+  - [3.4 批量画图](#34-批量画图)
 - [4. sfmodel_henderson45_y — 前沿边际效应 Henderson 图](#4-sfmodel_henderson45_y--前沿边际效应-henderson-图)
+  - [4.1 KU 系列前沿 Henderson 图](#41-ku-系列前沿-henderson-图)
+  - [4.2 KK 系列前沿 Henderson 图](#42-kk-系列前沿-henderson-图)
+  - [4.3 OA 系列前沿 Henderson 图](#43-oa-系列前沿-henderson-图)
 
 ---
 
@@ -297,37 +304,79 @@ res_oadh = sfmodel_fit(useData(Td))
 
 ### 2.2 KU 系列反事实
 
+特点: 含 Wy，需传 `Wy_mat`。有内生性 (E) 版本需额外传 `envar` + `ivvar`。
+
+**SSFKUH — 半正态 + 无内生性:**
+
 ```julia
-# SSFKUH: 无内生性
 cf_kuh = sfmodel_counterfactual(res_kuh;
     dat=Td, depvar="lnc2",
     scenarios=Dict("agg2" => :quantile => 0.75),
     Wy_mat=Wx[1])
+```
 
-# SSFKUEH: 有内生性, 必须传 envar + ivvar
-cf_kueh = sfmodel_counterfactual(res_kueh;
-    dat=Td, depvar="lnc2",
-    scenarios=Dict("agg2" => :quantile => 0.75),
-    Wy_mat=Wx[1],
-    envar="agg2", ivvar="ivkind22")
+**SSFKUT — 截断正态 + 无内生性:**
 
-# SSFKUT / SSFKUET: 截断正态, 用法相同
+```julia
 cf_kut = sfmodel_counterfactual(res_kut;
     dat=Td, depvar="lnc2",
     scenarios=Dict("agg2" => 0.0),
     Wy_mat=Wx[1])
 ```
 
-### 2.3 KK 系列反事实
+**SSFKUEH — 半正态 + 有内生性:**
 
 ```julia
-# SSFKKH: 不需要空间矩阵
+cf_kueh = sfmodel_counterfactual(res_kueh;
+    dat=Td, depvar="lnc2",
+    scenarios=Dict("agg2" => :quantile => 0.75),
+    Wy_mat=Wx[1],
+    envar="agg2", ivvar="ivkind22")
+```
+
+**SSFKUET — 截断正态 + 有内生性:**
+
+```julia
+cf_kuet = sfmodel_counterfactual(res_kuet;
+    dat=Td, depvar="lnc2",
+    scenarios=Dict("agg2" => 0.0),
+    Wy_mat=Wx[1],
+    envar="agg2", ivvar="ivkind22")
+```
+
+### 2.3 KK 系列反事实
+
+特点: 无空间权重，不需要传 `Wy_mat`/`Wu_mat`。有内生性 (E) 版本需传 `envar` + `ivvar`。
+
+**SSFKKH — 半正态 + 无内生性:**
+
+```julia
 cf_kkh = sfmodel_counterfactual(res_kkh;
     dat=Td, depvar="lnc2",
     scenarios=Dict("agg2" => 6.304568))
+```
 
-# SSFKKEH: 有内生性
+**SSFKKT — 截断正态 + 无内生性:**
+
+```julia
+cf_kkt = sfmodel_counterfactual(res_kkt;
+    dat=Td, depvar="lnc2",
+    scenarios=Dict("agg2" => 6.304568))
+```
+
+**SSFKKEH — 半正态 + 有内生性:**
+
+```julia
 cf_kkeh = sfmodel_counterfactual(res_kkeh;
+    dat=Td, depvar="lnc2",
+    scenarios=Dict("agg2" => 6.304568),
+    envar="agg2", ivvar="ivkind22")
+```
+
+**SSFKKET — 截断正态 + 有内生性:**
+
+```julia
+cf_kket = sfmodel_counterfactual(res_kket;
     dat=Td, depvar="lnc2",
     scenarios=Dict("agg2" => 6.304568),
     envar="agg2", ivvar="ivkind22")
@@ -335,15 +384,40 @@ cf_kkeh = sfmodel_counterfactual(res_kkeh;
 
 ### 2.4 OA 系列反事实
 
+特点: 含 Wy + Wu，需传 `Wy_mat` + `Wu_mat`。OAD 版本额外含 Wv + 内生性，需传 `Wv_mat` + `envar` + `ivvar`。
+
+**SSFOAH — 半正态 + 无内生性 (Wy+Wu):**
+
 ```julia
-# SSFOAH: 传 Wy_mat + Wu_mat
 cf_oah = sfmodel_counterfactual(res_oah;
     dat=Td, depvar="lnc2",
     scenarios=Dict("agg2" => 0.0),
     Wy_mat=Wx[1], Wu_mat=Wx[1])
+```
 
-# SSFOADH: 有内生性 + Wv, 传全部三个矩阵
+**SSFOAT — 截断正态 + 无内生性 (Wy+Wu):**
+
+```julia
+cf_oat = sfmodel_counterfactual(res_oat;
+    dat=Td, depvar="lnc2",
+    scenarios=Dict("agg2" => 0.0),
+    Wy_mat=Wx[1], Wu_mat=Wx[1])
+```
+
+**SSFOADH — 半正态 + 有内生性 (Wy+Wu+Wv):**
+
+```julia
 cf_oadh = sfmodel_counterfactual(res_oadh;
+    dat=Td, depvar="lnc2",
+    scenarios=Dict("agg2" => 0.0),
+    Wy_mat=Wx[1], Wu_mat=Wx[1], Wv_mat=Wx[1],
+    envar="agg2", ivvar="ivkind22")
+```
+
+**SSFOADT — 截断正态 + 有内生性 (Wy+Wu+Wv):**
+
+```julia
+cf_oadt = sfmodel_counterfactual(res_oadt;
     dat=Td, depvar="lnc2",
     scenarios=Dict("agg2" => 0.0),
     Wy_mat=Wx[1], Wu_mat=Wx[1], Wv_mat=Wx[1],
@@ -397,33 +471,123 @@ Henderson & Parmeter (2012) 45度诊断图，用于检验 hscale 变量对 E(u) 
 
 **返回值:** `.results`（Dict）、`.raw_margeff`、`.direct`/`.indirect`/`.total`、`.mc_direct`/`.mc_indirect`/`.mc_total`、`.config`
 
-### KU 系列（含 Wy → 输出 direct/indirect/total 三张图）
+### 3.1 KU 系列 Henderson 图
+
+特点: 含 Wy，需传 `Wy_mat`，输出 direct/indirect/total 三张图。
+
+**SSFKUH — 半正态 + 无内生性:**
 
 ```julia
-h45 = sfmodel_henderson45(res_kueh;
+h45_kuh = sfmodel_henderson45(res_kuh;
     dat=Td, target_var="agg2",
     Wy_mat=Wx[1],
-    save_dir="result/henderson_45/kueh", B=499, dpi=600)
+    save_dir="result/henderson_45/kuh", B=499, dpi=600)
 ```
 
-### KK 系列（无空间权重 → 只输出一张 total 图）
+**SSFKUT — 截断正态 + 无内生性:**
 
 ```julia
-h45 = sfmodel_henderson45(res_kkeh;
+h45_kut = sfmodel_henderson45(res_kut;
+    dat=Td, target_var="agg2",
+    Wy_mat=Wx[1],
+    save_dir="result/henderson_45/kut", B=499)
+```
+
+**SSFKUEH — 半正态 + 有内生性:**
+
+```julia
+h45_kueh = sfmodel_henderson45(res_kueh;
+    dat=Td, target_var="agg2",
+    Wy_mat=Wx[1],
+    save_dir="result/henderson_45/kueh", B=499)
+```
+
+**SSFKUET — 截断正态 + 有内生性:**
+
+```julia
+h45_kuet = sfmodel_henderson45(res_kuet;
+    dat=Td, target_var="agg2",
+    Wy_mat=Wx[1],
+    save_dir="result/henderson_45/kuet", B=499)
+```
+
+### 3.2 KK 系列 Henderson 图
+
+特点: 无空间权重，不需要传空间矩阵，只输出一张 total 图。
+
+**SSFKKH — 半正态 + 无内生性:**
+
+```julia
+h45_kkh = sfmodel_henderson45(res_kkh;
+    dat=Td, target_var="agg2",
+    save_dir="result/henderson_45/kkh", B=499)
+```
+
+**SSFKKT — 截断正态 + 无内生性:**
+
+```julia
+h45_kkt = sfmodel_henderson45(res_kkt;
+    dat=Td, target_var="agg2",
+    save_dir="result/henderson_45/kkt", B=499)
+```
+
+**SSFKKEH — 半正态 + 有内生性:**
+
+```julia
+h45_kkeh = sfmodel_henderson45(res_kkeh;
     dat=Td, target_var="agg2",
     save_dir="result/henderson_45/kkeh", B=499)
 ```
 
-### OA 系列（含 Wy+Wu → 输出 direct/indirect/total 三张图）
+**SSFKKET — 截断正态 + 有内生性:**
 
 ```julia
-h45 = sfmodel_henderson45(res_oadh;
+h45_kket = sfmodel_henderson45(res_kket;
+    dat=Td, target_var="agg2",
+    save_dir="result/henderson_45/kket", B=499)
+```
+
+### 3.3 OA 系列 Henderson 图
+
+特点: 含 Wy + Wu，需传 `Wy_mat` + `Wu_mat`，输出 direct/indirect/total 三张图。Henderson 图不区分内生性，OA 和 OAD 调用方式相同。
+
+**SSFOAH — 半正态 + 无内生性 (Wy+Wu):**
+
+```julia
+h45_oah = sfmodel_henderson45(res_oah;
+    dat=Td, target_var="agg2",
+    Wy_mat=Wx[1], Wu_mat=Wx[1],
+    save_dir="result/henderson_45/oah", B=499)
+```
+
+**SSFOAT — 截断正态 + 无内生性 (Wy+Wu):**
+
+```julia
+h45_oat = sfmodel_henderson45(res_oat;
+    dat=Td, target_var="agg2",
+    Wy_mat=Wx[1], Wu_mat=Wx[1],
+    save_dir="result/henderson_45/oat", B=499)
+```
+
+**SSFOADH — 半正态 + 有内生性 (Wy+Wu+Wv):**
+
+```julia
+h45_oadh = sfmodel_henderson45(res_oadh;
     dat=Td, target_var="agg2",
     Wy_mat=Wx[1], Wu_mat=Wx[1],
     save_dir="result/henderson_45/oadh", B=499)
 ```
 
-### 批量对所有 hscale 变量画图
+**SSFOADT — 截断正态 + 有内生性 (Wy+Wu+Wv):**
+
+```julia
+h45_oadt = sfmodel_henderson45(res_oadt;
+    dat=Td, target_var="agg2",
+    Wy_mat=Wx[1], Wu_mat=Wx[1],
+    save_dir="result/henderson_45/oadt", B=499)
+```
+
+### 3.4 批量画图
 
 ```julia
 for var in ["agg2", "indus2", "lagfdi2", "human2", "lnpgdp2", "roadpc2"]
@@ -453,35 +617,48 @@ end
 - `Vector` → 直接传入导数向量
 - 未列出的变量 → 导数为 0
 
-### ∂lnC/∂lnL（劳动弹性）
+**Translog 导数参考:**
 
 translog: `lnC = ... + β_L·lnL + β_LK·lnL·lnK + β_LY·lnL·lnY + 0.5·β_LL·lnL²`
 
+| 目标 | frontier_deriv | 说明 |
+|------|---------------|------|
+| ∂lnC/∂lnL | `:lnl22=>1.0, :lnl_lnk22=>:lnk22, :lnl_lny22=>:lny22, :lnl2_05=>:lnl22` | 劳动弹性 |
+| ∂lnC/∂lnK | `:lnk22=>1.0, :lnl_lnk22=>:lnl22, :lnk_lny22=>:lny22, :lnk2_05=>:lnk22` | 资本弹性 |
+| ∂lnC/∂lnY | `:lny22=>1.0, :lnl_lny22=>:lnl22, :lnk_lny22=>:lnk22, :lny2_05=>:lny22` | 产出弹性 |
+| ∂lnC/∂AGG | `:agg2=>1.0` + `wx_deriv=Dict(:agg2=>1.0)` | 含 WX 变量 |
+
+### 4.1 KU 系列前沿 Henderson 图
+
+特点: 含 Wy，输出 direct/indirect/total 三张图。含 `@frontierWx` 时需传 `wx_deriv`。
+
+**SSFKUH — 半正态 + 无内生性 (∂lnC/∂lnL):**
+
 ```julia
-sfmodel_henderson45_y(res_kueh; dat=Td, target_var="lnL",
+sfmodel_henderson45_y(res_kuh; dat=Td, target_var="lnL",
     frontier_deriv = Dict{Symbol,Any}(
-        :lnl22     => 1.0,       # ∂(lnL)/∂(lnL) = 1
-        :lnl_lnk22 => :lnk22,   # ∂(lnL·lnK)/∂(lnL) = lnK
-        :lnl_lny22 => :lny22,   # ∂(lnL·lnY)/∂(lnL) = lnY
-        :lnl2_05   => :lnl22,   # ∂(0.5·lnL²)/∂(lnL) = lnL
+        :lnl22     => 1.0,
+        :lnl_lnk22 => :lnk22,
+        :lnl_lny22 => :lny22,
+        :lnl2_05   => :lnl22,
     ),
-    save_dir="result/henderson_45_y/lnL", B=499)
+    save_dir="result/henderson_45_y/kuh_lnL", B=499)
 ```
 
-### ∂lnC/∂lnK（资本弹性）
+**SSFKUT — 截断正态 + 无内生性 (∂lnC/∂lnK):**
 
 ```julia
-sfmodel_henderson45_y(res_kueh; dat=Td, target_var="lnK",
+sfmodel_henderson45_y(res_kut; dat=Td, target_var="lnK",
     frontier_deriv = Dict{Symbol,Any}(
         :lnk22     => 1.0,
         :lnl_lnk22 => :lnl22,
         :lnk_lny22 => :lny22,
         :lnk2_05   => :lnk22,
     ),
-    save_dir="result/henderson_45_y/lnK", B=499)
+    save_dir="result/henderson_45_y/kut_lnK", B=499)
 ```
 
-### ∂lnC/∂lnY*（产出弹性）
+**SSFKUEH — 半正态 + 有内生性 (∂lnC/∂lnY):**
 
 ```julia
 sfmodel_henderson45_y(res_kueh; dat=Td, target_var="lnY",
@@ -491,16 +668,122 @@ sfmodel_henderson45_y(res_kueh; dat=Td, target_var="lnY",
         :lnk_lny22 => :lnk22,
         :lny2_05   => :lny22,
     ),
-    save_dir="result/henderson_45_y/lnY", B=499)
+    save_dir="result/henderson_45_y/kueh_lnY", B=499)
 ```
 
-### ∂lnC/∂AGG（含 WX 变量）
-
-当 `agg2` 同时在 `@frontier` 和 `@frontierWx` 中时，需要同时传 `frontier_deriv` 和 `wx_deriv`：
+**SSFKUET — 截断正态 + 有内生性 (∂lnC/∂AGG, 含 WX):**
 
 ```julia
-sfmodel_henderson45_y(res_kueh; dat=Td, target_var="AGG",
+sfmodel_henderson45_y(res_kuet; dat=Td, target_var="AGG",
     frontier_deriv = Dict{Symbol,Any}(:agg2 => 1.0),
     wx_deriv = Dict{Symbol,Any}(:agg2 => 1.0),
-    save_dir="result/henderson_45_y/AGG", B=499)
+    save_dir="result/henderson_45_y/kuet_AGG", B=499)
+```
+
+### 4.2 KK 系列前沿 Henderson 图
+
+特点: 无空间权重，只输出一张 total 图。无 `@frontierWx`，不需要 `wx_deriv`。
+
+**SSFKKH — 半正态 + 无内生性 (∂lnC/∂lnL):**
+
+```julia
+sfmodel_henderson45_y(res_kkh; dat=Td, target_var="lnL",
+    frontier_deriv = Dict{Symbol,Any}(
+        :lnl22     => 1.0,
+        :lnl_lnk22 => :lnk22,
+        :lnl_lny22 => :lny22,
+        :lnl2_05   => :lnl22,
+    ),
+    save_dir="result/henderson_45_y/kkh_lnL", B=499)
+```
+
+**SSFKKT — 截断正态 + 无内生性 (∂lnC/∂lnK):**
+
+```julia
+sfmodel_henderson45_y(res_kkt; dat=Td, target_var="lnK",
+    frontier_deriv = Dict{Symbol,Any}(
+        :lnk22     => 1.0,
+        :lnl_lnk22 => :lnl22,
+        :lnk_lny22 => :lny22,
+        :lnk2_05   => :lnk22,
+    ),
+    save_dir="result/henderson_45_y/kkt_lnK", B=499)
+```
+
+**SSFKKEH — 半正态 + 有内生性 (∂lnC/∂lnY):**
+
+```julia
+sfmodel_henderson45_y(res_kkeh; dat=Td, target_var="lnY",
+    frontier_deriv = Dict{Symbol,Any}(
+        :lny22     => 1.0,
+        :lnl_lny22 => :lnl22,
+        :lnk_lny22 => :lnk22,
+        :lny2_05   => :lny22,
+    ),
+    save_dir="result/henderson_45_y/kkeh_lnY", B=499)
+```
+
+**SSFKKET — 截断正态 + 有内生性 (∂lnC/∂lnL):**
+
+```julia
+sfmodel_henderson45_y(res_kket; dat=Td, target_var="lnL",
+    frontier_deriv = Dict{Symbol,Any}(
+        :lnl22     => 1.0,
+        :lnl_lnk22 => :lnk22,
+        :lnl_lny22 => :lny22,
+        :lnl2_05   => :lnl22,
+    ),
+    save_dir="result/henderson_45_y/kket_lnL", B=499)
+```
+
+### 4.3 OA 系列前沿 Henderson 图
+
+特点: 含 Wy，输出 direct/indirect/total 三张图。含 `@frontierWx` 时需传 `wx_deriv`。Henderson 图不区分内生性，OA 和 OAD 调用方式相同。
+
+**SSFOAH — 半正态 + 无内生性 (∂lnC/∂lnL):**
+
+```julia
+sfmodel_henderson45_y(res_oah; dat=Td, target_var="lnL",
+    frontier_deriv = Dict{Symbol,Any}(
+        :lnl22     => 1.0,
+        :lnl_lnk22 => :lnk22,
+        :lnl_lny22 => :lny22,
+        :lnl2_05   => :lnl22,
+    ),
+    save_dir="result/henderson_45_y/oah_lnL", B=499)
+```
+
+**SSFOAT — 截断正态 + 无内生性 (∂lnC/∂lnK):**
+
+```julia
+sfmodel_henderson45_y(res_oat; dat=Td, target_var="lnK",
+    frontier_deriv = Dict{Symbol,Any}(
+        :lnk22     => 1.0,
+        :lnl_lnk22 => :lnl22,
+        :lnk_lny22 => :lny22,
+        :lnk2_05   => :lnk22,
+    ),
+    save_dir="result/henderson_45_y/oat_lnK", B=499)
+```
+
+**SSFOADH — 半正态 + 有内生性 (∂lnC/∂lnY):**
+
+```julia
+sfmodel_henderson45_y(res_oadh; dat=Td, target_var="lnY",
+    frontier_deriv = Dict{Symbol,Any}(
+        :lny22     => 1.0,
+        :lnl_lny22 => :lnl22,
+        :lnk_lny22 => :lnk22,
+        :lny2_05   => :lny22,
+    ),
+    save_dir="result/henderson_45_y/oadh_lnY", B=499)
+```
+
+**SSFOADT — 截断正态 + 有内生性 (∂lnC/∂AGG, 含 WX):**
+
+```julia
+sfmodel_henderson45_y(res_oadt; dat=Td, target_var="AGG",
+    frontier_deriv = Dict{Symbol,Any}(:agg2 => 1.0),
+    wx_deriv = Dict{Symbol,Any}(:agg2 => 1.0),
+    save_dir="result/henderson_45_y/oadt_AGG", B=499)
 ```
