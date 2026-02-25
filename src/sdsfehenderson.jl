@@ -740,7 +740,7 @@ end
 """
     sfmodel_counterfactual(res; dat, depvar, scenarios, Wy_mat, Wu_mat, Wv_mat, envar, ivvar, C_level)
 
-反事实分析：支持按变量名指定、多种场景，适配 KU/KK/OA/WH/GI 全部模型类型。
+反事实分析：支持按变量名指定、多种场景，适配 KU/KK/OA/WH 全部模型类型。
 
 自动进行两通道分解：当反事实变量同时出现在 @frontier 和 @hscale 中时，
 返回前沿通道 (delta_lnC_frontier) 和效率通道 (delta_lnC_efficiency) 的分解结果。

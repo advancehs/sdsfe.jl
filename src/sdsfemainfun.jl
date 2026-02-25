@@ -96,22 +96,6 @@ sfmodel_spec(sfpanel(TRE), sftype(prod), sfdist(half),
              message = false);
 ```
 """
-function counterfact(arg::Vararg; message::Bool=false) 
-  global _cfdicM 
-  _cfdicM = Dict{Symbol, Any}()
-
-  for k in ( :depvar, :frontier,:frontierWx, :μ, :hscale,  :σᵤ², :σᵥ²,  ) 
-      _cfdicM[k] = nothing
-  end
-  for d in :($(arg))
-      _cfdicM[d[1]] = d[2]
-  end 
-
-  _cfdicM[:counterfact]      =  true
-
-
-  return _cfdicM # for debugging purpose
-end
 
 
 function sfmodel_spec(arg::Vararg; message::Bool=false) 
@@ -126,7 +110,7 @@ function sfmodel_spec(arg::Vararg; message::Bool=false)
 
        #* -- creates default values ---
 
-      for k in (:panel, :timevar, :idvar,  :dist, :type, :depvar, :frontier,:frontierWx, :margeffu, :mareffx, 
+      for k in (:panel, :timevar, :idvar,  :dist, :type, :depvar, :frontier,:frontierWx, :margeffu, :mareffx, :counterfact,
                   :μ, :hscale,  :σᵤ², :σᵥ²,  :hasDF, :transfer, :misc) # take out :data, :η, :λ, :τ, in this revision
           _dicM[k] = nothing
       end
@@ -163,7 +147,7 @@ function sfmodel_spec(arg::Vararg; message::Bool=false)
          varname = [:depvar]
          _dicM[:depvar] = [:depvar]
 
-         for k in (:timevar, :idvar, :frontier,:frontierWx, :margeffu, :mareffx,  :μ, :hscale,  :σᵤ², :σᵥ²) 
+         for k in (:timevar, :idvar, :frontier,:frontierWx, :margeffu, :mareffx, :counterfact, :μ, :hscale,  :σᵤ², :σᵥ²) 
              if _dicM[k] !== nothing # if not nothing, must be Array
                 isa(_dicM[k], Vector) || isa(_dicM[k][1], Vector) || isa(_dicM[k][1], Matrix) || throw("
                    `k` has to be a Vector or Matrix (e.g., Array{Float64, 1} or Array{Float64, 2}). 
@@ -249,13 +233,27 @@ function sfmodel_spec(arg::Vararg; message::Bool=false)
           tagD[:modelid] = SSFWHEH 
 
 
-        elseif (_dicM[:panel] == [:SSF_OAD2024]) && (s=="T") 
+        elseif (_dicM[:panel] == [:SSF_OAD2024]) && (s=="T")
           tagD = Dict{Symbol, Type{SSFOADT}}()
           tagD[:modelid] = SSFOADT
-        elseif (_dicM[:panel] == [:SSF_OAD2024]) && (s=="H") 
+        elseif (_dicM[:panel] == [:SSF_OAD2024]) && (s=="H")
           tagD = Dict{Symbol, Type{SSFOADH}}()
-          tagD[:modelid] = SSFOADH 
-        else 
+          tagD[:modelid] = SSFOADH
+
+        elseif (_dicM[:panel] == [:SSF_GI2025]) && (s=="T")
+          tagD = Dict{Symbol, Type{SSFGIT}}()
+          tagD[:modelid] = SSFGIT
+        elseif (_dicM[:panel] == [:SSF_GI2025]) && (s=="H")
+          tagD = Dict{Symbol, Type{SSFGIH}}()
+          tagD[:modelid] = SSFGIH
+        elseif (_dicM[:panel] == [:SSF_GIE2025]) && (s=="T")
+          tagD = Dict{Symbol, Type{SSFGIET}}()
+          tagD[:modelid] = SSFGIET
+        elseif (_dicM[:panel] == [:SSF_GIE2025]) && (s=="H")
+          tagD = Dict{Symbol, Type{SSFGIEH}}()
+          tagD[:modelid] = SSFGIEH
+
+        else
             throw("The `sfpanel()` and/or `sfdist()` are not specified correctly.")
         end
       end 
@@ -446,7 +444,9 @@ function sfmodel_opt(arg::Vararg; message::Bool=false) # create a dictionary of 
   _dicOPT[:banner]           =  true
   _dicOPT[:ineff_index]      =  true
   _dicOPT[:margeffu]         =  true
-  if tagD[:modelid] in (SSFOAT,SSFOAH,SSFOADT,SSFOADH,SSFKUEH,SSFKUET,SSFKUH,SSFKUT)
+  _dicOPT[:counterfact]      =  true
+
+  if tagD[:modelid] in (SSFOAT,SSFOAH,SSFOADT,SSFOADH,SSFKUEH,SSFKUET,SSFKUH,SSFKUT,SSFGIH,SSFGIT,SSFGIEH,SSFGIET)
     _dicOPT[:mareffx]        =  true
     _dicOPT[:margeffu]       =  true
   elseif tagD[:modelid] in (SSFKKEH,SSFKKET,SSFKKH,SSFKKT,SSFWHEH,SSFWHET,SSFWHH,SSFWHT)
@@ -869,11 +869,12 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
           sf_init = vcat(b_ini1, t_ini1, phi_ini,eta_ini, d2_ini1, g_ini1, d1_ini1)  
 
       elseif tagD[:modelid] == SSFWHT
-        if (haskey(_dicM, :envar)) 
+        if (haskey(_dicM, :envar))
           error("You can not specify @envar with model SSFWHT")
         end
           sf_init = vcat(b_ini, t_ini, d2_ini, d1_ini, g_ini)
 
+      # ============ Giannini 2025 (GI) 系列 ============
       elseif tagD[:modelid] == SSFGIEH
           sf_init0 = vcat(b_ini, t_ini, d2_ini, g_ini, gammma_ini)
           sf_init0 = vec(sf_init0)
@@ -932,7 +933,6 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
           error("You can not specify @envar with model SSFGIT")
         end
           sf_init = vcat(b_ini, t_ini, d2_ini, g_ini, d1_ini, gammma_ini)
-
 
       elseif tagD[:modelid] == SSFOADH
           if Wy!=Nothing  # yuv
@@ -1448,7 +1448,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                             _porc, num, pos, rho,
                               eigvalu, rowIDT, _dicM[:misc]),
                    sf_init;               
-                  autodiff = automode); 
+                  autodiff = automode) ;
   
 
   #* ---- Make placeholders for dictionary recording purposes *#
@@ -1676,11 +1676,9 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
       totalemat, diremat, indiremat = nothing, nothing, nothing
    end      
    #* ---- Counterfactual analysis -------------- 
-   if _cfdicM[:counterfact]  
-
-
-   @views (_counterfacttotal, _counterfactdire,_counterfactindire) = counterfactindex(  tagD[:modelid], 
-                                     _porc, num, pos, _coevec, eigvalu, rowIDT,  sfdat )
+   if _dicOPT[:counterfact]  
+   @views (_counterfacttotal, _counterfactdire,_counterfactindire) = counterfactindex(  tagD[:modelid], yvar, xvar, qvar, wvar, vvar,  zvar, envar, ivvar,
+                                     _porc, num, pos, _coevec, eigvalu, rowIDT )
    end
   
    #* ------- Make Table ------------------
@@ -1911,7 +1909,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
     _dicRES[:indiremat]       = indiremat
 
 
-    if _cfdicM[:counterfact]  
+    if _dicOPT[:counterfact]  
 
       _dicRES[:counterfacttotal] =_counterfacttotal
       _dicRES[:counterfactdire]  =_counterfactdire
@@ -1961,6 +1959,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
     _dicRES[:main_maxIT]       = sf_maxit
     _dicRES[:tolerance]        = sf_tol
     _dicRES[:eqpo]             = eqvec2
+    _dicRES[:eigvalu]          = eigvalu
 
     _dicRES[:redflag]          = redflag
 
