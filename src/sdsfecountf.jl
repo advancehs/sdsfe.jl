@@ -4289,7 +4289,33 @@ function  cfindexwht(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
       
       
     
-function counterfactindex(::Type{SSFWHET}, 
+# --- WH dispatch: standard calling convention (y,x,Q,w,v,z,EN,IV,...) ---
+function counterfactindex(::Type{SSFWHH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN, IV,
+    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+    jlms,jlms_direct,jlms_indirect = cfindexwhh(y, x, Q, PorC, pos, rho, eigvalu, rowIDT)
+    return jlms,jlms_direct,jlms_indirect
+end
+
+function counterfactindex(::Type{SSFWHT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN, IV,
+    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+    jlms,jlms_direct,jlms_indirect = cfindexwht(y, x, Q, PorC, pos, rho, eigvalu, rowIDT)
+    return jlms,jlms_direct,jlms_indirect
+end
+
+function counterfactindex(::Type{SSFWHEH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN, IV,
+    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+    jlms,jlms_direct,jlms_indirect = cfindexwhhe(y, x, Q, Matrix(EN), Matrix(IV), PorC, num, pos, rho, eigvalu, rowIDT)
+    return jlms,jlms_direct,jlms_indirect
+end
+
+function counterfactindex(::Type{SSFWHET}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN, IV,
+    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
+    jlms,jlms_direct,jlms_indirect = cfindexwhte(y, x, Q, Matrix(EN), Matrix(IV), PorC, num, pos, rho, eigvalu, rowIDT)
+    return jlms,jlms_direct,jlms_indirect
+end
+
+# --- WH dispatch: dat-based calling convention (legacy) ---
+function counterfactindex(::Type{SSFWHET},
     PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any},dat::DataFrame)
     
     yvar = dat[:, _dicM[:depvar]]   

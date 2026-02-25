@@ -5480,8 +5480,133 @@ end
 
 
 
-    
-    
+function ssdwhhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
+    PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any} )
+    β  = rho[1:po.endx]
+    τ  = rho[po.begq:po.endq]
+    phi = rho[po.begphi:po.endphi]
+    nofiv = num.nofphi/num.nofeta
+    eps = zeros(eltype(EN),num.nofobs,num.nofeta);
+    @views phi = reshape(phi, :, num.nofeta)
+    @views eps = EN- IV*phi
+    @views LL = cov(eps);
+    @views logdetll = log(det(LL))
+    @views invll = LL\I(num.nofeta)
+    likx = zero(eltype(y));
+   try
+    @floop begin
+    @inbounds for iitt =1:num.nofobs
+                tempx=-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+                if simple_check(tempx)
+                    likx += -1e9
+                else
+                    likx += tempx
+                end
+        end
+    end
+    ID = size(rowIDT,1)
+    @floop begin
+        @inbounds for iidd=1:ID
+            @views T = rowIDT[iidd,2];
+                    tempx2= (T-1) * (-0.5*num.nofeta*log(2*π)-0.5*logdetll);
+                    if simple_check(tempx2)
+                        likx += -1e99
+                    else
+                        likx += tempx2
+                    end
+                 end
+        end
+    eta = rho[po.begeta:po.endeta]
+    δ2 = rho[po.begw]
+    γ  = rho[po.begv]
+    hi  = exp.(Q*τ)
+    σᵤ²= exp(δ2)
+    σᵤ= exp(0.5*δ2)
+    σᵥ² = exp(γ)
+    σᵥ = exp(0.5*γ)
+    μ   = 0.0
+    ϵ = PorC*(y - x*β)
+    ID = size(rowIDT,1)
+    @floop begin
+        lik = zero(eltype(y));
+    @inbounds  for iidd=1:ID
+        @views T = rowIDT[iidd,2];
+        @views onecol = ones(T, 1);
+        @views IMT = (I(T)-onecol*pinv(onecol'*onecol)*onecol');
+        @views invPi = 1/σᵥ²;
+        @views lndetPi = log(σᵥ²);
+            @views ind = rowIDT[iidd,1];
+            @views his = IMT*(hi[ind]);
+            @views ϵs  = ϵ[ind] - PorC*(eps[ind,:]*eta) ;
+            @views sigs2 = 1.0 / ((his'*his*invPi) + 1/σᵤ²) ;
+            @views mus = (μ/σᵤ² - (ϵs'*his*invPi))*sigs2 ;
+            @views es2 = -0.5*(ϵs'*ϵs*invPi );
+            @views KK = -0.5*(T-1)*log(2 * π)-0.5*(T-1)*lndetPi;
+            @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
+                            0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
+                            0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                    if simple_check(temp)
+                        lik += -1e99
+                    else
+                        lik += temp
+                    end
+                end
+        end
+    return -lik-likx
+    catch e
+        return 1e100
+    end
+end
+
+
+function ssdwhh( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
+     PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any} )
+    β  = rho[1:po.endx]
+    τ  = rho[po.begq:po.endq]
+    δ2 = rho[po.begw]
+    γ  = rho[po.begv]
+    hi  = exp.(Q*τ)
+    σᵤ²= exp(δ2)
+    σᵤ= exp(0.5*δ2)
+    σᵥ² = exp(γ)
+    σᵥ = exp(0.5*γ)
+    μ   = 0.0
+    ϵ = PorC*(y - x*β)
+    ID = size(rowIDT,1)
+    try
+    @floop begin
+        lik = zero(eltype(y));
+    @inbounds  for iidd=1:ID
+        @views T = rowIDT[iidd,2];
+        @views onecol = ones(T, 1);
+        @views IMT = (I(T)-onecol*pinv(onecol'*onecol)*onecol');
+        @views invPi = 1/σᵥ²;
+        @views lndetPi = log(σᵥ²);
+        @views ind = rowIDT[iidd,1];
+        @views his = IMT*(hi[ind]);
+        @views ϵs  = ϵ[ind]   ;
+        @views sigs2 = 1.0 / ((his'*his*invPi) + 1/σᵤ²) ;
+        @views mus = (μ/σᵤ² - (ϵs'*his*invPi))*sigs2 ;
+        @views es2 = -0.5*(ϵs'*ϵs*invPi );
+        @views KK = -0.5*(T-1)*log(2 * π)-0.5*(T-1)*lndetPi;
+        @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
+                            0.5 * log(sigs2) + (normlogcdf(mus / sqrt(sigs2))) -
+                            0.5 * log(σᵤ²) - (normlogcdf(μ / σᵤ))
+                    if simple_check(temp)
+                        lik += -1e99
+                    else
+                        lik += temp
+                    end
+                end
+        end
+    return -lik
+    catch e
+        return 1e100
+    end
+end
+
+
+
 function ssdwhte( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
         PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any} )
         β  = rho[1:po.endx]
