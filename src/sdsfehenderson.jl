@@ -68,6 +68,7 @@ end
 # ============================================================
 
 function _h45_detect(modelid)
+    wh_set   = (SSFWHH, SSFWHT, SSFWHEH, SSFWHET)
     half_set = (SSFOAH, SSFOADH, SSFKUH, SSFKUEH, SSFKKH, SSFKKEH, SSFWHH, SSFWHEH)
     wu_set   = (SSFOAH, SSFOAT, SSFOADH, SSFOADT)
     wy_set   = (SSFOAH, SSFOAT, SSFOADH, SSFOADT, SSFKUH, SSFKUT, SSFKUEH, SSFKUET)
@@ -75,7 +76,8 @@ function _h45_detect(modelid)
     has_Wu  = modelid in wu_set
     has_Wy  = modelid in wy_set
     has_mu  = !is_half
-    return (is_half=is_half, has_Wu=has_Wu, has_Wy=has_Wy, has_mu=has_mu)
+    is_wh   = modelid in wh_set
+    return (is_half=is_half, has_Wu=has_Wu, has_Wy=has_Wy, has_mu=has_mu, is_wh=is_wh)
 end
 
 # ============================================================
@@ -203,6 +205,7 @@ function sfmodel_henderson45(res;
 
     modelid = res[:modelid]
     cfg = _h45_detect(modelid)
+    cfg.is_wh && error("WH 模型暂不支持 Henderson 45度图（原始 sdsfe 也未实现）")
     eqpo = res[:eqpo]
     coef = res[:coeff]
     vcov = res[:var_cov_mat]
@@ -492,6 +495,7 @@ function sfmodel_henderson45_y(res;
 
     modelid = res[:modelid]
     cfg = _h45_detect(modelid)
+    cfg.is_wh && error("WH 模型暂不支持 Henderson 45度图（原始 sdsfe 也未实现）")
     coef = res[:coeff]
     vcov = res[:var_cov_mat]
     eqpo = res[:eqpo]
