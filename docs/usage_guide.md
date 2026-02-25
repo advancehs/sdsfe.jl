@@ -65,6 +65,29 @@ Wx = Array{Matrix}(undef, 1, 1); Wx[1] = w_mat
 # （参见 examples/sdsfe_usage_guide.jl 中的 translog2 函数）
 ```
 
+## 因变量与 sftype 的关系
+
+本包基于双曲距离函数（Hyperbolic Distance Function）框架。论文中的理论模型为：
+
+```
+-ln(C_it) = Xβ + v_it + u_it,   u_it ≥ 0
+```
+
+其中 C 为非期望产出（如碳排放），u 为非效率项。但在实际使用中，因变量直接传入 `ln(C)`（即 `log(emission)`），**不需要手动取负号**。符号方向由 `sftype(cost)` 自动处理：
+
+- `sftype(cost)`: 复合误差 ε = v + u，无效率项使因变量增大
+- `sftype(prod)`: 复合误差 ε = v - u，无效率项使因变量减小
+
+因此数据预处理只需：
+
+```julia
+# lnc = log(emission)，数据中已有，无需取反
+# lnc2 = lnc - mean(lnc)，去均值化后作为因变量
+@depvar(lnc2)
+```
+
+模型内部通过 `PorC` 参数（cost=+1, prod=-1）自动调整方向，等价于论文中 `-ln(C) = Xβ + v + u` 的形式。碳排放效率 CEE = exp(-u) ∈ (0, 1]，u 越大效率越低。
+
 ## 模型对照表
 
 | 模型ID | 面板函数 | 分布 | 内生性 | Wy | Wu | Wv | cfindices |
