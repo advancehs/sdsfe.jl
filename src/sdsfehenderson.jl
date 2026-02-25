@@ -873,6 +873,12 @@ function sfmodel_counterfactual(res;
         tau_u = coef[first(eqpo[:coeff_τ])]
     end
 
+    # --- Wv 空间参数 (OA 模型) ---
+    rho_v = nothing
+    if is_oa && haskey(eqpo, :coeff_ρ) && length(eqpo[:coeff_ρ]) > 0
+        rho_v = coef[first(eqpo[:coeff_ρ])]
+    end
+
     # --- 获取 Wy ---
     if Wy_mat === nothing && cfg.has_Wy
         Wy_raw = _dicM[:wy]
@@ -891,6 +897,22 @@ function sfmodel_counterfactual(res;
     if Wu_mat !== nothing && !(Wu_mat isa AbstractMatrix{<:Real})
         Wu_mat = Wu_mat[1]
     end
+
+    # --- 获取 Wv (OA 模型) ---
+    if Wv_mat === nothing && is_oa && rho_v !== nothing
+        Wv_raw = _dicM[:wv]
+        Wv_mat = (Wv_raw !== nothing && Wv_raw !== Nothing) ? Wv_raw[1] : nothing
+    end
+    if Wv_mat !== nothing && !(Wv_mat isa AbstractMatrix{<:Real})
+        Wv_mat = Wv_mat[1]
+    end
+
+    # --- Wv 活跃标志 ---
+    has_wv_active = is_oa && rho_v !== nothing && Wv_mat !== nothing
+    if has_wv_active
+        println("    Wv 空间权重已启用 (ρᵥ=$(round(rho_v, digits=6)))")
+    end
+
     # --- 面板结构 ---
     idvar = Symbol(res[:idvar][1])
     timevar = Symbol(res[:timevar][1])
@@ -1070,6 +1092,9 @@ function sfmodel_counterfactual(res;
     # --- 内生性修正（SSFKUEH, SSFKUET 等含 E 的模型）---
     has_endo = haskey(eqpo, :coeff_ϕ) && haskey(eqpo, :coeff_η) &&
                length(eqpo[:coeff_ϕ]) > 0 && length(eqpo[:coeff_η]) > 0
+    # 提升到函数作用域，供 OA+Wv 分支使用
+    endo_eps_mat = nothing
+    endo_eta_vec = nothing
     if has_endo
         if envar === nothing || ivvar === nothing
             @warn "模型含内生性但未提供 envar/ivvar，反事实结果可能不准确"
@@ -1104,8 +1129,15 @@ function sfmodel_counterfactual(res;
             EN_mat = hcat([Float64.(dat[!, nm]) for nm in en_names]...)
             eps_mat = EN_mat - IV_mat * phi_mat
 
-            ϵ .-= PorC * (eps_mat * eta_vec)
-            println("    内生性修正已应用 (EN=$(en_names), IV=$(iv_names_list))")
+            # OA+Wv 时内生性修正需要 Mrho，延迟到 OA 分支内按时间块处理
+            if has_wv_active
+                endo_eps_mat = eps_mat
+                endo_eta_vec = eta_vec
+                println("    内生性修正将在 OA 分支内应用 (含 Wv/Mrho)")
+            else
+                ϵ .-= PorC * (eps_mat * eta_vec)
+                println("    内生性修正已应用 (EN=$(en_names), IV=$(iv_names_list))")
+            end
         end
     end
 
@@ -1130,13 +1162,23 @@ function sfmodel_counterfactual(res;
         jlms_indirect = zeros(nobs)
 
     elseif is_oa
-        # === OA 模型: 按时间段计算，含 Wu/Wy ===
+        # === OA 模型: 按时间段计算，含 Wu/Wy/Wv (8种组合) ===
         Mtau = (cfg.has_Wu && tau_u !== nothing && Wu_mat !== nothing) ?
                inv(I(N) - tau_u * Wu_mat) : Matrix{Float64}(I, N, N)
         Mgamma = (cfg.has_Wy && gamma !== nothing && Wy_mat !== nothing) ?
                  inv(I(N) - gamma * Wy_mat) : Matrix{Float64}(I, N, N)
         MgammaMtau = Mgamma * Mtau
-        invPi = 1.0 / σᵥ²
+
+        # invPi: 含 Wv 时为 Pi⁻¹ 矩阵，否则为 (1/σᵥ²)·I
+        # 对应原始 sdsfe: Mrho=(I-ρᵥWv)⁻¹, Pi=σᵥ²(Mrho·Mrho'), invPi=Pi⁻¹
+        Mrho_oa = nothing
+        if has_wv_active
+            Mrho_oa = inv(I(N) - rho_v * Wv_mat)
+            Pi = σᵥ² * (Mrho_oa * Mrho_oa')
+            invPi_mat = inv(Pi)
+        else
+            invPi_mat = (1.0 / σᵥ²) * Matrix{Float64}(I, N, N)
+        end
 
         jlms_total = zeros(nobs)
         jlms_direct = zeros(nobs)
@@ -1146,14 +1188,23 @@ function sfmodel_counterfactual(res;
             hi_ind = hi_cf[ind]
             hitau_ind = Mtau * hi_ind
 
+            # Wy 修正: ϵ -= PorC·γ·Wy·y
             if cfg.has_Wy && gamma !== nothing && Wy_mat !== nothing
                 y_ind = Float64.(dat[ind, depvar_sym])
                 ϵ[ind] .-= PorC * gamma * Wy_mat * y_ind
             end
 
+            # 内生性修正 (OA+Wv): ϵ -= PorC·Mrho·(eps·η)
+            # 内生性修正 (OA-Wv): ϵ -= PorC·(eps·η) (已在全局处理)
+            if has_wv_active && endo_eps_mat !== nothing
+                ϵ[ind] .-= PorC * Mrho_oa * (endo_eps_mat[ind, :] * endo_eta_vec)
+            end
+
             eps_ind = ϵ[ind]
-            sig2_t = 1.0 / (dot(hitau_ind, hitau_ind) * invPi + 1.0 / σᵤ²)
-            mu_t = (μ / σᵤ² - dot(eps_ind, hitau_ind) * invPi) * sig2_t
+            # sig2_t = 1/(hitau'·invPi·hitau + 1/σᵤ²)
+            sig2_t = 1.0 / (hitau_ind' * invPi_mat * hitau_ind + 1.0 / σᵤ²)
+            # mu_t = (μ/σᵤ² - eps'·invPi·hitau)·sig2_t
+            mu_t = (μ / σᵤ² - eps_ind' * invPi_mat * hitau_ind) * sig2_t
 
             ratio = mu_t / sqrt(sig2_t)
             base = hi_ind .* (mu_t + sqrt(sig2_t) * normpdf(ratio) / normcdf(ratio))
