@@ -2,7 +2,7 @@
 #  sdsfe 全模型使用指南
 #  包含: sfmodel_fit, sfmodel_counterfactual,
 #        sfmodel_henderson45, sfmodel_henderson45_y
-#  覆盖 16 种模型 (KU/KK/OA/WH × 半正态/截断 × 有无内生性)
+#  覆盖 20 种模型 (KU/KK/OA/WH/GI × 半正态/截断 × 有无内生性)
 #########################################################
 
 # ============================================================
@@ -473,9 +473,10 @@ cf_with_level = sfmodel_counterfactual(res_kueh;
 
 # ============================================================
 # 5. sfmodel_henderson45 — 非效率 E(u) 边际效应 Henderson 45度图
-#    支持: KU(4) + KK(4) + OA(4) = 12 种模型
+#    支持: KU(4) + KK(4) + OA(4) + GI(4) = 16 种模型
 #    WH 系列暂不支持
 #    自动检测模型类型, 自动进行空间分解 (direct/indirect/total)
+#    注意: dat 统一按 [year, city_code] 排序传入, 内部自动处理排序
 # ============================================================
 #
 # 参数说明:
@@ -565,7 +566,32 @@ h45_oadt = sfmodel_henderson45(res_oadt;
     Wy_mat=Wx[1], Wu_mat=Wx[1],
     save_dir="result/henderson_45/oadt", B=499)
 
-# --- 5.4 对多个 hscale 变量分别画图 ---
+# --- 5.4 GI 系列 Henderson 45度图 ---
+# dat 统一按 [year, city_code] 排序传入，无需按 [id, time] 预排序
+
+# SSFGIH \ SSFGIEH: 含 Wy, 输出 direct/indirect/total 三张图
+h45_gih = sfmodel_henderson45(res_gih;
+    dat=Td, target_var="agg2",
+    Wy_mat=Wx[1],
+    save_dir="result/henderson_45/gih", B=499)
+
+h45_gieh = sfmodel_henderson45(res_gieh;
+    dat=Td, target_var="agg2",
+    Wy_mat=Wx[1],
+    save_dir="result/henderson_45/gieh", B=499)
+
+# SSFGIT \ SSFGIET: 截断正态
+h45_git = sfmodel_henderson45(res_git;
+    dat=Td, target_var="agg2",
+    Wy_mat=Wx[1],
+    save_dir="result/henderson_45/git", B=499)
+
+h45_giet = sfmodel_henderson45(res_giet;
+    dat=Td, target_var="agg2",
+    Wy_mat=Wx[1],
+    save_dir="result/henderson_45/giet", B=499)
+
+# --- 5.5 对多个 hscale 变量分别画图 ---
 for var in ["agg2", "indus2", "lagfdi2", "human2", "lnpgdp2", "roadpc2"]
     sfmodel_henderson45(res_kueh;
         dat=Td, target_var=var,
@@ -576,8 +602,9 @@ end
 # ============================================================
 # 6. sfmodel_henderson45_y — 前沿（因变量）边际效应 Henderson 45度图
 #    用于 translog 成本/生产函数中 ∂lnC/∂lnL, ∂lnC/∂lnK 等
-#    支持: 所有含 Wy 的模型 (KU/OA 系列)
-#    KK 系列无空间权重, 只输出 total 图
+#    支持: 所有含 Wy 的模型 (KU/OA/GI 系列)
+#    KK/WH 系列无空间权重, 只输出 total 图
+#    注意: dat 统一按 [year, city_code] 排序传入, 内部自动处理排序
 # ============================================================
 #
 # 参数说明:
@@ -648,6 +675,28 @@ sfmodel_henderson45_y(res_oadh; dat=Td, target_var="lnK",
     ),
     save_dir="result/henderson_45_y/oa_lnK", B=499)
 
+# --- 6.7 GI 系列 (含 Wy, 输出 direct/indirect/total) ---
+# dat 统一按 [year, city_code] 排序传入，无需按 [id, time] 预排序
+sfmodel_henderson45_y(res_gieh; dat=Td, target_var="lnL",
+    frontier_deriv = Dict{Symbol,Any}(
+        :lnl22     => 1.0,
+        :lnl_lnk22 => :lnk22,
+        :lnl_lny22 => :lny22,
+        :lnl2_05   => :lnl22,
+    ),
+    Wy_mat=Wx[1],
+    save_dir="result/henderson_45_y/gi_lnL", B=499)
+
+sfmodel_henderson45_y(res_gieh; dat=Td, target_var="lnK",
+    frontier_deriv = Dict{Symbol,Any}(
+        :lnk22     => 1.0,
+        :lnl_lnk22 => :lnl22,
+        :lnk_lny22 => :lny22,
+        :lnk2_05   => :lnk22,
+    ),
+    Wy_mat=Wx[1],
+    save_dir="result/henderson_45_y/gi_lnK", B=499)
+
 # ============================================================
 # 7. 模型对照表 (快速参考)
 # ============================================================
@@ -674,6 +723,11 @@ sfmodel_henderson45_y(res_oadh; dat=Td, target_var="lnK",
 # │ SSFWHT   │ SSF_WH2010│ trun │  ✗  │  ✗  │  ✗  │  ✗  │ (暂不支持)│
 # │ SSFWHEH  │ SSF_WHE2010│half │  ✓  │  ✗  │  ✗  │  ✗  │ (暂不支持)│
 # │ SSFWHET  │ SSF_WHE2010│trun │  ✓  │  ✗  │  ✗  │  ✗  │ (暂不支持)│
+# ├──────────┼──────────┼──────┼──────┼──────┼──────┼──────┼──────────┤
+# │ SSFGIH   │ SSF_GI2025│ half │  ✗  │  ✓  │  ✗  │  ✗  │ Dict(1=>0)│
+# │ SSFGIT   │ SSF_GI2025│ trun │  ✗  │  ✓  │  ✗  │  ✗  │ Dict(1=>0)│
+# │ SSFGIEH  │ SSF_GIE2025│half │  ✓  │  ✓  │  ✗  │  ✗  │ Dict(1=>0)│
+# │ SSFGIET  │ SSF_GIE2025│trun │  ✓  │  ✓  │  ✗  │  ✗  │ Dict(1=>0)│
 # └──────────┴──────────┴──────┴──────┴──────┴──────┴──────┴──────────┘
 #
 # 关键区别:
@@ -683,17 +737,20 @@ sfmodel_henderson45_y(res_oadh; dat=Td, target_var="lnK",
 #   KK 系列: 无空间权重, 优化器推荐 NelderMead + finite
 #   KU 系列: 含 Wy, 优化器推荐 BFGS + forward
 #   OA 系列: 含 Wy+Wu(+Wv), 优化器推荐 BFGS + forward
+#   GI 系列: 含 Wy, 一阶差分消除固定效应, 优化器推荐 BFGS + forward
 #
 # sfmodel_counterfactual 调用要点:
 #   KU: 传 Wy_mat; 有内生性传 envar+ivvar
 #   KK: 不传空间矩阵; 有内生性传 envar+ivvar
 #   OA: 传 Wy_mat+Wu_mat; OAD 额外传 Wv_mat+envar+ivvar
+#   GI: 传 Wy_mat; 有内生性传 envar+ivvar; dat 按 [year, city_code] 传入即可
 #
 # sfmodel_henderson45 调用要点:
 #   target_var 必须在 @hscale 变量列表中
 #   KU: 传 Wy_mat
 #   KK: 不传空间矩阵
 #   OA: 传 Wy_mat + Wu_mat
+#   GI: 传 Wy_mat; dat 按 [year, city_code] 传入即可
 #
 # sfmodel_henderson45_y 调用要点:
 #   frontier_deriv: 只填有导数的变量, 其余自动为 0

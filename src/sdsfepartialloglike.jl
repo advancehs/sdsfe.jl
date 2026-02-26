@@ -1832,6 +1832,7 @@ function prtlloglikegihe(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, EN::Matr
  dhi    = hi_cur - hi_lag
 
  σᵤ² = exp(δ2)
+ σᵤ  = exp(0.5*δ2)
  σᵥ² = exp(γ)
  μ   = 0.0
  ϵ   = PorC*(y - x*β)
@@ -1912,6 +1913,7 @@ function prtlloglikegite(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, EN::Matr
  dhi    = hi_cur - hi_lag
 
  σᵤ² = exp(δ2)
+ σᵤ  = exp(0.5*δ2)
  σᵥ² = exp(γ)
  μ   = δ1
  ϵ   = PorC*(y - x*β)

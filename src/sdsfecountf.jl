@@ -3842,83 +3842,27 @@ function counterfactindex(::Type{SSFKKH}, y::Union{Vector,Matrix}, x::Matrix, Q:
 
 end
 # ============ Giannini 2025 (GI) 系列 ============
-function counterfactindex(::Type{SSFGIEH},
-    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any}, dat::DataFrame)
-
-    yvar = dat[:, _dicM[:depvar]]
-    xvar = dat[:, _dicM[:frontier]]
-    qvar = dat[:, _dicM[:hscale]]
-
-    envar = dat[:, _dicM[:envar]]
-    name_xuvar = unique(union(_dicM[:frontier], _dicM[:hscale]), dims=1)
-    name_exovar = unique(setdiff(name_xuvar, _dicM[:envar]), dims=1)
-    name_new_ivvar = union(name_exovar, _dicM[:ivvar])
-    ivvar = dat[:, name_new_ivvar]
-
-    y  = convert(Array{Float64}, Matrix(yvar))
-    x  = convert(Array{Float64}, Matrix(xvar))
-    Q  = convert(Array{Float64}, Matrix(qvar))
-    IV = convert(Array{Float64}, Matrix(ivvar))
-    EN = convert(Array{Float64}, Matrix(envar))
-
+function counterfactindex(::Type{SSFGIEH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
+    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
     jlms,jlms_direct,jlms_indirect = cfindexgihe(y, x, Q, EN, IV, PorC, num, pos, rho, eigvalu, rowIDT)
-
     return jlms,jlms_direct,jlms_indirect
 end
 
-function counterfactindex(::Type{SSFGIH},
-    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any}, dat::DataFrame)
-
-    yvar = dat[:, _dicM[:depvar]]
-    xvar = dat[:, _dicM[:frontier]]
-    qvar = dat[:, _dicM[:hscale]]
-
-    y  = convert(Array{Float64}, Matrix(yvar))
-    x  = convert(Array{Float64}, Matrix(xvar))
-    Q  = convert(Array{Float64}, Matrix(qvar))
-
+function counterfactindex(::Type{SSFGIH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
+    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
     jlms,jlms_direct,jlms_indirect = cfindexgih(y, x, Q, PorC, pos, rho, eigvalu, rowIDT)
-
     return jlms,jlms_direct,jlms_indirect
 end
 
-function counterfactindex(::Type{SSFGIET},
-    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any}, dat::DataFrame)
-
-    yvar = dat[:, _dicM[:depvar]]
-    xvar = dat[:, _dicM[:frontier]]
-    qvar = dat[:, _dicM[:hscale]]
-
-    envar = dat[:, _dicM[:envar]]
-    name_xuvar = unique(union(_dicM[:frontier], _dicM[:hscale]), dims=1)
-    name_exovar = unique(setdiff(name_xuvar, _dicM[:envar]), dims=1)
-    name_new_ivvar = union(name_exovar, _dicM[:ivvar])
-    ivvar = dat[:, name_new_ivvar]
-
-    y  = convert(Array{Float64}, Matrix(yvar))
-    x  = convert(Array{Float64}, Matrix(xvar))
-    Q  = convert(Array{Float64}, Matrix(qvar))
-    IV = convert(Array{Float64}, Matrix(ivvar))
-    EN = convert(Array{Float64}, Matrix(envar))
-
+function counterfactindex(::Type{SSFGIET}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
+    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
     jlms,jlms_direct,jlms_indirect = cfindexgite(y, x, Q, EN, IV, PorC, num, pos, rho, eigvalu, rowIDT)
-
     return jlms,jlms_direct,jlms_indirect
 end
 
-function counterfactindex(::Type{SSFGIT},
-    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any}, dat::DataFrame)
-
-    yvar = dat[:, _dicM[:depvar]]
-    xvar = dat[:, _dicM[:frontier]]
-    qvar = dat[:, _dicM[:hscale]]
-
-    y  = convert(Array{Float64}, Matrix(yvar))
-    x  = convert(Array{Float64}, Matrix(xvar))
-    Q  = convert(Array{Float64}, Matrix(qvar))
-
+function counterfactindex(::Type{SSFGIT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
+    PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
     jlms,jlms_direct,jlms_indirect = cfindexgit(y, x, Q, PorC, pos, rho, eigvalu, rowIDT)
-
     return jlms,jlms_direct,jlms_indirect
 end
 

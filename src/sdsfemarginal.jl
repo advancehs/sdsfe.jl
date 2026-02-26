@@ -4,6 +4,27 @@
 #                                                       #
 #########################################################
 
+"""
+    _safe_cholesky_L(A) -> LowerTriangular
+
+安全的 Cholesky 分解：先尝试标准 cholesky，若矩阵不正定则通过
+特征值修正（将负/零特征值截断为 ε）得到最近正定矩阵后再分解。
+用于 MC 模拟中从方差-协方差矩阵生成随机扰动。
+"""
+function _safe_cholesky_L(A::Union{Symmetric{Float64, Matrix{Float64}}, Matrix{Float64}})
+    As = A isa Symmetric ? A : Symmetric(A)
+    C = cholesky(As; check=false)
+    if issuccess(C)
+        return C.L
+    end
+    # 特征值修正：最近正定矩阵
+    F = eigen(As)
+    ε = max(1e-10, eps(Float64) * maximum(abs.(F.values)))
+    D_clamped = max.(F.values, ε)
+    A_pd = Symmetric(F.vectors * Diagonal(D_clamped) * F.vectors')
+    return cholesky(A_pd).L
+end
+
 
 #? ----------- truncated normal, marginal effect function -------
 
@@ -385,14 +406,14 @@ function IrhoW(gamma::Float64, rowIDT::Matrix{Any} )
      Wy = _dicM[:wy]
      T = size(rowIDT,1)
 
-    
+
    if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
-        @views N = rowIDT[1,2];
+        N = size(Wy[1], 1)   # 用空间权重矩阵维度，兼容 GI 个体索引 rowIDT
 		 wirho = (I(N)-gamma*Wy[1])\I(N)
 		 dire = tr(wirho)/N
 		 indire = (sum(wirho) - tr(wirho))/N
-	
+
 	else
 		NN=0.0
 		dire=0.0
@@ -425,12 +446,12 @@ function IrhoWW(gamma::Float64, rowIDT::Matrix{Any} )
 
 	
    if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
-        @views N = rowIDT[1,2];
-            
+        N = size(Wy[1], 1);
+
 		 wirho = (I(N)-gamma*Wy[1])\I(N)*Wx[1]
 		 dire = tr(wirho)/N
 		 indire = (sum(wirho) - tr(wirho))/N
-    
+
 	else
 		NN=0.0
 		dire=0.0
@@ -460,7 +481,7 @@ function IrhoWWIrhoW(gamma::Float64,dgamma::Float64, rowIDT::Matrix{Any} )
 
 
    if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
-        @views N = rowIDT[1,2];  
+        N = size(Wy[1], 1);
          wirho = (I(N)-gamma*Wy[1])\I(N)*Wy[1]*(I(N)-gamma*Wy[1])*dgamma
          dire = tr(wirho)/N
          indire = (sum(wirho) - tr(wirho))/N
@@ -493,9 +514,9 @@ function IrhoWWIrhoWW(gamma::Float64,dgamma::Float64, rowIDT::Matrix{Any} )
      T = size(rowIDT,1)
 
 
-   if length(Wy)==1  
-		 
-        @views N = rowIDT[1,2];  
+   if length(Wy)==1
+
+        N = size(Wy[1], 1);
 		 wirho = (I(N)-gamma*Wy[1])\I(N)*Wy[1]*(I(N)-gamma*Wy[1])*Wx[1]*dgamma
 		 dire = tr(wirho)/N
 		 indire = (sum(wirho) - tr(wirho))/N
@@ -525,28 +546,49 @@ function IrhoWItauW(gamma::Float64,tau::Float64, jlms0, rowIDT::Matrix{Any} )
      Wu = _dicM[:wu]
 
      T = size(rowIDT,1)
-   if length(Wy)==1 
-		 
-     NN=0.0
-     dire=0.0
-     total=0.0
-     for ttt=1:T
-          @views ind = rowIDT[ttt,1];
-          @views jlms= jlms0[ind];
+   if length(Wy)==1
 
+     N_spatial = size(Wy[1], 1)
+     N_rowIDT  = rowIDT[1,2]
 
-       @views N = rowIDT[1,2];
-          NN = NN +N
-          if Wu!=Nothing 
-               wirho = ((I(N)-gamma*Wy[1])\I(N))*((I(N)-tau*Wu[1])\I(N))*Diagonal(jlms)    
-          else
-               wirho = ((I(N)-gamma*Wy[1])\I(N))*Diagonal(jlms) 
-          end
-          dire =dire+ tr(wirho)
-          total =total+ (sum(wirho) )
+     if N_rowIDT == N_spatial
+       # 时间索引 rowIDT (KU/OA 等模型): rowIDT[t,1]=时间t的索引, rowIDT[t,2]=N
+       NN=0.0; dire=0.0; total=0.0
+       for ttt=1:T
+            @views ind = rowIDT[ttt,1];
+            @views jlms= jlms0[ind];
+            N = N_spatial
+            NN = NN +N
+            if Wu!=Nothing
+                 wirho = ((I(N)-gamma*Wy[1])\I(N))*((I(N)-tau*Wu[1])\I(N))*Diagonal(jlms)
+            else
+                 wirho = ((I(N)-gamma*Wy[1])\I(N))*Diagonal(jlms)
+            end
+            dire =dire+ tr(wirho)
+            total =total+ (sum(wirho) )
+       end
+       dire = dire/NN
+       total = total /NN
+     else
+       # 个体索引 rowIDT (GI 模型): rowIDT[i,1]=个体i的索引, rowIDT[i,2]=T_fd
+       ID = T;  T_fd = N_rowIDT;  N = N_spatial
+       Mgamma = (I(N) - gamma*Wy[1]) \ I(N)
+       NN=0.0; dire=0.0; total=0.0
+       for t in 1:T_fd
+            jlms_t = [jlms0[rowIDT[i,1][t]] for i in 1:ID]
+            if Wu!=Nothing
+                 wirho = Mgamma*((I(N)-tau*Wu[1])\I(N))*Diagonal(vec(jlms_t))
+            else
+                 wirho = Mgamma*Diagonal(vec(jlms_t))
+            end
+            NN = NN + N
+            dire = dire + tr(wirho)
+            total = total + sum(wirho)
+       end
+       dire = dire/NN
+       total = total/NN
      end
-          dire = dire/NN 
-          total = total /NN
+
      else
 		NN=0.0
 		dire=0.0
@@ -792,13 +834,12 @@ function get_mareffx(
      gamma  = eigvalu.rymin/(1+exp(gammap))+eigvalu.rymax*exp(gammap)/(1+exp(gammap));
      dgamma =  exp(gammap)*((eigvalu.rymax-eigvalu.rymin)/(1+exp(gammap))^2);
 
-     C = cholesky(var_cov_matrix)
-     L = C.L
+     L = _safe_cholesky_L(var_cov_matrix)
 
     totalemat = Array{Any}(undef,0,2)
     diremat   = Array{Any}(undef,0,2)
     indiremat = Array{Any}(undef,0,2)
-    
+
     dire0, indire0= IrhoW(gamma,  rowIDT)
     
     for (_, indices) in indices_list
@@ -867,8 +908,7 @@ function get_margeffu(
      jlms0, pos::NamedTuple, coef::Array{Float64, 1},  var_cov_matrix::Symmetric{Float64, Matrix{Float64}},
      eigvalu::NamedTuple ,indices_listz::Vector{Any}, rowIDT::Matrix{Any})
     
-     C = cholesky(var_cov_matrix)
-     L = C.L
+     L = _safe_cholesky_L(var_cov_matrix)
 
      Wu = _dicM[:wu]
      Wy = _dicM[:wy]

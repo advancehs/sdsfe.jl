@@ -10047,7 +10047,7 @@ function jlmsbcgih0(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, Q_lag::Matrix
     jlms_direct   = Diagonal(diag(Mgammat)) * jlms1
     jlms_indirect = jlms - jlms_direct
 
-    return jlms, jlms_direct, jlms_indirect
+    return jlms, jlms_direct, jlms_indirect, jlms1
 end
 
 # __JLMS_GIHE0__
@@ -10114,7 +10114,7 @@ function jlmsbcgihe0(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, Q_lag::Matri
     jlms_direct   = Diagonal(diag(Mgammat)) * jlms1
     jlms_indirect = jlms - jlms_direct
 
-    return jlms, jlms_direct, jlms_indirect
+    return jlms, jlms_direct, jlms_indirect, jlms1
 end
 
 
@@ -10176,7 +10176,7 @@ function jlmsbcgit0(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, Q_lag::Matrix
     jlms_direct   = Diagonal(diag(Mgammat)) * jlms1
     jlms_indirect = jlms - jlms_direct
 
-    return jlms, jlms_direct, jlms_indirect
+    return jlms, jlms_direct, jlms_indirect, jlms1
 end
 
 # __JLMS_GITE0__
@@ -10244,7 +10244,7 @@ function jlmsbcgite0(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, Q_lag::Matri
     jlms_direct   = Diagonal(diag(Mgammat)) * jlms1
     jlms_indirect = jlms - jlms_direct
 
-    return jlms, jlms_direct, jlms_indirect
+    return jlms, jlms_direct, jlms_indirect, jlms1
 end
 
 
@@ -10253,29 +10253,29 @@ end
 function jlmsbc0(::Type{SSFGIH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
     PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
     Wy = _dicM[:wy];  Q_lag = _dicM[:qvar_lag]
-    jlms, _, _ = jlmsbcgih0(y, x, Q, Q_lag, Wy, PorC, pos, rho, eigvalu, rowIDT)
-    return jlms
+    _, _, _, jlms1 = jlmsbcgih0(y, x, Q, Q_lag, Wy, PorC, pos, rho, eigvalu, rowIDT)
+    return jlms1
 end
 
 function jlmsbc0(::Type{SSFGIEH}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
     PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
     Wy = _dicM[:wy];  Q_lag = _dicM[:qvar_lag]
-    jlms, _, _ = jlmsbcgihe0(y, x, Q, Q_lag, EN, IV, Wy, PorC, num, pos, rho, eigvalu, rowIDT)
-    return jlms
+    _, _, _, jlms1 = jlmsbcgihe0(y, x, Q, Q_lag, EN, IV, Wy, PorC, num, pos, rho, eigvalu, rowIDT)
+    return jlms1
 end
 
 function jlmsbc0(::Type{SSFGIT}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
     PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
     Wy = _dicM[:wy];  Q_lag = _dicM[:qvar_lag]
-    jlms, _, _ = jlmsbcgit0(y, x, Q, Q_lag, Wy, PorC, pos, rho, eigvalu, rowIDT)
-    return jlms
+    _, _, _, jlms1 = jlmsbcgit0(y, x, Q, Q_lag, Wy, PorC, pos, rho, eigvalu, rowIDT)
+    return jlms1
 end
 
 function jlmsbc0(::Type{SSFGIET}, y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w::Matrix, v::Matrix, z, EN, IV,
     PorC::Int64, num::NamedTuple, pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
     Wy = _dicM[:wy];  Q_lag = _dicM[:qvar_lag]
-    jlms, _, _ = jlmsbcgite0(y, x, Q, Q_lag, EN, IV, Wy, PorC, num, pos, rho, eigvalu, rowIDT)
-    return jlms
+    _, _, _, jlms1 = jlmsbcgite0(y, x, Q, Q_lag, EN, IV, Wy, PorC, num, pos, rho, eigvalu, rowIDT)
+    return jlms1
 end
 
 

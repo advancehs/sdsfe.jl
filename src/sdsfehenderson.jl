@@ -69,15 +69,18 @@ end
 
 function _h45_detect(modelid)
     wh_set   = (SSFWHH, SSFWHT, SSFWHEH, SSFWHET)
-    half_set = (SSFOAH, SSFOADH, SSFKUH, SSFKUEH, SSFKKH, SSFKKEH, SSFWHH, SSFWHEH)
+    gi_set   = (SSFGIH, SSFGIT, SSFGIEH, SSFGIET)
+    half_set = (SSFOAH, SSFOADH, SSFKUH, SSFKUEH, SSFKKH, SSFKKEH, SSFWHH, SSFWHEH, SSFGIH, SSFGIEH)
     wu_set   = (SSFOAH, SSFOAT, SSFOADH, SSFOADT)
-    wy_set   = (SSFOAH, SSFOAT, SSFOADH, SSFOADT, SSFKUH, SSFKUT, SSFKUEH, SSFKUET)
+    wy_set   = (SSFOAH, SSFOAT, SSFOADH, SSFOADT, SSFKUH, SSFKUT, SSFKUEH, SSFKUET,
+                SSFGIH, SSFGIT, SSFGIEH, SSFGIET)
     is_half = modelid in half_set
     has_Wu  = modelid in wu_set
     has_Wy  = modelid in wy_set
     has_mu  = !is_half
     is_wh   = modelid in wh_set
-    return (is_half=is_half, has_Wu=has_Wu, has_Wy=has_Wy, has_mu=has_mu, is_wh=is_wh)
+    is_gi   = modelid in gi_set
+    return (is_half=is_half, has_Wu=has_Wu, has_Wy=has_Wy, has_mu=has_mu, is_wh=is_wh, is_gi=is_gi)
 end
 
 # ============================================================
@@ -229,6 +232,9 @@ function sfmodel_henderson45(res;
     if cfg.has_Wy && haskey(eqpo, :coeff_γ)
         idx_gamma = eqpo[:coeff_γ]
         rho_y = coef[first(idx_gamma)]  # 已变换，直接使用
+    elseif cfg.has_Wy && haskey(eqpo, :coeff_λ)   # GI 系列用 coeff_λ
+        idx_gamma = eqpo[:coeff_λ]
+        rho_y = coef[first(idx_gamma)]
     end
     tau_u = nothing; idx_tau = nothing
     if cfg.has_Wu && haskey(eqpo, :coeff_τ)
@@ -353,7 +359,7 @@ function sfmodel_henderson45(res;
     end
 
     sub_vcov = vcov[mc_idx, mc_idx]
-    L = cholesky(Symmetric(sub_vcov)).L
+    L = _safe_cholesky_L(Symmetric(sub_vcov))
     mc_direct = zeros(nobs, B); mc_indirect = zeros(nobs, B); mc_total = zeros(nobs, B)
 
     # --- MC 模拟循环 ---
@@ -563,6 +569,9 @@ function sfmodel_henderson45_y(res;
     if cfg.has_Wy && haskey(eqpo, :coeff_γ)
         idx_gamma = eqpo[:coeff_γ]
         rho_y = coef[first(idx_gamma)]
+    elseif cfg.has_Wy && haskey(eqpo, :coeff_λ)   # GI 系列用 coeff_λ
+        idx_gamma = eqpo[:coeff_λ]
+        rho_y = coef[first(idx_gamma)]
     end
 
     # --- 特征值边界 ---
@@ -651,7 +660,7 @@ function sfmodel_henderson45_y(res;
     end
 
     sub_vcov = vcov[mc_idx, mc_idx]
-    L = cholesky(Symmetric(sub_vcov)).L
+    L = _safe_cholesky_L(Symmetric(sub_vcov))
     mc_direct = zeros(nobs, B); mc_indirect = zeros(nobs, B); mc_total = zeros(nobs, B)
     for b in 1:B
         perturb = L * randn(size(L,1))
@@ -828,11 +837,13 @@ function sfmodel_counterfactual(res;
     is_kk = _match_model(modelid_str, ["SSFKKH", "SSFKKT", "SSFKKEH", "SSFKKET"])
     is_oa = _match_model(modelid_str, ["SSFOAH", "SSFOAT", "SSFOADH", "SSFOADT"])
     is_wh = _match_model(modelid_str, ["SSFWHH", "SSFWHT", "SSFWHEH", "SSFWHET"])
+    is_gi = _match_model(modelid_str, ["SSFGIH", "SSFGIT", "SSFGIEH", "SSFGIET"])
 
     # 检测分布和空间特征（字符串匹配，兼容 JLD2 加载）
-    is_half = _match_model(modelid_str, ["SSFKUH", "SSFKUEH", "SSFKKH", "SSFKKEH", "SSFOAH", "SSFOADH", "SSFWHH", "SSFWHEH"])
+    is_half = _match_model(modelid_str, ["SSFKUH", "SSFKUEH", "SSFKKH", "SSFKKEH", "SSFOAH", "SSFOADH", "SSFWHH", "SSFWHEH", "SSFGIH", "SSFGIEH"])
     has_Wu  = _match_model(modelid_str, ["SSFOAH", "SSFOAT", "SSFOADH", "SSFOADT"])
-    has_Wy  = _match_model(modelid_str, ["SSFOAH", "SSFOAT", "SSFOADH", "SSFOADT", "SSFKUH", "SSFKUT", "SSFKUEH", "SSFKUET"])
+    has_Wy  = _match_model(modelid_str, ["SSFOAH", "SSFOAT", "SSFOADH", "SSFOADT", "SSFKUH", "SSFKUT", "SSFKUEH", "SSFKUET",
+                                          "SSFGIH", "SSFGIT", "SSFGIEH", "SSFGIET"])
     has_mu  = !is_half
     cfg = (is_half=is_half, has_Wu=has_Wu, has_Wy=has_Wy, has_mu=has_mu)
 
@@ -840,7 +851,7 @@ function sfmodel_counterfactual(res;
     eqpo = res[:eqpo]
     PorC = res[:PorC]
 
-    println(">>> 反事实分析 — 模型: $modelid_str ($(is_ku ? "KU" : is_kk ? "KK" : is_oa ? "OA" : is_wh ? "WH" : "其他"))")
+    println(">>> 反事实分析 — 模型: $modelid_str ($(is_ku ? "KU" : is_kk ? "KK" : is_oa ? "OA" : is_wh ? "WH" : is_gi ? "GI" : "其他"))")
 
     # --- 提取系数 ---
     idx_frontier = eqpo[:coeff_frontier]
@@ -864,6 +875,8 @@ function sfmodel_counterfactual(res;
     gamma = nothing
     if cfg.has_Wy && haskey(eqpo, :coeff_γ)
         gamma = coef[first(eqpo[:coeff_γ])]
+    elseif cfg.has_Wy && haskey(eqpo, :coeff_λ)   # GI 系列用 coeff_λ
+        gamma = coef[first(eqpo[:coeff_λ])]
     end
 
     # --- Wu 空间参数 (OA 模型) ---
@@ -916,10 +929,10 @@ function sfmodel_counterfactual(res;
     idvar = Symbol(res[:idvar][1])
     timevar = Symbol(res[:timevar][1])
 
-    # KK 模型内部按 [idvar, timevar] 排序，其他模型按 [timevar, idvar] 排序
+    # KK/GI 模型内部按 [idvar, timevar] 排序，其他模型按 [timevar, idvar] 排序
     # 记录原始行顺序，计算完后排回去
     unsort_perm = nothing
-    if is_kk
+    if is_kk || is_gi
         dat = copy(dat)
         dat[!, :_orig_row_] = 1:nrow(dat)
         sort!(dat, [idvar, timevar])
@@ -942,9 +955,9 @@ function sfmodel_counterfactual(res;
         rowIDT[tt, 2] = length(rowIDT[tt, 1])
     end
 
-    # --- 构建 rowIDI（按个体索引，KK/WH 模型需要）---
+    # --- 构建 rowIDI（按个体索引，KK/WH/GI 模型需要）---
     rowIDI = nothing
-    if is_kk || is_wh
+    if is_kk || is_wh || is_gi
         rowIDI = Array{Any}(undef, N, 2)
         for (ii, cc) in enumerate(city_codes)
             rowIDI[ii, 1] = findall(ivar .== cc)
@@ -1183,6 +1196,135 @@ function sfmodel_counterfactual(res;
 
         jlms_direct = copy(jlms_total)
         jlms_indirect = zeros(nobs)
+
+    elseif is_gi
+        # === GI 模型: 一阶差分 + Toeplitz 逆 + 空间乘数 ===
+        # GI 数据按 [idvar, timevar] 排序，rowIDI 按个体索引
+        # 需要构建 dhi = h_cur - h_lag（一阶差分的 hscale）
+        # 注意: 反事实中 dat 是原始数据，需要手动构建 FD 结构
+
+        # 构建 hi_lag: 每个个体内，lag 一期的 h
+        hi_lag_cf = zeros(nobs)
+        for idid in 1:N
+            ind = rowIDI[idid, 1]
+            T_i = length(ind)
+            for t in 2:T_i
+                hi_lag_cf[ind[t]] = hi_cf[ind[t-1]]
+            end
+            hi_lag_cf[ind[1]] = hi_cf[ind[1]]  # 第一期无 lag，占位
+        end
+        dhi_cf = hi_cf .- hi_lag_cf
+
+        # 一阶差分 ϵ
+        ϵ_fd = zeros(nobs)
+        for idid in 1:N
+            ind = rowIDI[idid, 1]
+            T_i = length(ind)
+            for t in 2:T_i
+                ϵ_fd[ind[t]] = ϵ[ind[t]] - ϵ[ind[t-1]]
+            end
+        end
+
+        # 空间滤波 + 内生性修正（在 FD 数据上）
+        if cfg.has_Wy && gamma !== nothing && Wy_mat !== nothing
+            y_vec = Float64.(dat[!, depvar_sym])
+            # FD of y
+            y_fd = zeros(nobs)
+            for idid in 1:N
+                ind = rowIDI[idid, 1]
+                T_i = length(ind)
+                for t in 2:T_i
+                    y_fd[ind[t]] = y_vec[ind[t]] - y_vec[ind[t-1]]
+                end
+            end
+            # 按时间块应用 Wy（GI 内部按个体排序，需按时间截面操作）
+            # 由于数据按 [id, time] 排序，需要重组为按时间截面
+            # 简化: 直接用 kron(Wy, I(T_fd)) 结构
+            # 但这里 rowIDI 是按个体的，我们需要按时间截面的索引
+            # 构建按时间截面的索引
+            time_vals = sort(unique(tvar))
+            for tt in 2:length(time_vals)
+                # 找到该时间截面中有效的 FD 观测（第 tt 期对应 FD 的第 tt-1 个差分）
+                # 在按 [id, time] 排序的数据中，每个个体的第 tt 个观测
+                idx_t = Int[]
+                for idid in 1:N
+                    ind = rowIDI[idid, 1]
+                    if length(ind) >= tt
+                        push!(idx_t, ind[tt])
+                    end
+                end
+                if length(idx_t) == N
+                    ϵ_fd[idx_t] .-= PorC * gamma * Wy_mat * y_fd[idx_t]
+                end
+            end
+        end
+        if has_endo && endo_eps_mat !== nothing
+            # FD of eps_mat
+            eps_fd = zeros(nobs, size(endo_eps_mat, 2))
+            for idid in 1:N
+                ind = rowIDI[idid, 1]
+                T_i = length(ind)
+                for t in 2:T_i
+                    eps_fd[ind[t], :] .= endo_eps_mat[ind[t], :] .- endo_eps_mat[ind[t-1], :]
+                end
+            end
+            ϵ_fd .-= PorC * (eps_fd * endo_eta_vec)
+        end
+
+        # Toeplitz 逆矩阵
+        T_total = length(sort(unique(tvar)))
+        T_fd = T_total - 1
+        T_orig = T_total
+        Ainv = zeros(T_fd, T_fd)
+        for j = 1:T_fd, k = 1:T_fd
+            Ainv[j,k] = min(j,k) * (T_orig - max(j,k)) / T_orig
+        end
+        invPi = Ainv / σᵥ²
+
+        jlms1 = zeros(nobs)
+        for idid in 1:N
+            ind = rowIDI[idid, 1]
+            T_i = length(ind)
+            # 取 FD 部分（跳过第一期）
+            fd_ind = ind[2:end]
+            if length(fd_ind) != T_fd
+                continue  # 非平衡面板跳过
+            end
+            dhis = dhi_cf[fd_ind]
+            ϵs   = ϵ_fd[fd_ind]
+
+            sigs2 = 1.0 / (dhis' * invPi * dhis + 1.0 / σᵤ²)
+            mus   = (μ / σᵤ² - ϵs' * invPi * dhis) * sigs2
+            eu    = mus + sqrt(sigs2) * normpdf(mus / sqrt(sigs2)) / normcdf(mus / sqrt(sigs2))
+            # 赋值到所有 FD 期（与 jlmsbcgih0 一致，用 hi_cur）
+            jlms1[fd_ind] .= hi_cf[fd_ind] .* eu
+        end
+
+        # 空间乘数 (I-λW)⁻¹
+        if cfg.has_Wy && gamma !== nothing && Wy_mat !== nothing
+            Mgamma = inv(I(N) - gamma * Wy_mat)
+            # 按时间截面应用空间乘数
+            jlms_total = zeros(nobs)
+            jlms_direct = zeros(nobs)
+            for tt in 2:T_total
+                idx_t = Int[]
+                for idid in 1:N
+                    ind = rowIDI[idid, 1]
+                    if length(ind) >= tt
+                        push!(idx_t, ind[tt])
+                    end
+                end
+                if length(idx_t) == N
+                    jlms_total[idx_t] .= Mgamma * jlms1[idx_t]
+                    jlms_direct[idx_t] .= Diagonal(diag(Mgamma)) * jlms1[idx_t]
+                end
+            end
+            jlms_indirect = jlms_total .- jlms_direct
+        else
+            jlms_total = jlms1
+            jlms_direct = copy(jlms1)
+            jlms_indirect = zeros(nobs)
+        end
 
     elseif is_oa
         # === OA 模型: 按时间段计算，含 Wu/Wy/Wv (8种组合) ===

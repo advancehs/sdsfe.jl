@@ -1664,17 +1664,17 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
       totalematu, dirematu, indirematu = nothing, nothing, nothing
    end      
   
-   #* ---- marginal effect on x or wx -------------- 
+   #* ---- marginal effect on x or wx --------------
 
-   if _dicOPT[:mareffx]                    
-      if Wy!=Nothing 
+   if _dicOPT[:mareffx]
+      if Wy!=Nothing && _dicM[:wx]!=Nothing
       totalemat, diremat, indiremat = get_mareffx( pos, _coevec,  var_cov_matrix, eigvalu, indices_list, rowIDT )
       else
       totalemat, diremat, indiremat = nothing, nothing, nothing
       end
-   else      
+   else
       totalemat, diremat, indiremat = nothing, nothing, nothing
-   end      
+   end
    #* ---- Counterfactual analysis -------------- 
    if _dicOPT[:counterfact]  
    @views (_counterfacttotal, _counterfactdire,_counterfactindire) = counterfactindex(  tagD[:modelid], yvar, xvar, qvar, wvar, vvar,  zvar, envar, ivvar,

@@ -1033,36 +1033,35 @@ Wv = _dicM[:wv]
 
 
 
-#* --- model info printout --------- 
-modelinfo1 = "spatial stochastic frontier analysis in Orea and Al (2019 JoE), normal and truncated-normal"
+#* --- model info printout ---------
+modelinfo1 = "spatial stochastic frontier analysis in Orea and Al (2019 JoE), normal and half-normal"
 modelinfo2 = begin
  """
  * In the case of type(cost), "- uᵢₜ" below is changed to "+ uᵢₜ".
 
  $(_dicM[:depvar][1]) = frontier( $(_dicM[:frontier])) + ̃vᵢₜ - ̃uᵢₜ,
- 
+
  where vᵢₜ ∼ N(0, σᵥ²),
-             σᵥ² = exp(log_σᵥ²) 
+             σᵥ² = exp(log_σᵥ²)
                  = exp($(_dicM[:σᵥ²]));
        uᵢₜ ∼ hscaleᵢₜ * uᵢ,
              hscaleᵢₜ = exp($(_dicM[:hscale])),
-       uᵢ ∼ N⁺(μ, σᵤ²),
-            μ = $(_dicM[:μ])
-            σᵤ² = exp(log_σᵤ²) 
+       uᵢ ∼ N⁺(0, σᵤ²),
+            σᵤ² = exp(log_σᵤ²)
                 = exp($(_dicM[:σᵤ²]));
  """
 end
-  
+
 if  Wx!=Nothing   # yuvx
     wxvar = zeros(size(dat, 1), length(_dicM[:frontierWx]) )
     T=length(unique(vec(Matrix(tvar))));
     for ttt in 1:T
         if length(Wx) == 1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
-       
+
             xx = Matrix(dat[!, _dicM[:frontierWx]])
             @views wxvar[rowIDT[ttt,1], :] .= Wx[1] * xx[rowIDT[ttt,1], :]
         elseif length(wx) > 1
-  
+
             xx = Matrix(dat[!, _dicM[:frontierWx]])
             @views wxvar[rowIDT[ttt,1], :] .= Wx[ttt] * xx[rowIDT[ttt,1], :]
            
@@ -1443,30 +1442,29 @@ Wx = _dicM[:wx]
 Wu = _dicM[:wu]
 Wv = _dicM[:wv]
 
-envar = dat[:, _dicM[:envar]]   
+envar = dat[:, _dicM[:envar]]
   name_xuvar = unique(union(_dicM[:frontier], _dicM[:hscale]), dims=1)  #  frontier + h (xu) 中的变量
   name_exovar = unique(setdiff(name_xuvar, _dicM[:envar]), dims=1)  # xu中的所以外生变量
   name_new_ivvar = union(name_exovar, _dicM[:ivvar])  # xu中的所以外生变量 + iv
 
-ivvar = dat[:, name_new_ivvar]   
+ivvar = dat[:, name_new_ivvar]
 
 
-#* --- model info printout --------- 
-modelinfo1 = "spatial stochastic frontier analysis in Orea and Al (2019 JoE), normal and truncated-normal"
+#* --- model info printout ---------
+modelinfo1 = "spatial stochastic frontier analysis in Orea and Al (2019 JoE), normal and half-normal"
 modelinfo2 = begin
  """
  * In the case of type(cost), "- uᵢₜ" below is changed to "+ uᵢₜ".
 
  $(_dicM[:depvar][1]) = frontier( $(_dicM[:frontier])) + ̃vᵢₜ - ̃uᵢₜ,
- 
+
  where vᵢₜ ∼ N(0, σᵥ²),
-             σᵥ² = exp(log_σᵥ²) 
+             σᵥ² = exp(log_σᵥ²)
                  = exp($(_dicM[:σᵥ²]));
        uᵢₜ ∼ hscaleᵢₜ * uᵢ,
              hscaleᵢₜ = exp($(_dicM[:hscale])),
-       uᵢ ∼ N⁺(μ, σᵤ²),
-            μ = $(_dicM[:μ])
-            σᵤ² = exp(log_σᵤ²) 
+       uᵢ ∼ N⁺(0, σᵤ²),
+            σᵤ² = exp(log_σᵤ²)
                 = exp($(_dicM[:σᵤ²]));
  """
 end
@@ -1911,35 +1909,34 @@ function getvar(::Type{SSFKUEH}, dat::DataFrame)
     ivvar = dat[:, name_new_ivvar]   
     
     
-    #* --- model info printout --------- 
-    modelinfo1 = "spatial stochastic frontier analysis in Kutlu (2020 EJoR), normal and truncated-normal"
+    #* --- model info printout ---------
+    modelinfo1 = "spatial stochastic frontier analysis in Kutlu (2020 EJoR), normal and half-normal"
     modelinfo2 = begin
      """
      * In the case of type(cost), "- uᵢₜ" below is changed to "+ uᵢₜ".
-    
+
      $(_dicM[:depvar][1]) = frontier( $(_dicM[:frontier])) + ̃vᵢₜ - ̃uᵢₜ,
-     
+
      where vᵢₜ ∼ N(0, σᵥ²),
-                 σᵥ² = exp(log_σᵥ²) 
+                 σᵥ² = exp(log_σᵥ²)
                      = exp($(_dicM[:σᵥ²]));
            uᵢₜ ∼ hscaleᵢₜ * uᵢ,
                  hscaleᵢₜ = exp($(_dicM[:hscale])),
-           uᵢ ∼ N⁺(μ, σᵤ²),
-                μ = $(_dicM[:μ])
-                σᵤ² = exp(log_σᵤ²) 
+           uᵢ ∼ N⁺(0, σᵤ²),
+                σᵤ² = exp(log_σᵤ²)
                     = exp($(_dicM[:σᵤ²]));
      """
     end
-      
+
     if  Wx!=Nothing   # yuvx
         wxvar = zeros(size(dat, 1), length(_dicM[:frontierWx]) )
         T=length(unique(vec(Matrix(tvar))));
         for ttt in 1:T
             if length(Wx) == 1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
-           
+
                 xx = Matrix(dat[!, _dicM[:frontierWx]])
                 @views wxvar[rowIDT[ttt,1], :] .= Wx[1] * xx[rowIDT[ttt,1], :]
-                
+
 
             elseif length(wx) > 1
       
@@ -2120,24 +2117,23 @@ function getvar(::Type{SSFKUH}, dat::DataFrame)
       # zvar = dat[:, _dicM[:μ]]
       
       Wy = _dicM[:wy]
-      Wx = _dicM[:wx] 
-      
-      #* --- model info printout --------- 
-      modelinfo1 = "spatial stochastic frontier analysis in Kutlu (2020 EJoR), normal and truncated-normal"
+      Wx = _dicM[:wx]
+
+      #* --- model info printout ---------
+      modelinfo1 = "spatial stochastic frontier analysis in Kutlu (2020 EJoR), normal and half-normal"
       modelinfo2 = begin
         """
         * In the case of type(cost), "- uᵢₜ" below is changed to "+ uᵢₜ".
-      
+
         $(_dicM[:depvar][1]) = frontier( $(_dicM[:frontier])) + ̃vᵢₜ - ̃uᵢₜ,
-        
+
         where vᵢₜ ∼ N(0, σᵥ²),
-                    σᵥ² = exp(log_σᵥ²) 
+                    σᵥ² = exp(log_σᵥ²)
                         = exp($(_dicM[:σᵥ²]));
               uᵢₜ ∼ hscaleᵢₜ * uᵢ,
                     hscaleᵢₜ = exp($(_dicM[:hscale])),
-              uᵢ ∼ N⁺(μ, σᵤ²),
-                  μ = $(_dicM[:μ])
-                  σᵤ² = exp(log_σᵤ²) 
+              uᵢ ∼ N⁺(0, σᵤ²),
+                  σᵤ² = exp(log_σᵤ²)
                       = exp($(_dicM[:σᵤ²]));
         """
       end
@@ -2542,8 +2538,8 @@ Wy = _dicM[:wy]
 Wx = _dicM[:wx]
 
 
-#* --- model info printout --------- 
-modelinfo1 = "spatial stochastic frontier analysis in Orea and Al (2019 JoE), normal and truncated-normal"
+#* --- model info printout ---------
+modelinfo1 = "spatial stochastic frontier analysis in Kutlu (2020 EJoR), normal and truncated-normal"
 modelinfo2 = begin
  """
  * In the case of type(cost), "- uᵢₜ" below is changed to "+ uᵢₜ".
@@ -2742,17 +2738,16 @@ function getvar(::Type{SSFKKEH}, dat::DataFrame)
   modelinfo2 = begin
    """
    * In the case of type(cost), "- uᵢₜ" below is changed to "+ uᵢₜ".
-  
+
    $(_dicM[:depvar][1]) = frontier( $(_dicM[:frontier])) + ̃vᵢₜ - ̃uᵢₜ,
-   
+
    where vᵢₜ ∼ N(0, σᵥ²),
-               σᵥ² = exp(log_σᵥ²) 
+               σᵥ² = exp(log_σᵥ²)
                    = exp($(_dicM[:σᵥ²]));
          uᵢₜ ∼ hscaleᵢₜ * uᵢ,
                hscaleᵢₜ = exp($(_dicM[:hscale])),
-         uᵢ ∼ N⁺(μ, σᵤ²),
-              μ = $(_dicM[:μ])
-              σᵤ² = exp(log_σᵤ²) 
+         uᵢ ∼ N⁺(0, σᵤ²),
+              σᵤ² = exp(log_σᵤ²)
                   = exp($(_dicM[:σᵤ²]));
    """
   end
@@ -2873,36 +2868,35 @@ lnσᵥ²   = begv + 1)
 
 function getvar(::Type{SSFKKH}, dat::DataFrame)
 
-  
-    ivar = dat[:, _dicM[:idvar]] 
+
+    ivar = dat[:, _dicM[:idvar]]
     dat = sort(dat,  [_dicM[:idvar][1], _dicM[:timevar][1]])
     tvar = dat[:, _dicM[:timevar]]
     rowIDT = get_rowIDT(vec(Matrix(ivar)))   # rowIDT (Nx2): col_1 is panel's row info; col_2 is panel's number of id in each year
-    
+
     yvar = dat[:, _dicM[:depvar]]   # still a DataFrame
     xvar = dat[:, _dicM[:frontier]]  ## 如果有wx，则要在这里合并一下，x和wx
 
-    qvar = dat[:, _dicM[:hscale]]  
+    qvar = dat[:, _dicM[:hscale]]
     wvar = dat[:, _dicM[:σᵤ²]]
     vvar = dat[:, _dicM[:σᵥ²]]
     # zvar = dat[:, _dicM[:μ]]
-    
-    #* --- model info printout --------- 
-    modelinfo1 = "spatial stochastic frontier analysis in Kutlu (2017 Applied Economics), normal and truncated-normal"
+
+    #* --- model info printout ---------
+    modelinfo1 = "spatial stochastic frontier analysis in Kutlu (2017 Applied Economics), normal and half-normal"
     modelinfo2 = begin
       """
       * In the case of type(cost), "- uᵢₜ" below is changed to "+ uᵢₜ".
-    
+
       $(_dicM[:depvar][1]) = frontier( $(_dicM[:frontier])) + ̃vᵢₜ - ̃uᵢₜ,
-      
+
       where vᵢₜ ∼ N(0, σᵥ²),
-                  σᵥ² = exp(log_σᵥ²) 
+                  σᵥ² = exp(log_σᵥ²)
                       = exp($(_dicM[:σᵥ²]));
             uᵢₜ ∼ hscaleᵢₜ * uᵢ,
                   hscaleᵢₜ = exp($(_dicM[:hscale])),
-            uᵢ ∼ N⁺(μ, σᵤ²),
-                μ = $(_dicM[:μ])
-                σᵤ² = exp(log_σᵤ²) 
+            uᵢ ∼ N⁺(0, σᵤ²),
+                σᵤ² = exp(log_σᵤ²)
                     = exp($(_dicM[:σᵤ²]));
       """
     end
@@ -3034,28 +3028,28 @@ function getvar(::Type{SSFKKET}, dat::DataFrame)
     
     
     #* --- model info printout --------- 
-    modelinfo1 = "spatial stochastic frontier analysis in Kutlu (2020 Applied Economics), normal and truncated-normal"
+    modelinfo1 = "spatial stochastic frontier analysis in Kutlu (2017 Applied Economics), normal and truncated-normal"
     modelinfo2 = begin
      """
      * In the case of type(cost), "- uᵢₜ" below is changed to "+ uᵢₜ".
-    
+
      $(_dicM[:depvar][1]) = frontier( $(_dicM[:frontier])) + ̃vᵢₜ - ̃uᵢₜ,
-     
+
      where vᵢₜ ∼ N(0, σᵥ²),
-                 σᵥ² = exp(log_σᵥ²) 
+                 σᵥ² = exp(log_σᵥ²)
                      = exp($(_dicM[:σᵥ²]));
            uᵢₜ ∼ hscaleᵢₜ * uᵢ,
                  hscaleᵢₜ = exp($(_dicM[:hscale])),
            uᵢ ∼ N⁺(μ, σᵤ²),
                 μ = $(_dicM[:μ])
-                σᵤ² = exp(log_σᵤ²) 
+                σᵤ² = exp(log_σᵤ²)
                     = exp($(_dicM[:σᵤ²]));
      """
     end
-      
-    
+
+
     #* --- retrieve and generate important parameters -----
-    
+
     #*   number of obs and number of variables
     nofx = nofq = nofw = nofv = nofz = nofphi = nofeta = 0  # to make a complete list
     
@@ -3342,9 +3336,25 @@ function getvar(::Type{SSFGIEH}, dat::DataFrame)
     ivvar = dat[:, name_new_ivvar]
 
     modelinfo1 = "spatial SFA in Giannini (2025), first-difference with spatial lag, half-normal, endogeneity"
-    modelinfo2 = """
-     Δyᵢₜ = λWΔy + Δxβ + Δvᵢₜ - Δ(hᵢₜuᵢ), uᵢ∼N⁺(0,σᵤ²)
+    modelinfo2 = begin
      """
+     * In the case of type(cost), "- uᵢₜ" below is changed to "+ uᵢₜ".
+
+     Δyᵢₜ = λWΔy + Δxβ + Δvᵢₜ - Δ(hᵢₜuᵢ),
+
+     where vᵢₜ ∼ N(0, σᵥ²),
+                 σᵥ² = exp(log_σᵥ²)
+                     = exp($(_dicM[:σᵥ²]));
+           uᵢₜ ∼ hscaleᵢₜ * uᵢ,
+                 hscaleᵢₜ = exp($(_dicM[:hscale])),
+           uᵢ ∼ N⁺(0, σᵤ²),
+                σᵤ² = exp(log_σᵤ²)
+                    = exp($(_dicM[:σᵤ²]));
+     frontier: $(_dicM[:frontier])
+     endogenous: $(_dicM[:envar])
+     instruments: $(_dicM[:ivvar])
+     """
+    end
 
     #* variable names for tables
     if Wx!=Nothing
@@ -3533,9 +3543,23 @@ function getvar(::Type{SSFGIH}, dat::DataFrame)
     Wx = _dicM[:wx]
 
     modelinfo1 = "spatial SFA in Giannini (2025), first-difference with spatial lag, half-normal"
-    modelinfo2 = """
-     Δyᵢₜ = λWΔy + Δxβ + Δvᵢₜ - Δ(hᵢₜuᵢ), uᵢ∼N⁺(0,σᵤ²)
+    modelinfo2 = begin
      """
+     * In the case of type(cost), "- uᵢₜ" below is changed to "+ uᵢₜ".
+
+     Δyᵢₜ = λWΔy + Δxβ + Δvᵢₜ - Δ(hᵢₜuᵢ),
+
+     where vᵢₜ ∼ N(0, σᵥ²),
+                 σᵥ² = exp(log_σᵥ²)
+                     = exp($(_dicM[:σᵥ²]));
+           uᵢₜ ∼ hscaleᵢₜ * uᵢ,
+                 hscaleᵢₜ = exp($(_dicM[:hscale])),
+           uᵢ ∼ N⁺(0, σᵤ²),
+                σᵤ² = exp(log_σᵤ²)
+                    = exp($(_dicM[:σᵤ²]));
+     frontier: $(_dicM[:frontier])
+     """
+    end
 
     if Wx!=Nothing
         xnames = vcat(names(xvar), ["W*" * s for s in names(Wxvar)])
@@ -3707,9 +3731,26 @@ function getvar(::Type{SSFGIET}, dat::DataFrame)
     ivvar = dat[:, name_new_ivvar]
 
     modelinfo1 = "spatial SFA in Giannini (2025), first-difference with spatial lag, truncated-normal, endogeneity"
-    modelinfo2 = """
-     Δyᵢₜ = λWΔy + Δxβ + Δvᵢₜ - Δ(hᵢₜuᵢ), uᵢ∼N⁺(μ,σᵤ²)
+    modelinfo2 = begin
      """
+     * In the case of type(cost), "- uᵢₜ" below is changed to "+ uᵢₜ".
+
+     Δyᵢₜ = λWΔy + Δxβ + Δvᵢₜ - Δ(hᵢₜuᵢ),
+
+     where vᵢₜ ∼ N(0, σᵥ²),
+                 σᵥ² = exp(log_σᵥ²)
+                     = exp($(_dicM[:σᵥ²]));
+           uᵢₜ ∼ hscaleᵢₜ * uᵢ,
+                 hscaleᵢₜ = exp($(_dicM[:hscale])),
+           uᵢ ∼ N⁺(μ, σᵤ²),
+                μ = $(_dicM[:μ])
+                σᵤ² = exp(log_σᵤ²)
+                    = exp($(_dicM[:σᵤ²]));
+     frontier: $(_dicM[:frontier])
+     endogenous: $(_dicM[:envar])
+     instruments: $(_dicM[:ivvar])
+     """
+    end
 
     if Wx!=Nothing
         xnames = vcat(names(xvar), ["W*" * s for s in names(Wxvar)])
@@ -3891,9 +3932,24 @@ function getvar(::Type{SSFGIT}, dat::DataFrame)
     Wx = _dicM[:wx]
 
     modelinfo1 = "spatial SFA in Giannini (2025), first-difference with spatial lag, truncated-normal"
-    modelinfo2 = """
-     Δyᵢₜ = λWΔy + Δxβ + Δvᵢₜ - Δ(hᵢₜuᵢ), uᵢ∼N⁺(μ,σᵤ²)
+    modelinfo2 = begin
      """
+     * In the case of type(cost), "- uᵢₜ" below is changed to "+ uᵢₜ".
+
+     Δyᵢₜ = λWΔy + Δxβ + Δvᵢₜ - Δ(hᵢₜuᵢ),
+
+     where vᵢₜ ∼ N(0, σᵥ²),
+                 σᵥ² = exp(log_σᵥ²)
+                     = exp($(_dicM[:σᵥ²]));
+           uᵢₜ ∼ hscaleᵢₜ * uᵢ,
+                 hscaleᵢₜ = exp($(_dicM[:hscale])),
+           uᵢ ∼ N⁺(μ, σᵤ²),
+                μ = $(_dicM[:μ])
+                σᵤ² = exp(log_σᵤ²)
+                    = exp($(_dicM[:σᵤ²]));
+     frontier: $(_dicM[:frontier])
+     """
+    end
 
     if Wx!=Nothing
         xnames = vcat(names(xvar), ["W*" * s for s in names(Wxvar)])
@@ -4042,47 +4098,49 @@ end
 
 function getvar(::Type{SSFWHEH}, dat::DataFrame)
 
-  ivar = dat[:, _dicM[:idvar]] 
+  ivar = dat[:, _dicM[:idvar]]
   dat = sort(dat,  [_dicM[:idvar][1], _dicM[:timevar][1]])
   tvar = dat[:, _dicM[:timevar]]
   rowIDT = get_rowIDT(vec(Matrix(ivar)))   # rowIDT (Nx2): col_1 is panel's row info; col_2 is panel's number of id in each year
-  
+
   yvar = dat[:, _dicM[:depvar]]   # still a DataFrame
   xvar = dat[:, _dicM[:frontier]]  ## 如果有wx，则要在这里合并一下，x和wx
   if _dicM[:wx]!=Nothing  # yuvx
-     Wxvar = dat[:, _dicM[:frontierWx]]   
+     Wxvar = dat[:, _dicM[:frontierWx]]
   end
-  qvar = dat[:, _dicM[:hscale]]  
+  qvar = dat[:, _dicM[:hscale]]
   wvar = dat[:, _dicM[:σᵤ²]]
   vvar = dat[:, _dicM[:σᵥ²]]
   # zvar = dat[:, _dicM[:μ]]
-  
 
-  envar = dat[:, _dicM[:envar]]   
+
+  envar = dat[:, _dicM[:envar]]
     name_xuvar = unique(union(_dicM[:frontier], _dicM[:hscale]), dims=1)  #  frontier + h (xu) 中的变量
     name_exovar = unique(setdiff(name_xuvar, _dicM[:envar]), dims=1)  # xu中的所以外生变量
     name_new_ivvar = union(name_exovar, _dicM[:ivvar])  # xu中的所以外生变量 + iv
-  
-  ivvar = dat[:, name_new_ivvar]   
-  
-  
-  #* --- model info printout --------- 
-  modelinfo1 = "spatial stochastic frontier analysis in Kutlu (2017 Applied economics), normal and half-normal"
+
+  ivvar = dat[:, name_new_ivvar]
+
+
+  #* --- model info printout ---------
+  modelinfo1 = "stochastic frontier analysis in Wang and Ho (2010) with endogeneity in Kutlu et al. (2019), normal and half-normal"
   modelinfo2 = begin
    """
    * In the case of type(cost), "- uᵢₜ" below is changed to "+ uᵢₜ".
-  
-   $(_dicM[:depvar][1]) = frontier( $(_dicM[:frontier])) + ̃vᵢₜ - ̃uᵢₜ,
-   
+
+   $(_dicM[:depvar][1]) = αᵢ + frontier( $(_dicM[:frontier])) + vᵢₜ - uᵢₜ,
+
    where vᵢₜ ∼ N(0, σᵥ²),
-               σᵥ² = exp(log_σᵥ²) 
+               σᵥ² = exp(log_σᵥ²)
                    = exp($(_dicM[:σᵥ²]));
          uᵢₜ ∼ hscaleᵢₜ * uᵢ,
                hscaleᵢₜ = exp($(_dicM[:hscale])),
-         uᵢ ∼ N⁺(μ, σᵤ²),
-              μ = $(_dicM[:μ])
-              σᵤ² = exp(log_σᵤ²) 
+         uᵢ ∼ N⁺(0, σᵤ²),
+              σᵤ² = exp(log_σᵤ²)
                   = exp($(_dicM[:σᵤ²]));
+   αᵢ: individual fixed effects (removed by within-transformation)
+   endogenous: $(_dicM[:envar])
+   instruments: $(_dicM[:ivvar])
    """
   end
     
@@ -4219,39 +4277,39 @@ function getvar(::Type{SSFWHH}, dat::DataFrame)
 
   dat = sort(dat,  [_dicM[:idvar][1], _dicM[:timevar][1]])
 
-    ivar = dat[:, _dicM[:idvar]] 
+    ivar = dat[:, _dicM[:idvar]]
     tvar = dat[:, _dicM[:timevar]]
     rowIDT = get_rowIDT(vec(Matrix(ivar)))   # rowIDT (Nx2): col_1 is panel's row info; col_2 is panel's number of id in each year
-    
+
     yvar = dat[:, _dicM[:depvar]]   # still a DataFrame
     xvar = dat[:, _dicM[:frontier]]  ## 如果有wx，则要在这里合并一下，x和wx
 
-    qvar = dat[:, _dicM[:hscale]]  
+    qvar = dat[:, _dicM[:hscale]]
     wvar = dat[:, _dicM[:σᵤ²]]
     vvar = dat[:, _dicM[:σᵥ²]]
     # zvar = dat[:, _dicM[:μ]]
-    
-    #* --- model info printout --------- 
-    modelinfo1 = "spatial stochastic frontier analysis in Kutlu (2017 Applied Economics), normal and truncated-normal"
+
+    #* --- model info printout ---------
+    modelinfo1 = "stochastic frontier analysis in Wang and Ho (2010), normal and half-normal"
     modelinfo2 = begin
       """
       * In the case of type(cost), "- uᵢₜ" below is changed to "+ uᵢₜ".
-    
-      $(_dicM[:depvar][1]) = frontier( $(_dicM[:frontier])) + ̃vᵢₜ - ̃uᵢₜ,
-      
+
+      $(_dicM[:depvar][1]) = αᵢ + frontier( $(_dicM[:frontier])) + vᵢₜ - uᵢₜ,
+
       where vᵢₜ ∼ N(0, σᵥ²),
-                  σᵥ² = exp(log_σᵥ²) 
+                  σᵥ² = exp(log_σᵥ²)
                       = exp($(_dicM[:σᵥ²]));
             uᵢₜ ∼ hscaleᵢₜ * uᵢ,
                   hscaleᵢₜ = exp($(_dicM[:hscale])),
-            uᵢ ∼ N⁺(μ, σᵤ²),
-                μ = $(_dicM[:μ])
-                σᵤ² = exp(log_σᵤ²) 
+            uᵢ ∼ N⁺(0, σᵤ²),
+                σᵤ² = exp(log_σᵤ²)
                     = exp($(_dicM[:σᵤ²]));
+      αᵢ: individual fixed effects (removed by within-transformation)
       """
     end
-      
-  
+
+
     #* --- retrieve and generate important parameters -----
     
     #*   number of obs and number of variables
@@ -4381,46 +4439,49 @@ end
 function getvar(::Type{SSFWHET}, dat::DataFrame)
 
   dat = sort(dat,  [_dicM[:idvar][1], _dicM[:timevar][1]])
-  ivar = dat[:, _dicM[:idvar]] 
+  ivar = dat[:, _dicM[:idvar]]
   tvar = dat[:, _dicM[:timevar]]
   rowIDT = get_rowIDT(vec(Matrix(ivar)))   # rowIDT (Nx2): col_1 is panel's row info; col_2 is panel's number of id in each year
-  
+
   yvar = dat[:, _dicM[:depvar]]   # still a DataFrame
   xvar = dat[:, _dicM[:frontier]]  ## 如果有wx，则要在这里合并一下，x和wx
   if _dicM[:wx]!=Nothing  # yuvx
-     Wxvar = dat[:, _dicM[:frontierWx]]   
+     Wxvar = dat[:, _dicM[:frontierWx]]
   end
-  qvar = dat[:, _dicM[:hscale]]  
+  qvar = dat[:, _dicM[:hscale]]
   wvar = dat[:, _dicM[:σᵤ²]]
   vvar = dat[:, _dicM[:σᵥ²]]
   zvar = dat[:, _dicM[:μ]]
-  
 
-  envar = dat[:, _dicM[:envar]]   
+
+  envar = dat[:, _dicM[:envar]]
     name_xuvar = unique(union(_dicM[:frontier], _dicM[:hscale]), dims=1)  #  frontier + h (xu) 中的变量
     name_exovar = unique(setdiff(name_xuvar, _dicM[:envar]), dims=1)  # xu中的所以外生变量
     name_new_ivvar = union(name_exovar, _dicM[:ivvar])  # xu中的所以外生变量 + iv
-  
-  ivvar = dat[:, name_new_ivvar]   
-  
-  
-  #* --- model info printout --------- 
-  modelinfo1 = "spatial stochastic frontier analysis in Kutlu (2017 Applied economics), normal and half-normal"
+
+  ivvar = dat[:, name_new_ivvar]
+
+
+  #* --- model info printout ---------
+  modelinfo1 = "stochastic frontier analysis in Wang and Ho (2010) with endogeneity in Kutlu et al. (2019), normal and truncated-normal"
   modelinfo2 = begin
    """
    * In the case of type(cost), "- uᵢₜ" below is changed to "+ uᵢₜ".
-  
-   $(_dicM[:depvar][1]) = frontier( $(_dicM[:frontier])) + ̃vᵢₜ - ̃uᵢₜ,
-   
+
+   $(_dicM[:depvar][1]) = αᵢ + frontier( $(_dicM[:frontier])) + vᵢₜ - uᵢₜ,
+
    where vᵢₜ ∼ N(0, σᵥ²),
-               σᵥ² = exp(log_σᵥ²) 
+               σᵥ² = exp(log_σᵥ²)
                    = exp($(_dicM[:σᵥ²]));
          uᵢₜ ∼ hscaleᵢₜ * uᵢ,
                hscaleᵢₜ = exp($(_dicM[:hscale])),
          uᵢ ∼ N⁺(μ, σᵤ²),
               μ = $(_dicM[:μ])
-              σᵤ² = exp(log_σᵤ²) 
+              σᵤ² = exp(log_σᵤ²)
                   = exp($(_dicM[:σᵤ²]));
+   αᵢ: individual fixed effects (removed by within-transformation)
+   endogenous: $(_dicM[:envar])
+   instruments: $(_dicM[:ivvar])
    """
   end
     
@@ -4562,41 +4623,42 @@ function getvar(::Type{SSFWHT}, dat::DataFrame)
 
   dat = sort(dat,  [_dicM[:idvar][1], _dicM[:timevar][1]])
 
-    ivar = dat[:, _dicM[:idvar]] 
+    ivar = dat[:, _dicM[:idvar]]
     tvar = dat[:, _dicM[:timevar]]
     rowIDT = get_rowIDT(vec(Matrix(ivar)))   # rowIDT (Nx2): col_1 is panel's row info; col_2 is panel's number of id in each year
-    
+
     yvar = dat[:, _dicM[:depvar]]   # still a DataFrame
     xvar = dat[:, _dicM[:frontier]]  ## 如果有wx，则要在这里合并一下，x和wx
 
-    qvar = dat[:, _dicM[:hscale]]  
+    qvar = dat[:, _dicM[:hscale]]
     wvar = dat[:, _dicM[:σᵤ²]]
     vvar = dat[:, _dicM[:σᵥ²]]
     zvar = dat[:, _dicM[:μ]]
-    
-    #* --- model info printout --------- 
-    modelinfo1 = "spatial stochastic frontier analysis in Kutlu (2017 Applied Economics), normal and truncated-normal"
+
+    #* --- model info printout ---------
+    modelinfo1 = "stochastic frontier analysis in Wang and Ho (2010), normal and truncated-normal"
     modelinfo2 = begin
       """
       * In the case of type(cost), "- uᵢₜ" below is changed to "+ uᵢₜ".
-    
-      $(_dicM[:depvar][1]) = frontier( $(_dicM[:frontier])) + ̃vᵢₜ - ̃uᵢₜ,
-      
+
+      $(_dicM[:depvar][1]) = αᵢ + frontier( $(_dicM[:frontier])) + vᵢₜ - uᵢₜ,
+
       where vᵢₜ ∼ N(0, σᵥ²),
-                  σᵥ² = exp(log_σᵥ²) 
+                  σᵥ² = exp(log_σᵥ²)
                       = exp($(_dicM[:σᵥ²]));
             uᵢₜ ∼ hscaleᵢₜ * uᵢ,
                   hscaleᵢₜ = exp($(_dicM[:hscale])),
             uᵢ ∼ N⁺(μ, σᵤ²),
                 μ = $(_dicM[:μ])
-                σᵤ² = exp(log_σᵤ²) 
+                σᵤ² = exp(log_σᵤ²)
                     = exp($(_dicM[:σᵤ²]));
+      αᵢ: individual fixed effects (removed by within-transformation)
       """
     end
-      
-  
+
+
     #* --- retrieve and generate important parameters -----
-    
+
     #*   number of obs and number of variables
     nofx = nofq = nofw = nofv = nofz  = 0  # to make a complete list
     
