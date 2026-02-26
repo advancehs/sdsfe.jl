@@ -4098,8 +4098,8 @@ end
 
 function getvar(::Type{SSFWHEH}, dat::DataFrame)
 
-  ivar = dat[:, _dicM[:idvar]]
   dat = sort(dat,  [_dicM[:idvar][1], _dicM[:timevar][1]])
+  ivar = dat[:, _dicM[:idvar]]
   tvar = dat[:, _dicM[:timevar]]
   rowIDT = get_rowIDT(vec(Matrix(ivar)))   # rowIDT (Nx2): col_1 is panel's row info; col_2 is panel's number of id in each year
 

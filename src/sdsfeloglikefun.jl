@@ -850,7 +850,7 @@ function ssdoadh_yuv( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN
 try
 @floop begin
 @inbounds for iitt =1:num.nofobs
-         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*(eps[iitt,:]'*invll*eps[iitt,:]);
             if simple_check(tempx)
                 likx += -1e9
             else
@@ -988,7 +988,7 @@ function ssdoadh_yv( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,
 try
 @floop begin
 @inbounds for iitt =1:num.nofobs
-         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*(eps[iitt,:]'*invll*eps[iitt,:]);
             if simple_check(tempx)
                 likx += -1e9
             else
@@ -1120,7 +1120,7 @@ function ssdoadh_yu( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,
 try
 @floop begin
 @inbounds for iitt =1:num.nofobs
-         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*(eps[iitt,:]'*invll*eps[iitt,:]);
             if simple_check(tempx)
                 likx += -1e9
             else
@@ -1254,7 +1254,7 @@ function ssdoadh_y( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,I
 try
 @floop begin
 @inbounds for iitt =1:num.nofobs
-         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*(eps[iitt,:]'*invll*eps[iitt,:]);
             if simple_check(tempx)
                 likx += -1e9
             else
@@ -1381,7 +1381,7 @@ function ssdoadh_uv( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,
 try
 @floop begin
 @inbounds for iitt =1:num.nofobs
-         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*(eps[iitt,:]'*invll*eps[iitt,:]);
             if simple_check(tempx)
                 likx += -1e9
             else
@@ -1517,7 +1517,7 @@ function ssdoadh_u( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,I
 try
 @floop begin
 @inbounds for iitt =1:num.nofobs
-         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*(eps[iitt,:]'*invll*eps[iitt,:]);
             if simple_check(tempx)
                 likx += -1e9
             else
@@ -1644,7 +1644,7 @@ function ssdoadh_v( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,I
 try
 @floop begin
 @inbounds for iitt =1:num.nofobs
-         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*(eps[iitt,:]'*invll*eps[iitt,:]);
             if simple_check(tempx)
                 likx += -1e9
             else
@@ -1772,7 +1772,7 @@ function ssdoadh_( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,IV
 try
 @floop begin
 @inbounds for iitt =1:num.nofobs
-         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*(eps[iitt,:]'*invll*eps[iitt,:]);
             if simple_check(tempx)
                 likx += -1e9
             else
@@ -2721,7 +2721,7 @@ function ssdoadt_yuv( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN
 try
 @floop begin
 @inbounds for iitt =1:num.nofobs
-         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*(eps[iitt,:]'*invll*eps[iitt,:]);
             if simple_check(tempx)
                 likx += -1e9
             else
@@ -2860,7 +2860,7 @@ function ssdoadt_yv( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,
 try
 @floop begin
 @inbounds for iitt =1:num.nofobs
-         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*(eps[iitt,:]'*invll*eps[iitt,:]);
             if simple_check(tempx)
                 likx += -1e9
             else
@@ -2992,7 +2992,7 @@ function ssdoadt_yu( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,
 try
 @floop begin
 @inbounds for iitt =1:num.nofobs
-         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*(eps[iitt,:]'*invll*eps[iitt,:]);
             if simple_check(tempx)
                 likx += -1e9
             else
@@ -3124,7 +3124,7 @@ function ssdoadt_y( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,I
 try
 @floop begin
 @inbounds for iitt =1:num.nofobs
-         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*(eps[iitt,:]'*invll*eps[iitt,:]);
             if simple_check(tempx)
                 likx += -1e9
             else
@@ -3251,7 +3251,7 @@ function ssdoadt_uv( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,
 try
 @floop begin
 @inbounds for iitt =1:num.nofobs
-         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*(eps[iitt,:]'*invll*eps[iitt,:]);
             if simple_check(tempx)
                 likx += -1e9
             else
@@ -3387,7 +3387,7 @@ function ssdoadt_u( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,I
 try
 @floop begin
 @inbounds for iitt =1:num.nofobs
-         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*(eps[iitt,:]'*invll*eps[iitt,:]);
             if simple_check(tempx)
                 likx += -1e9
             else
@@ -3518,7 +3518,7 @@ function ssdoadt_v( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,I
 try
 @floop begin
 @inbounds for iitt =1:num.nofobs
-         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*(eps[iitt,:]'*invll*eps[iitt,:]);
             if simple_check(tempx)
                 likx += -1e9
             else
@@ -3646,7 +3646,7 @@ function ssdoadt_( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z, EN,IV
 try
 @floop begin
 @inbounds for iitt =1:num.nofobs
-         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*(eps[iitt,:]'*invll*eps[iitt,:]);
             if simple_check(tempx)
                 likx += -1e9
             else
@@ -3862,7 +3862,7 @@ end
 # try
 # @floop begin
 # @inbounds for iitt =1:num.nofobs
-#         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+#         tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*(eps[iitt,:]'*invll*eps[iitt,:]);
 #            if simple_check(tempx)
 #                likx += -1e9
 #            else
@@ -4019,7 +4019,7 @@ end
 #    try
 #     @floop begin
 #     @inbounds for iitt =1:num.nofobs
-#              tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+#              tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*(eps[iitt,:]'*invll*eps[iitt,:]);
 #                 if simple_check(tempx)
 #                     likx += -1e9
 #                 else
@@ -4146,7 +4146,7 @@ end
 #    try
 #     @floop begin
 #     @inbounds for iitt =1:num.nofobs
-#              tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+#              tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*(eps[iitt,:]'*invll*eps[iitt,:]);
 #                 if simple_check(tempx)
 #                     likx += -1e9
 #                 else
@@ -4268,7 +4268,7 @@ function ssdkuhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
    try
     @floop begin
     @inbounds for iitt =1:num.nofobs
-                tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+                tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*(eps[iitt,:]'*invll*eps[iitt,:]);
                 if simple_check(tempx)
                     likx += -1e99
                 else
@@ -4501,7 +4501,7 @@ function ssdkute( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
    try
     @floop begin
         @inbounds for iitt =1:num.nofobs
-                 tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+                 tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*(eps[iitt,:]'*invll*eps[iitt,:]);
                     if simple_check(tempx)
                         likx += -1e99
                     else
@@ -4738,7 +4738,7 @@ function ssdkkhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
    try
     @floop begin
     @inbounds for iitt =1:num.nofobs
-                tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+                tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*(eps[iitt,:]'*invll*eps[iitt,:]);
                 if simple_check(tempx)
                     likx += -1e9
                 else
@@ -4904,7 +4904,7 @@ function ssdkkte( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
    try
     @floop begin
     @inbounds for iitt =1:num.nofobs
-                tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+                tempx=-0.5*num.nofeta*log(2*π)-0.5*logdetll-0.5*(eps[iitt,:]'*invll*eps[iitt,:]);
                 if simple_check(tempx)
                     likx += -1e9
                 else
@@ -5143,7 +5143,7 @@ function ssdgihe(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, Q_lag::Matrix,
   try
     @floop begin
     @inbounds for iitt = 1:num.nofobs
-        tempx = -0.5*tr(invll*eps[iitt,:]'*eps[iitt,:])
+        tempx = -0.5*(eps[iitt,:]'*invll*eps[iitt,:])
         if simple_check(tempx)
             likx += -1e9
         else
@@ -5334,7 +5334,7 @@ function ssdgite(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, Q_lag::Matrix,
   try
     @floop begin
     @inbounds for iitt = 1:num.nofobs
-        tempx = -0.5*tr(invll*eps[iitt,:]'*eps[iitt,:])
+        tempx = -0.5*(eps[iitt,:]'*invll*eps[iitt,:])
         if simple_check(tempx)
             likx += -1e9
         else
@@ -5496,7 +5496,7 @@ function ssdwhhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
    try
     @floop begin
     @inbounds for iitt =1:num.nofobs
-                tempx=-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+                tempx=-0.5*(eps[iitt,:]'*invll*eps[iitt,:]);
                 if simple_check(tempx)
                     likx += -1e9
                 else
@@ -5632,7 +5632,7 @@ function ssdwhte( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
        try
         @floop begin
         @inbounds for iitt =1:num.nofobs
-                    tempx=-0.5*tr(invll*eps[iitt,:]'*eps[iitt,:]);
+                    tempx=-0.5*(eps[iitt,:]'*invll*eps[iitt,:]);
                     if simple_check(tempx)
                         likx += -1e9
                     else
