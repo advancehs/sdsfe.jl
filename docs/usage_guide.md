@@ -26,12 +26,14 @@
   - [3.2 KK 系列 Henderson 图](#32-kk-系列-henderson-图)
   - [3.3 OA 系列 Henderson 图](#33-oa-系列-henderson-图)
   - [3.4 WH 系列 Henderson 图](#34-wh-系列-henderson-图)
-  - [3.5 批量画图](#35-批量画图)
+  - [3.5 GI 系列 Henderson 图](#35-gi-系列-henderson-图)
+  - [3.6 批量画图](#36-批量画图)
 - [4. sfmodel_henderson45_y — 前沿边际效应 Henderson 图](#4-sfmodel_henderson45_y--前沿边际效应-henderson-图)
   - [4.1 KU 系列前沿 Henderson 图](#41-ku-系列前沿-henderson-图)
   - [4.2 KK 系列前沿 Henderson 图](#42-kk-系列前沿-henderson-图)
   - [4.3 OA 系列前沿 Henderson 图](#43-oa-系列前沿-henderson-图)
   - [4.4 WH 系列前沿 Henderson 图](#44-wh-系列前沿-henderson-图)
+  - [4.5 GI 系列前沿 Henderson 图](#45-gi-系列前沿-henderson-图)
 
 ---
 
@@ -859,7 +861,48 @@ h45_whet = sfmodel_henderson45(res_whet;
     save_dir="result/henderson_45/whet", B=499)
 ```
 
-### 3.5 批量画图
+### 3.5 GI 系列 Henderson 图
+
+特点: 含 Wy（可自动获取，也可显式传入），输出 direct/indirect/total 三张图。数据需按 `[id, time]` 排序。空间参数内部使用 `coeff_λ`。Henderson 图不区分内生性，GI 和 GIE 调用方式相同。
+
+**SSFGIH — 半正态 + 无内生性:**
+
+```julia
+# 注意: dat_gi 需按 [id, time] 排序
+h45_gih = sfmodel_henderson45(res_gih;
+    dat=dat_gi, target_var="agg2",
+    Wy_mat=Wx[1],
+    save_dir="result/henderson_45/gih", B=499, dpi=600)
+```
+
+**SSFGIT — 截断正态 + 无内生性:**
+
+```julia
+h45_git = sfmodel_henderson45(res_git;
+    dat=dat_gi, target_var="agg2",
+    Wy_mat=Wx[1],
+    save_dir="result/henderson_45/git", B=499)
+```
+
+**SSFGIEH — 半正态 + 有内生性:**
+
+```julia
+h45_gieh = sfmodel_henderson45(res_gieh;
+    dat=dat_gi, target_var="agg2",
+    Wy_mat=Wx[1],
+    save_dir="result/henderson_45/gieh", B=499)
+```
+
+**SSFGIET — 截断正态 + 有内生性:**
+
+```julia
+h45_giet = sfmodel_henderson45(res_giet;
+    dat=dat_gi, target_var="agg2",
+    Wy_mat=Wx[1],
+    save_dir="result/henderson_45/giet", B=499)
+```
+
+### 3.6 批量画图
 
 ```julia
 for var in ["agg2", "indus2", "lagfdi2", "human2", "lnpgdp2", "roadpc2"]
@@ -1114,4 +1157,60 @@ sfmodel_henderson45_y(res_whet; dat=Td, target_var="lnL",
         :lnl2_05   => :lnl22,
     ),
     save_dir="result/henderson_45_y/whet_lnL", B=499)
+```
+
+### 4.5 GI 系列前沿 Henderson 图
+
+特点: 含 Wy（可自动获取，也可显式传入），输出 direct/indirect/total 三张图。数据需按 `[id, time]` 排序。空间参数内部使用 `coeff_λ`。Henderson 图不区分内生性，GI 和 GIE 调用方式相同。
+
+**SSFGIH — 半正态 + 无内生性 (∂lnC/∂lnL):**
+
+```julia
+# 注意: dat_gi 需按 [id, time] 排序
+sfmodel_henderson45_y(res_gih; dat=dat_gi, target_var="lnL",
+    frontier_deriv = Dict{Symbol,Any}(
+        :lnl22     => 1.0,
+        :lnl_lnk22 => :lnk22,
+        :lnl_lny22 => :lny22,
+        :lnl2_05   => :lnl22,
+    ),
+    Wy_mat=Wx[1],
+    save_dir="result/henderson_45_y/gih_lnL", B=499)
+```
+
+**SSFGIT — 截断正态 + 无内生性 (∂lnC/∂lnK):**
+
+```julia
+sfmodel_henderson45_y(res_git; dat=dat_gi, target_var="lnK",
+    frontier_deriv = Dict{Symbol,Any}(
+        :lnk22     => 1.0,
+        :lnl_lnk22 => :lnl22,
+        :lnk_lny22 => :lny22,
+        :lnk2_05   => :lnk22,
+    ),
+    Wy_mat=Wx[1],
+    save_dir="result/henderson_45_y/git_lnK", B=499)
+```
+
+**SSFGIEH — 半正态 + 有内生性 (∂lnC/∂lnY):**
+
+```julia
+sfmodel_henderson45_y(res_gieh; dat=dat_gi, target_var="lnY",
+    frontier_deriv = Dict{Symbol,Any}(
+        :lny22     => 1.0,
+        :lnl_lny22 => :lnl22,
+        :lnk_lny22 => :lnk22,
+        :lny2_05   => :lny22,
+    ),
+    Wy_mat=Wx[1],
+    save_dir="result/henderson_45_y/gieh_lnY", B=499)
+```
+
+**SSFGIET — 截断正态 + 有内生性 (∂lnC/∂AGG):**
+
+```julia
+sfmodel_henderson45_y(res_giet; dat=dat_gi, target_var="AGG",
+    frontier_deriv = Dict{Symbol,Any}(:agg2 => 1.0),
+    Wy_mat=Wx[1],
+    save_dir="result/henderson_45_y/giet_AGG", B=499)
 ```
