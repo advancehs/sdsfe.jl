@@ -1440,9 +1440,9 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
        automode = _dicOPT[:autodiff_mode]
        # 兼容新版 Optim.jl: 将 Symbol 转换为 ADTypes 对象
        if automode == :forward || automode == :(forward)
-           automode = ADTypes.AutoForwardDiff()
+           automode = :forward
        elseif automode == :finite || automode == :(finite)
-           automode = ADTypes.AutoFiniteDiff()
+           automode = :finite
        end
 
 #* ########  Start the Estimation  ##########
