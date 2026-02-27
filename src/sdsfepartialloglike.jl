@@ -88,8 +88,8 @@ end # for ttt=1:T
 end # begin
 end  #    if length(Wy)==1 
 @views liky = @. KK + es2 + 0.5*(((mus^2)/sigs2) - (μ^2 /σᵤ²) ) + 
-              0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) - 
-              0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ ))
+              0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) - 
+              0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ )
     return sum(-liky);       
 end
 
@@ -170,8 +170,8 @@ end # for ttt=1:T
 end # begin
 end  #    if length(Wy)==1 
 @views liky = @. KK + es2 + 0.5*(((mus^2)/sigs2) - (μ^2 /σᵤ²) ) + 
-              0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) - 
-              0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ ))
+              0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) - 
+              0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ )
 return sum(-liky);     
   
 end
@@ -261,8 +261,8 @@ end # for ttt=1:T
 end # begin
 end  #    if length(Wy)==1 
 @views liky = @. KK + es2 + 0.5*(((mus^2)/sigs2) - (μ^2 /σᵤ²) ) + 
-              0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) - 
-              0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ ))
+              0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) - 
+              0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ )
 return sum(-liky);     
 end
 
@@ -310,16 +310,17 @@ KK = zeros(eltype(y),T,1);
 if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
 @views N = rowIDT[1,2];
-@views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));   
+@views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));
 @views Mtau = 1.0;
 @views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
+@views Mrho = I(N);  # no Wv, so (I - ρ_v·Wv)⁻¹ = I
 
 #   @views Mgamma = (I(N)-gamma*Wy[1])\I(N)
 
 
 @floop begin
-@inbounds for ttt=1:T 
+@inbounds for ttt=1:T
   @views ind = rowIDT[ttt,1];
   @views hi[ind]= Mtau*hi[ind];
   @views ϵ[ind] = ϵ[ind]-PorC*gamma*Wy[1]*y[ind]  - PorC* Mrho*(eps[ind,:]*eta) ;
@@ -331,12 +332,13 @@ end # begin
 end # for ttt=1:T
 elseif length(Wy)>1
 @floop begin
-@inbounds for ttt=1:T  
+@inbounds for ttt=1:T
   @views N = rowIDT[ttt,2];
-  @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
+  @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));
 @views Mtau = 1.0;
 @views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
+@views Mrho = I(N);  # no Wv, so (I - ρ_v·Wv)⁻¹ = I
 
 @views ind = rowIDT[ttt,1];
 @views hi[ind]= Mtau*hi[ind];
@@ -344,14 +346,14 @@ elseif length(Wy)>1
 @views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
-@views KK[ttt] = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi; 
+@views KK[ttt] = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
 end # for ttt=1:T
 end # begin
-end  #    if length(Wy)==1 
-@views liky = @. KK + es2 + 0.5*(((mus^2)/sigs2) - (μ^2 /σᵤ²) ) + 
-              0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) - 
-              0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ ))
-return sum(-liky);     
+end  #    if length(Wy)==1
+@views liky = @. KK + es2 + 0.5*(((mus^2)/sigs2) - (μ^2 /σᵤ²) ) +
+              0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+              0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ )
+return sum(-liky);
 end
 
 
@@ -439,8 +441,8 @@ end # for ttt=1:T
 end # begin
 end  #    if length(Wy)==1 
 @views liky = @. KK + es2 + 0.5*(((mus^2)/sigs2) - (μ^2 /σᵤ²) ) + 
-              0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) - 
-              0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ ))
+              0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) - 
+              0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ )
               return sum(-liky);       
             end
 
@@ -526,8 +528,8 @@ end # for ttt=1:T
 end # begin
 end  #    if length(Wy)==1 
 @views liky = @. KK + es2 + 0.5*(((mus^2)/sigs2) - (μ^2 /σᵤ²) ) + 
-             0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) - 
-             0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ ))
+             0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) - 
+             0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ )
              return sum(-liky);       
             end
 
@@ -613,8 +615,8 @@ end # for ttt=1:T
 end # begin
 end  #    if length(Wy)==1 
 @views liky = @. KK + es2 + 0.5*(((mus^2)/sigs2) - (μ^2 /σᵤ²) ) + 
-             0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) - 
-             0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ ))
+             0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) - 
+             0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ )
              return sum(-liky);       
             end
 
@@ -675,8 +677,8 @@ KK = zeros(eltype(y),T,1);
 end # for ttt=1:T
 end # begin
 @views liky = @. KK + es2 + 0.5*(((mus^2)/sigs2) - (μ^2 /σᵤ²) ) + 
-             0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) - 
-             0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ ))
+             0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) - 
+             0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ )
              return sum(-liky);       
             end
 
@@ -733,7 +735,6 @@ function prtlloglikekute( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Ma
     Wy::Matrix, PorC::Int64, num::NamedTuple, po::NamedTuple, rho,  eigvalu::NamedTuple, rowIDT::Matrix{Any} )
     β  = rho[1:po.endx]
     τ  = rho[po.begq:po.endq]
-    println("tho",rho)
     phi = rho[po.begphi:po.endphi]
     phi = reshape(phi,:,num.nofeta)
     eps = zeros(eltype(EN),num.nofobs,num.nofeta);
@@ -774,8 +775,8 @@ function prtlloglikekute( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Ma
         @views es2 =@. -0.5 * ϵ^2 *invPi;
         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
         @views temp_1 =@. KK +  es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                        0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                        0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                        0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                        0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
  
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
         @views temp_1 = map(x -> x ≠ x ? -1e99  : isinf(x) ? -1e99  : x, temp_1)
@@ -804,8 +805,8 @@ function prtlloglikekute( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Ma
         @views es2 =@. -0.5 * ϵ^2 *invPi;
         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
         @views temp_1 =@. KK +  es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                        0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                        0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                        0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                        0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
 
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
         @views temp_1 = map(x -> x ≠ x ? -1e99  : isinf(x) ? -1e99  : x, temp_1)
@@ -826,7 +827,6 @@ function prtlloglike(::Type{SSFKUET}, y::Union{Vector,Matrix}, x::Matrix, Q::Mat
   PorC::Int64,  num::NamedTuple,  pos::NamedTuple, rho::Array{Float64,1}, eigvalu::NamedTuple, rowIDT::Matrix{Any})
 
   Wy = _dicM[:wy]
-  println("tho1",rho)
   liky = prtlloglikekute(y, x, Q, EN, IV, Wy, PorC, num, pos, rho,  eigvalu, rowIDT )  
 
   return liky;       
@@ -876,8 +876,8 @@ function prtlloglikekuhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Ma
       @views es2 =@. -0.5 * ϵ^2 *invPi;
       @views KK = -0.5*log(2 * π)-0.5*lndetPi;
       @views temp_1 =@. KK +  es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                      0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                      0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                      0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                      0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
 
       # 检查 lik 是否为 NaN, 非实数, 或 Inf
       @views temp_1 = map(x -> x ≠ x ? -1e99  : isinf(x) ? -1e99  : x, temp_1)
@@ -906,8 +906,8 @@ function prtlloglikekuhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Ma
       @views es2 =@. -0.5 * ϵ^2 *invPi;
       @views KK = -0.5*log(2 * π)-0.5*lndetPi;
       @views temp_1 =@. KK +  es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                      0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                      0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                      0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                      0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
 
       # 检查 lik 是否为 NaN, 非实数, 或 Inf
       @views temp_1 = map(x -> x ≠ x ? -1e99  : isinf(x) ? -1e99  : x, temp_1)
@@ -979,8 +979,8 @@ function prtlloglikekkhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Ma
           @views KK = 0.5*N*log(2 * π)-0.5*lndetPi;
 
           @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                          0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                          0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                          0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                          0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                   if simple_check(temp)
                       lik += -1e19
                   else
@@ -1049,8 +1049,8 @@ function prtlloglikekkte( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Ma
           @views KK = 0.5*N*log(2 * π)-0.5*lndetPi;
 
           @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                          0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                          0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                          0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                          0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                   if simple_check(temp)
                       lik += -1e19
                   else
@@ -1165,8 +1165,8 @@ end # for ttt=1:T
 end # begin
 end  #    if length(Wy)==1 
 @views liky = @. KK + es2 + 0.5*(((mus^2)/sigs2) - (μ^2 /σᵤ²) ) + 
-              0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) - 
-              0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ ))
+              0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) - 
+              0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ )
   return sum(-liky);       
 end
 
@@ -1247,8 +1247,8 @@ end # for ttt=1:T
 end # begin
 end  #    if length(Wy)==1 
 @views liky = @. KK + es2 + 0.5*(((mus^2)/sigs2) - (μ^2 /σᵤ²) ) + 
-              0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) - 
-              0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ ))
+              0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) - 
+              0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ )
               return sum(-liky);       
             end
 
@@ -1339,8 +1339,8 @@ end # for ttt=1:T
 end # begin
 end  #    if length(Wy)==1 
 @views liky = @. KK + es2 + 0.5*(((mus^2)/sigs2) - (μ^2 /σᵤ²) ) + 
-              0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) - 
-              0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ ))
+              0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) - 
+              0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ )
               return sum(-liky);       
             end
 
@@ -1387,16 +1387,17 @@ KK = zeros(eltype(y),T,1);
 if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
 @views N = rowIDT[1,2];
-@views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));   
+@views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));
 @views Mtau = 1.0;
 @views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
+@views Mrho = I(N);  # no Wv, so (I - ρ_v·Wv)⁻¹ = I
 
 #   @views Mgamma = (I(N)-gamma*Wy[1])\I(N)
 
 
 @floop begin
-@inbounds for ttt=1:T 
+@inbounds for ttt=1:T
   @views ind = rowIDT[ttt,1];
   @views hi[ind]= Mtau*hi[ind];
   @views ϵ[ind] = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] - PorC* Mrho*(eps[ind,:]*eta)  ;
@@ -1410,10 +1411,11 @@ elseif length(Wy)>1
 @floop begin
 @inbounds for ttt=1:T  
   @views N = rowIDT[ttt,2];
-  @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
+  @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));
 @views Mtau = 1.0;
 @views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
+@views Mrho = I(N);  # no Wv, so (I - ρ_v·Wv)⁻¹ = I
 
 @views ind = rowIDT[ttt,1];
 @views hi[ind]= Mtau*hi[ind];
@@ -1421,14 +1423,14 @@ elseif length(Wy)>1
 @views sigs2[ttt] = 1.0 /(hi[ind]'*invPi*hi[ind]+1.0/σᵤ²);
 @views mus[ttt] = (μ/σᵤ² - ϵ[ind]'*invPi*hi[ind])*sigs2[ttt] ;
 @views es2[ttt] = -0.5*ϵ[ind]'*invPi*ϵ[ind] ;
-@views KK[ttt] = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi; 
+@views KK[ttt] = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
 end # for ttt=1:T
 end # begin
-end  #    if length(Wy)==1 
-@views liky = @. KK + es2 + 0.5*(((mus^2)/sigs2) - (μ^2 /σᵤ²) ) + 
-              0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) - 
-              0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ ))
-              return sum(-liky);       
+end  #    if length(Wy)==1
+@views liky = @. KK + es2 + 0.5*(((mus^2)/sigs2) - (μ^2 /σᵤ²) ) +
+              0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+              0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ )
+              return sum(-liky);
             end
 
 
@@ -1515,8 +1517,8 @@ end # for ttt=1:T
 end # begin
 end  #    if length(Wy)==1 
 @views liky = @. KK + es2 + 0.5*(((mus^2)/sigs2) - (μ^2 /σᵤ²) ) + 
-              0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) - 
-              0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ ))
+              0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) - 
+              0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ )
               return sum(-liky);       
             end
 
@@ -1602,8 +1604,8 @@ end # for ttt=1:T
 end # begin
 end  #    if length(Wy)==1 
 @views liky = @. KK + es2 + 0.5*(((mus^2)/sigs2) - (μ^2 /σᵤ²) ) + 
-             0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) - 
-             0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ ))
+             0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) - 
+             0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ )
              return sum(-liky);       
             end
 
@@ -1689,8 +1691,8 @@ end # for ttt=1:T
 end # begin
 end  #    if length(Wy)==1 
 @views liky = @. KK + es2 + 0.5*(((mus^2)/sigs2) - (μ^2 /σᵤ²) ) + 
-             0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) - 
-             0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ ))
+             0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) - 
+             0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ )
              return sum(-liky);       
             end
 
@@ -1751,8 +1753,8 @@ KK = zeros(eltype(y),T,1);
 end # for ttt=1:T
 end # begin
 @views liky = @. KK + es2 + 0.5*(((mus^2)/sigs2) - (μ^2 /σᵤ²) ) + 
-             0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) - 
-             0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ ))
+             0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) - 
+             0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ )
              return sum(-liky);       
             end
 
@@ -1869,8 +1871,8 @@ function prtlloglikegihe(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, EN::Matr
      es2   = -0.5 * ϵs'*invPi*ϵs
      KK    = -0.5*T_i_fd*log(2π) - 0.5*T_i_fd*log(σᵥ²) - 0.5*lndetA
      temp = KK + es2 + 0.5*((mus^2)/sigs2 - μ^2/σᵤ²) +
-            0.5*log(sigs2) + log(normcdf(mus/sqrt(sigs2))) -
-            0.5*log(σᵤ²) - log(normcdf(μ/σᵤ))
+            0.5*log(sigs2) + normlogcdf(mus/sqrt(sigs2)) -
+            0.5*log(σᵤ²) - normlogcdf(μ/σᵤ)
      if simple_check(temp)
          lik += -1e99
      else
@@ -1950,8 +1952,8 @@ function prtlloglikegite(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, EN::Matr
      es2   = -0.5 * ϵs'*invPi*ϵs
      KK    = -0.5*T_i_fd*log(2π) - 0.5*T_i_fd*log(σᵥ²) - 0.5*lndetA
      temp = KK + es2 + 0.5*((mus^2)/sigs2 - μ^2/σᵤ²) +
-            0.5*log(sigs2) + log(normcdf(mus/sqrt(sigs2))) -
-            0.5*log(σᵤ²) - log(normcdf(μ/σᵤ))
+            0.5*log(sigs2) + normlogcdf(mus/sqrt(sigs2)) -
+            0.5*log(σᵤ²) - normlogcdf(μ/σᵤ)
      if simple_check(temp)
          lik += -1e99
      else
@@ -2006,8 +2008,8 @@ function prtlloglikewhhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Ma
       @views es2 = -0.5*(ϵs'*ϵs*invPi );
       @views KK = -0.5*(T-1)*log(2 * π)-0.5*(T-1)*lndetPi;
       @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                      0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                      0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                      0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                      0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                   lik += temp
           end
   end
@@ -2077,8 +2079,8 @@ function prtlloglikewhte( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN::Ma
           @views KK = -0.5*(T-1)*log(2 * π)-0.5*(T-1)*lndetPi;
 
           @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                          0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                          0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                          0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                          0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                   
                 lik += temp
               end # for ttt=1:ID

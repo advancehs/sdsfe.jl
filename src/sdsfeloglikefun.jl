@@ -70,8 +70,8 @@ try
 
 
                 @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                                0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                                0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                                0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                                0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                 if simple_check(temp)
                     lik += -1e9
                 else
@@ -104,8 +104,8 @@ elseif length(Wy)>1
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
             
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                        0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                        0.5 * log(σᵤ²) - normlogcdf(μ / sqrt(σᵤ²))
         
     if simple_check(temp)
         lik += -1e9
@@ -180,8 +180,8 @@ try
                 @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
 
                 @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                                0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                                0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                                0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                                0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                 if simple_check(temp)
                     lik += -1e9
                 else
@@ -213,8 +213,8 @@ elseif length(Wy)>1
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
             
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                        0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                        0.5 * log(σᵤ²) - normlogcdf(μ / sqrt(σᵤ²))
         
     if simple_check(temp)
         lik += -1e9
@@ -288,8 +288,8 @@ try
 
 
                 @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                                0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                                0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                                0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                                0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                 if simple_check(temp)
                     lik += -1e9
                 else
@@ -318,8 +318,8 @@ elseif length(Wy)>1
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
             
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                        0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                        0.5 * log(σᵤ²) - normlogcdf(μ / sqrt(σᵤ²))
         
     if simple_check(temp)
         lik += -1e9
@@ -384,8 +384,8 @@ try
 
 
                 @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                                0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                                0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                                0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                                0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                 
                 if simple_check(temp)
                     lik += -1e9
@@ -414,8 +414,8 @@ elseif length(Wy)>1
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
             
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                        0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                        0.5 * log(σᵤ²) - normlogcdf(μ / sqrt(σᵤ²))
         
     if simple_check(temp)
         lik += -1e9
@@ -490,8 +490,8 @@ try
 
 
                 @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                                0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                                0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                                0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                                0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                 if simple_check(temp)
                     lik += -1e9
                 else
@@ -523,8 +523,8 @@ elseif length(Wu)>1
     @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
             
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                        0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                        0.5 * log(σᵤ²) - normlogcdf(μ / sqrt(σᵤ²))
         
     if simple_check(temp)
         lik += -1e9
@@ -597,8 +597,8 @@ try
 
 
                 @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                                0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                                0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                                0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                                0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                 if simple_check(temp)
                     lik += -1e9
                 else
@@ -629,8 +629,8 @@ elseif length(Wu)>1
     @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
             
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                        0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                        0.5 * log(σᵤ²) - normlogcdf(μ / sqrt(σᵤ²))
         
     if simple_check(temp)
         lik += -1e9
@@ -705,8 +705,8 @@ try
 
 
                 @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                                0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                                0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                                0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                                0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                 if simple_check(temp)
                     lik += -1e9
                 else
@@ -737,8 +737,8 @@ elseif length(Wv)>1
     @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
             
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                        0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                        0.5 * log(σᵤ²) - normlogcdf(μ / sqrt(σᵤ²))
         
     if simple_check(temp)
         lik += -1e9
@@ -804,8 +804,8 @@ try
 
 
                 @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                                0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                                0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                                0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                                0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                 if simple_check(temp)
                     lik += -1e9
                 else
@@ -906,8 +906,8 @@ end # @floop begin
                     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
 
             @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                            0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                            0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                            0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                            0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                     if simple_check(temp)
                         lik += -1e9
                     else
@@ -940,8 +940,8 @@ elseif length(Wy)>1
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
                 
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                    0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                    0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
         
         if simple_check(temp)
             lik += -1e9
@@ -1039,8 +1039,8 @@ end # @floop begin
                     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
 
             @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                            0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                            0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                            0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                            0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                     if simple_check(temp)
                         lik += -1e9
                     else
@@ -1072,8 +1072,8 @@ elseif length(Wy)>1
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
                 
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                    0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                    0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
         
         if simple_check(temp)
             lik += -1e9
@@ -1172,8 +1172,8 @@ end # @floop begin
             @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
 
             @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                            0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                            0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                            0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                            0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                     if simple_check(temp)
                         lik += -1e9
                     else
@@ -1204,8 +1204,8 @@ elseif length(Wy)>1
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
                 
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                    0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                    0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
         
         if simple_check(temp)
             lik += -1e9
@@ -1300,8 +1300,8 @@ end # @floop begin
             @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
 
             @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                            0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                            0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                            0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                            0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                     if simple_check(temp)
                         lik += -1e9
                     else
@@ -1331,8 +1331,8 @@ elseif length(Wy)>1
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
                 
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                    0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                    0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
         
         if simple_check(temp)
             lik += -1e9
@@ -1432,8 +1432,8 @@ end # @floop begin
     @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
 
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                    0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                    0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
             if simple_check(temp)
                 lik += -1e9
             else
@@ -1465,8 +1465,8 @@ elseif length(Wu)>1
     @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
                 
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                    0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                    0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
         
         if simple_check(temp)
             lik += -1e9
@@ -1564,8 +1564,8 @@ end # @floop begin
             @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
 
             @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                            0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                            0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                            0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                            0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                     if simple_check(temp)
                         lik += -1e9
                     else
@@ -1595,8 +1595,8 @@ elseif length(Wu)>1
     @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
                 
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                    0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                    0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
         
         if simple_check(temp)
             lik += -1e9
@@ -1691,8 +1691,8 @@ end # @floop begin
             @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
 
             @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                            0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                            0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                            0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                            0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                     if simple_check(temp)
                         lik += -1e9
                     else
@@ -1723,8 +1723,8 @@ elseif length(Wv)>1
     @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
                 
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                    0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                    0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
         
         if simple_check(temp)
             lik += -1e9
@@ -1815,8 +1815,8 @@ end # @floop begin
             @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
 
             @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                            0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                            0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                            0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                            0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                     if simple_check(temp)
                         lik += -1e9
                     else
@@ -1932,8 +1932,8 @@ function ssdoat_yuv( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, w, v, z,
 
 
                 @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                                0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                                0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                                0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                                0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                 if simple_check(temp)
                     lik += -1e9
                 else
@@ -1966,8 +1966,8 @@ elseif length(Wy)>1
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
             
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                        0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                        0.5 * log(σᵤ²) - normlogcdf(μ / sqrt(σᵤ²))
         
     if simple_check(temp)
         lik += -1e9
@@ -2044,8 +2044,8 @@ try
                 @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
 
                 @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                                0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                                0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                                0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                                0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                 if simple_check(temp)
                     lik += -1e9
                 else
@@ -2077,8 +2077,8 @@ elseif length(Wy)>1
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
             
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                        0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                        0.5 * log(σᵤ²) - normlogcdf(μ / sqrt(σᵤ²))
         
     if simple_check(temp)
         lik += -1e9
@@ -2154,8 +2154,8 @@ try
 
 
                 @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                                0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                                0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                                0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                                0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                 if simple_check(temp)
                     lik += -1e9
                 else
@@ -2184,8 +2184,8 @@ elseif length(Wy)>1
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
             
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                        0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                        0.5 * log(σᵤ²) - normlogcdf(μ / sqrt(σᵤ²))
         
     if simple_check(temp)
         lik += -1e9
@@ -2252,8 +2252,8 @@ try
 
 
                 @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                                0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                                0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                                0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                                0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                 
                 if simple_check(temp)
                     lik += -1e9
@@ -2282,8 +2282,8 @@ elseif length(Wy)>1
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
             
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                        0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                        0.5 * log(σᵤ²) - normlogcdf(μ / sqrt(σᵤ²))
         
     if simple_check(temp)
         lik += -1e9
@@ -2359,8 +2359,8 @@ try
 
 
                 @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                                0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                                0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                                0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                                0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                 if simple_check(temp)
                     lik += -1e9
                 else
@@ -2392,8 +2392,8 @@ elseif length(Wu)>1
     @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
             
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                        0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                        0.5 * log(σᵤ²) - normlogcdf(μ / sqrt(σᵤ²))
         
     if simple_check(temp)
         lik += -1e9
@@ -2467,8 +2467,8 @@ try
 
 
                 @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                                0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                                0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                                0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                                0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                 if simple_check(temp)
                     lik += -1e9
                 else
@@ -2499,8 +2499,8 @@ elseif length(Wu)>1
     @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
             
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                        0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                        0.5 * log(σᵤ²) - normlogcdf(μ / sqrt(σᵤ²))
         
     if simple_check(temp)
         lik += -1e9
@@ -2575,8 +2575,8 @@ try
 
 
                 @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                                0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                                0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                                0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                                0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                 if simple_check(temp)
                     lik += -1e9
                 else
@@ -2607,8 +2607,8 @@ elseif length(Wv)>1
     @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
             
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                        0.5 * log(σᵤ²) - log(normcdf(μ / sqrt(σᵤ²)))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                        0.5 * log(σᵤ²) - normlogcdf(μ / sqrt(σᵤ²))
         
     if simple_check(temp)
         lik += -1e9
@@ -2674,8 +2674,8 @@ try
 
 
                 @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                                0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                                0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                                0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                                0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                 if simple_check(temp)
                     lik += -1e9
                 else
@@ -2777,8 +2777,8 @@ end # @floop begin
                     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
 
             @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                            0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                            0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                            0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                            0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                     if simple_check(temp)
                         lik += -1e9
                     else
@@ -2811,8 +2811,8 @@ elseif length(Wy)>1
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
                 
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                    0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                    0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
         
         if simple_check(temp)
             lik += -1e9
@@ -2911,8 +2911,8 @@ end # @floop begin
                     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
 
             @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                            0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                            0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                            0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                            0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                     if simple_check(temp)
                         lik += -1e9
                     else
@@ -2944,8 +2944,8 @@ elseif length(Wy)>1
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
                 
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                    0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                    0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
         
         if simple_check(temp)
             lik += -1e9
@@ -3042,8 +3042,8 @@ end # @floop begin
             @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
 
             @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                            0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                            0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                            0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                            0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                     if simple_check(temp)
                         lik += -1e9
                     else
@@ -3074,8 +3074,8 @@ elseif length(Wy)>1
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
                 
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                    0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                    0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
         
         if simple_check(temp)
             lik += -1e9
@@ -3170,8 +3170,8 @@ end # @floop begin
             @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
 
             @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                            0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                            0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                            0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                            0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                     if simple_check(temp)
                         lik += -1e9
                     else
@@ -3201,8 +3201,8 @@ elseif length(Wy)>1
     @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
                 
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                    0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                    0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
         
         if simple_check(temp)
             lik += -1e9
@@ -3302,8 +3302,8 @@ end # @floop begin
     @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
 
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                    0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                    0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
             if simple_check(temp)
                 lik += -1e9
             else
@@ -3335,8 +3335,8 @@ elseif length(Wu)>1
     @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
                 
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                    0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                    0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
         
         if simple_check(temp)
             lik += -1e9
@@ -3435,8 +3435,8 @@ end # @floop begin
             @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
 
             @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                            0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                            0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                            0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                            0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                     if simple_check(temp)
                         lik += -1e9
                     else
@@ -3466,8 +3466,8 @@ elseif length(Wu)>1
     @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
                 
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                    0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                    0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
         
         if simple_check(temp)
             lik += -1e9
@@ -3565,8 +3565,8 @@ end # @floop begin
             @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
 
             @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                            0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                            0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                            0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                            0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                     if simple_check(temp)
                         lik += -1e9
                     else
@@ -3597,8 +3597,8 @@ elseif length(Wv)>1
     @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
                 
     @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                    0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                    0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
         
         if simple_check(temp)
             lik += -1e9
@@ -3689,8 +3689,8 @@ end # @floop begin
             @views KK = -0.5*N*log(2 * π)-0.5*lndetPi;
 
             @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                            0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                            0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                            0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                            0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                     if simple_check(temp)
                         lik += -1e9
                     else
@@ -3913,8 +3913,8 @@ end
 #         @views mus = (μ/σᵤ² - ϵs'*(1/σᵥ²)*his)*sigs2 ;
 #         @views es2 = -0.5*ϵs'*ϵs ;
 #         @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-#                         0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-#                         0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+#                         0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+#                         0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
 #                 if simple_check(temp)
 #                     lik += -1e9
 #                 else
@@ -3969,8 +3969,8 @@ end
 #    @views mus = (μ/σᵤ² - ϵs'*(1/σᵥ²)*his)*sigs2 ;
 #    @views es2 = -0.5*ϵs'*ϵs ;
 #    @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-#                    0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-#                    0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+#                    0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+#                    0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
 #            if simple_check(temp)
 #                lik += -1e9
 #            else
@@ -4065,8 +4065,8 @@ end
 #                 @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
     
 #                 @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-#                                 0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-#                                 0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+#                                 0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+#                                 0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
 #                         if simple_check(temp)
 #                             lik += -1e9
 #                         else
@@ -4096,8 +4096,8 @@ end
 #         @views KK = lndetIrhoW-0.5*N*log(2 * π)-0.5*lndetPi;
                     
 #         @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-#                         0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-#                         0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+#                         0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+#                         0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
             
 #             if simple_check(temp)
 #                 lik += -1e9
@@ -4193,7 +4193,7 @@ end
 #         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
 #         @views temp_1 = KK .+  es2 .+ 0.5 .* (((mus .^ 2) ./ sigs2) .- (μ^2 / σᵤ²) ) .+
 #                         0.5 .* log.(sigs2) .+ log.(normcdf.(mus ./ sqrt.(sigs2))) .-
-#                         0.5 * log(σᵤ²) .- log(normcdf(μ / σᵤ))
+#                         0.5 * log(σᵤ²) .- normlogcdf(μ / σᵤ)
 #                 # print(size(temp_1))
 
 #         # 检查 lik 是否为 NaN, 非实数, 或 Inf
@@ -4223,7 +4223,7 @@ end
 #         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
 #         @views temp_1 = KK .+  es2 .+ 0.5 .* (((mus .^ 2) ./ sigs2) .- (μ^2 / σᵤ²) ) .+
 #                         0.5 .* log.(sigs2) .+ log.(normcdf.(mus ./ sqrt.(sigs2))) .-
-#                         0.5 * log(σᵤ²) .- log(normcdf(μ / σᵤ))
+#                         0.5 * log(σᵤ²) .- normlogcdf(μ / σᵤ)
 #                 # print(size(temp_1))
 
 #         # 检查 lik 是否为 NaN, 非实数, 或 Inf
@@ -4313,8 +4313,8 @@ function ssdkuhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
         @views es2 =@. -0.5 * ϵ^2 *invPi;
         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
         @views temp_1 =@. KK +  es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                        0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                        0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                        0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                        0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                 # print(size(temp_1))
 
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
@@ -4343,8 +4343,8 @@ function ssdkuhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
         @views es2 =@. -0.5 * ϵ^2 *invPi;
         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
         @views temp_1 =@. KK +  es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                        0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                        0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                        0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                        0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                 # print(size(temp_1))
 
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
@@ -4401,8 +4401,8 @@ function ssdkuh( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
         @views es2 =@.  -0.5 * ϵ^2 *invPi;
         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
         @views temp_1 =@. KK +  es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                        0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                        0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                        0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                        0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                 # print(size(temp_1))
 
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
@@ -4433,8 +4433,8 @@ function ssdkuh( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
         @views es2 = @. -0.5 * ϵ^2 *invPi;
         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
         @views temp_1 =@. KK +  es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                        0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                        0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                        0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                        0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                 # print(size(temp_1))
 
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
@@ -4546,8 +4546,8 @@ function ssdkute( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
         @views es2 =@. -0.5 * ϵ^2 *invPi;
         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
         @views temp_1 =@. KK +  es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                        0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                        0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                        0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                        0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
  
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
         @views temp_1 = map(x -> x ≠ x ? -1e99  : isinf(x) ? -1e99  : x, temp_1)
@@ -4576,8 +4576,8 @@ function ssdkute( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
         @views es2 =@. -0.5 * ϵ^2 *invPi;
         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
         @views temp_1 =@. KK +  es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                        0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                        0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                        0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                        0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
 
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
         @views temp_1 = map(x -> x ≠ x ? -1e99  : isinf(x) ? -1e99  : x, temp_1)
@@ -4635,8 +4635,8 @@ function ssdkut( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
         @views es2 =@. -0.5 * ϵ ^2 *invPi;
         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
         @views temp_1 =@. KK +  es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                        0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                        0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                        0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                        0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                 # print(size(temp_1))
 
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
@@ -4667,8 +4667,8 @@ function ssdkut( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
         @views es2 =@. -0.5 * ϵ ^2 *invPi;
         @views KK = -0.5*log(2 * π)-0.5*lndetPi;
         @views temp_1 =@. KK +  es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                        0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                        0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                        0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                        0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
 
         # 检查 lik 是否为 NaN, 非实数, 或 Inf
         @views temp_1 = map(x -> x ≠ x ? -1e99  : isinf(x) ? -1e99  : x, temp_1)
@@ -4780,8 +4780,8 @@ function ssdkkhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
             @views KK = 0.5*N*log(2 * π)-0.5*lndetPi;
 
             @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                            0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                            0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                            0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                            0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                     if simple_check(temp)
                         lik += -1e9
                     else
@@ -4840,8 +4840,8 @@ function ssdkkh( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
             @views KK = 0.5*N*log(2 * π)-0.5*lndetPi;
 
             @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                            0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                            0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                            0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                            0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                     if simple_check(temp)
                         lik += -1e9
                     else
@@ -4947,8 +4947,8 @@ function ssdkkte( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
             @views KK = 0.5*N*log(2 * π)-0.5*lndetPi;
 
             @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                            0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                            0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                            0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                            0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                     if simple_check(temp)
                         lik += -1e9
                     else
@@ -5006,8 +5006,8 @@ function ssdkkt( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,
             @views KK = 0.5*N*log(2 * π)-0.5*lndetPi;
 
             @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                            0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                            0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                            0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                            0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                     if simple_check(temp)
                         lik += -1e9
                     else
@@ -5104,8 +5104,8 @@ function ssdgih(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, Q_lag::Matrix,
         KK    = -0.5*T_i_fd*log(2π) - 0.5*T_i_fd*log(σᵥ²) - 0.5*lndetA
 
         temp = KK + es2 + 0.5*((mus^2)/sigs2 - μ^2/σᵤ²) +
-               0.5*log(sigs2) + log(normcdf(mus/sqrt(sigs2))) -
-               0.5*log(σᵤ²) - log(normcdf(μ/σᵤ))
+               0.5*log(sigs2) + normlogcdf(mus/sqrt(sigs2)) -
+               0.5*log(σᵤ²) - normlogcdf(μ/σᵤ)
 
         if simple_check(temp)
             lik += -1e99
@@ -5219,8 +5219,8 @@ function ssdgihe(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, Q_lag::Matrix,
         KK    = -0.5*T_i_fd*log(2π) - 0.5*T_i_fd*log(σᵥ²) - 0.5*lndetA
 
         temp = KK + es2 + 0.5*((mus^2)/sigs2 - μ^2/σᵤ²) +
-               0.5*log(sigs2) + log(normcdf(mus/sqrt(sigs2))) -
-               0.5*log(σᵤ²) - log(normcdf(μ/σᵤ))
+               0.5*log(sigs2) + normlogcdf(mus/sqrt(sigs2)) -
+               0.5*log(σᵤ²) - normlogcdf(μ/σᵤ)
 
         if simple_check(temp)
             lik += -1e99
@@ -5295,8 +5295,8 @@ function ssdgit(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, Q_lag::Matrix,
         KK    = -0.5*T_i_fd*log(2π) - 0.5*T_i_fd*log(σᵥ²) - 0.5*lndetA
 
         temp = KK + es2 + 0.5*((mus^2)/sigs2 - μ^2/σᵤ²) +
-               0.5*log(sigs2) + log(normcdf(mus/sqrt(sigs2))) -
-               0.5*log(σᵤ²) - log(normcdf(μ/σᵤ))
+               0.5*log(sigs2) + normlogcdf(mus/sqrt(sigs2)) -
+               0.5*log(σᵤ²) - normlogcdf(μ/σᵤ)
 
         if simple_check(temp)
             lik += -1e99
@@ -5408,8 +5408,8 @@ function ssdgite(y::Union{Vector,Matrix}, x::Matrix, Q::Matrix, Q_lag::Matrix,
         KK    = -0.5*T_i_fd*log(2π) - 0.5*T_i_fd*log(σᵥ²) - 0.5*lndetA
 
         temp = KK + es2 + 0.5*((mus^2)/sigs2 - μ^2/σᵤ²) +
-               0.5*log(sigs2) + log(normcdf(mus/sqrt(sigs2))) -
-               0.5*log(σᵤ²) - log(normcdf(μ/σᵤ))
+               0.5*log(sigs2) + normlogcdf(mus/sqrt(sigs2)) -
+               0.5*log(σᵤ²) - normlogcdf(μ/σᵤ)
 
         if simple_check(temp)
             lik += -1e99
@@ -5543,8 +5543,8 @@ function ssdwhhe( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
             @views es2 = -0.5*(ϵs'*ϵs*invPi );
             @views KK = -0.5*(T-1)*log(2 * π)-0.5*(T-1)*lndetPi;
             @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                            0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                            0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                            0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                            0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                     if simple_check(temp)
                         lik += -1e99
                     else
@@ -5691,8 +5691,8 @@ function ssdwhte( y::Union{Vector,Matrix}, x::Matrix, Q::Matrix,  EN,IV,
                 @views KK = -0.5*(T-1)*log(2 * π)-0.5*(T-1)*lndetPi;
     
                 @views temp = KK + es2 + 0.5 * (((mus ^ 2) / sigs2) - (μ^2 / σᵤ²) ) +
-                                0.5 * log(sigs2) + log(normcdf(mus / sqrt(sigs2))) -
-                                0.5 * log(σᵤ²) - log(normcdf(μ / σᵤ))
+                                0.5 * log(sigs2) + normlogcdf(mus / sqrt(sigs2)) -
+                                0.5 * log(σᵤ²) - normlogcdf(μ / σᵤ)
                         if simple_check(temp)
                             lik += -1e99
                         else
