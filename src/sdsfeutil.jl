@@ -171,7 +171,8 @@ function sfmodel_MixTable(dof::Real=9999) # not using ::Int64 in order to thow i
                  column_labels=["dof", "0.10", "0.05", "0.025", "0.01"],
                  formatters = [ft_printf("%2.3f", 2:5)],
                  compact_printing = true,
-                 backend = sf_table)
+                 backend = sf_table,
+                 display_size = (-1, -1))
     println()
     printstyled("source: Table 1, Kodde and Palm (1986, Econometrica)."; color = :yellow)
     println()
@@ -205,7 +206,8 @@ function sfmodel_ChiSquareTable(dof::Real=1) # not using ::Int64 in order to thr
                  column_labels=["dof", "0.10", "0.05", "0.025", "0.01"],
                  formatters = [ft_printf("%2.3f", 2:5)],
                  compact_printing = true,
-                 backend = sf_table)
+                 backend = sf_table,
+                 display_size = (-1, -1))
 
 end
 

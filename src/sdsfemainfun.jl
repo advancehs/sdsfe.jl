@@ -1823,7 +1823,8 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                             "95%CI_l", "95%CI_u"],
                     formatters = [ft_printf("%5.4f", 3:8)],
                     compact_printing = true,
-                    backend = sf_table)
+                    backend = sf_table,
+                    display_size = (-1, -1))
        println()
 
 
@@ -1858,7 +1859,8 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                         column_labels=["", "Coef.", "Std.Err."],
                         formatters = [ft_printf("%5.4f", 2:3)],
                         compact_printing = true,
-                        backend = sf_table)
+                        backend = sf_table,
+                        display_size = (-1, -1))
 
            print("\nTable format: "); printstyled("$(sf_table)"; color=:yellow); println(". Use sfmodel_opt() to choose between text, html, and latex.")
            println()
