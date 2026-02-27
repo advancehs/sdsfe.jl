@@ -163,15 +163,15 @@ function sfmodel_MixTable(dof::Real=9999) # not using ::Int64 in order to thow i
                  elseif dof == 9999  # user did not specify dof
                     printstyled("  * Use `sfmodel_MixTable(d)` to show the specific critical values for the d.o.f. equal to `d`.\n"; color = :red)
                     table            # show all
-                 elseif (dof < 1) || (dof > 40)                 
+                 elseif (dof < 1) || (dof > 40)
                     throw("The table only allows the degree of freedom between 1 and 40.")
-                 else 
-                    throw("There is a problem in your specification of the degree of freedom.")   
-                 end,
-                 header=["dof", "0.10", "0.05", "0.025", "0.01"],
-                 formatters = ft_printf("%2.3f", 2:5),
+                 else
+                    throw("There is a problem in your specification of the degree of freedom.")
+                 end;
+                 column_labels=["dof", "0.10", "0.05", "0.025", "0.01"],
+                 formatters = [ft_printf("%2.3f", 2:5)],
                  compact_printing = true,
-                 backend = Val(sf_table))
+                 backend = sf_table)
     println()
     printstyled("source: Table 1, Kodde and Palm (1986, Econometrica)."; color = :yellow)
     println()
@@ -201,11 +201,11 @@ function sfmodel_ChiSquareTable(dof::Real=1) # not using ::Int64 in order to thr
     println()
     printstyled("  * significance levels and critical values of the χ² distribution\n"; color = :yellow)
 
-    pretty_table(table,
-                 ["dof", "0.10", "0.05", "0.025", "0.01"],
-                 formatters = ft_printf( "%2.3f", 2:5),
+    pretty_table(table;
+                 column_labels=["dof", "0.10", "0.05", "0.025", "0.01"],
+                 formatters = [ft_printf("%2.3f", 2:5)],
                  compact_printing = true,
-                 backend = Val(sf_table))
+                 backend = sf_table)
 
 end
 
