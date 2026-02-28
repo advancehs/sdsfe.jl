@@ -1445,12 +1445,19 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
       elseif sf_table == :(latex) || sf_table == :latex
           sf_table = Val(:latex)
       end
-       automode = _dicOPT[:autodiff_mode]
-       if automode == :(forward)
+       # --- 修正后的自动微分模式处理 ---
+       automode_raw = _dicOPT[:autodiff_mode]
+       if automode_raw == :(forward) || automode_raw == :forward
            automode = :forward
-       elseif automode == :(finite)
+           ad_backend = Optim.AutoForwardDiff() # 创建具体的 AD 类型对象
+       elseif automode_raw == :(finite) || automode_raw == :finite
            automode = :finite
+           ad_backend = Optim.AutoFiniteDiff()
+       else
+           automode = :forward # 默认值
+           ad_backend = Optim.AutoForwardDiff()
        end
+
 
 #* ########  Start the Estimation  ##########
 
@@ -1461,7 +1468,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                             _porc, num, pos, rho,
                               eigvalu, rowIDT, _dicM[:misc]),
                    sf_init;               
-                  autodiff = automode) ;
+                  autodiff = ad_backend) ;
   
 
   #* ---- Make placeholders for dictionary recording purposes *#
