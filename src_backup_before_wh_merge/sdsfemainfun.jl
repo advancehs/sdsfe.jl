@@ -233,27 +233,13 @@ function sfmodel_spec(arg::Vararg; message::Bool=false)
           tagD[:modelid] = SSFWHEH 
 
 
-        elseif (_dicM[:panel] == [:SSF_OAD2024]) && (s=="T")
+        elseif (_dicM[:panel] == [:SSF_OAD2024]) && (s=="T") 
           tagD = Dict{Symbol, Type{SSFOADT}}()
           tagD[:modelid] = SSFOADT
-        elseif (_dicM[:panel] == [:SSF_OAD2024]) && (s=="H")
+        elseif (_dicM[:panel] == [:SSF_OAD2024]) && (s=="H") 
           tagD = Dict{Symbol, Type{SSFOADH}}()
-          tagD[:modelid] = SSFOADH
-
-        elseif (_dicM[:panel] == [:SSF_GI2025]) && (s=="T")
-          tagD = Dict{Symbol, Type{SSFGIT}}()
-          tagD[:modelid] = SSFGIT
-        elseif (_dicM[:panel] == [:SSF_GI2025]) && (s=="H")
-          tagD = Dict{Symbol, Type{SSFGIH}}()
-          tagD[:modelid] = SSFGIH
-        elseif (_dicM[:panel] == [:SSF_GIE2025]) && (s=="T")
-          tagD = Dict{Symbol, Type{SSFGIET}}()
-          tagD[:modelid] = SSFGIET
-        elseif (_dicM[:panel] == [:SSF_GIE2025]) && (s=="H")
-          tagD = Dict{Symbol, Type{SSFGIEH}}()
-          tagD[:modelid] = SSFGIEH
-
-        else
+          tagD[:modelid] = SSFOADH 
+        else 
             throw("The `sfpanel()` and/or `sfdist()` are not specified correctly.")
         end
       end 
@@ -446,7 +432,7 @@ function sfmodel_opt(arg::Vararg; message::Bool=false) # create a dictionary of 
   _dicOPT[:margeffu]         =  true
   _dicOPT[:counterfact]      =  true
 
-  if tagD[:modelid] in (SSFOAT,SSFOAH,SSFOADT,SSFOADH,SSFKUEH,SSFKUET,SSFKUH,SSFKUT,SSFGIH,SSFGIT,SSFGIEH,SSFGIET)
+  if tagD[:modelid] in (SSFOAT,SSFOAH,SSFOADT,SSFOADH,SSFKUEH,SSFKUET,SSFKUH,SSFKUT)
     _dicOPT[:mareffx]        =  true
     _dicOPT[:margeffu]       =  true
   elseif tagD[:modelid] in (SSFKKEH,SSFKKET,SSFKKH,SSFKKT,SSFWHEH,SSFWHET,SSFWHH,SSFWHT)
@@ -869,70 +855,13 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
           sf_init = vcat(b_ini1, t_ini1, phi_ini,eta_ini, d2_ini1, g_ini1, d1_ini1)  
 
       elseif tagD[:modelid] == SSFWHT
-        if (haskey(_dicM, :envar))
+        if (haskey(_dicM, :envar)) 
           error("You can not specify @envar with model SSFWHT")
         end
-          sf_init = vcat(b_ini, t_ini, d2_ini, d1_ini, g_ini)
+          sf_init = vcat(b_ini, t_ini, d2_ini, d1_ini, g_ini)  
 
-      # ============ Giannini 2025 (GI) 系列 ============
-      elseif tagD[:modelid] == SSFGIEH
-          sf_init0 = vcat(b_ini, t_ini, d2_ini, g_ini, gammma_ini)
-          sf_init0 = vec(sf_init0)
-       (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
-          eigvalu0, indices_list0, indices_listz0, rowIDT0, varlist0) = getvar(SSFGIH, sfdat)
-          mfun0 = optimize(rho -> LL_T(SSFGIH, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
-                                            _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
-                                           sf_init0,
-                                           NelderMead(),
-                                           Optim.Options(g_tol = 1.0e-6,
-                                           iterations  = 600,
-                                           store_trace = false,
-                                           show_trace  = false))
-          sf_init1  = Optim.minimizer(mfun0)
-          b_ini1 = sf_init1[1:num.nofx]
-          t_ini1  = sf_init1[num.nofx+1: num.nofx+num.nofq]
-          phi_ini = get(_dicINI, :eqphi, vec(ivvar \ envar))
-          eta_ini = get(_dicINI, :eqeta, ones(num.nofeta)*0.1)
-          d2_ini1 = sf_init1[num.nofx+num.nofq+1: num.nofx+num.nofq+num.nofw]
-          g_ini1  = sf_init1[num.nofx+num.nofq+num.nofw+1: num.nofx+num.nofq+num.nofw+num.nofv]
-          gammma_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+1]
-          sf_init = vcat(b_ini1, t_ini1, phi_ini, eta_ini, d2_ini1, g_ini1, gammma_ini1)
 
-      elseif tagD[:modelid] == SSFGIH
-        if (haskey(_dicM, :envar))
-          error("You can not specify @envar with model SSFGIH")
-        end
-          sf_init = vcat(b_ini, t_ini, d2_ini, g_ini, gammma_ini)
 
-      elseif tagD[:modelid] == SSFGIET
-          sf_init0 = vcat(b_ini, t_ini, d2_ini, g_ini, d1_ini, gammma_ini)
-          sf_init0 = vec(sf_init0)
-       (minfo10, minfo20, pos0, num0, eqvec0, eqvec20, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
-          eigvalu0, indices_list0, indices_listz0, rowIDT0, varlist0) = getvar(SSFGIT, sfdat)
-          mfun0 = optimize(rho -> LL_T(SSFGIT, yvar0, xvar0, qvar0, wvar0, vvar0, zvar0, envar0, ivvar0,
-                                            _porc, num0, pos0, rho, eigvalu0, rowIDT0, _dicM[:misc]),
-                                           sf_init0,
-                                           NelderMead(),
-                                           Optim.Options(g_tol = 1.0e-6,
-                                           iterations  = 600,
-                                           store_trace = false,
-                                           show_trace  = false))
-          sf_init1  = Optim.minimizer(mfun0)
-          b_ini1 = sf_init1[1:num.nofx]
-          t_ini1  = sf_init1[num.nofx+1: num.nofx+num.nofq]
-          phi_ini = get(_dicINI, :eqphi, vec(ivvar \ envar))
-          eta_ini = get(_dicINI, :eqeta, ones(num.nofeta)*0.1)
-          d2_ini1 = sf_init1[num.nofx+num.nofq+1: num.nofx+num.nofq+num.nofw]
-          g_ini1  = sf_init1[num.nofx+num.nofq+num.nofw+1: num.nofx+num.nofq+num.nofw+num.nofv]
-          d1_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+1: num.nofx+num.nofq+num.nofw+num.nofv+num.nofz]
-          gammma_ini1 = sf_init1[num.nofx+num.nofq+num.nofw+num.nofv+num.nofz+1]
-          sf_init = vcat(b_ini1, t_ini1, phi_ini, eta_ini, d2_ini1, g_ini1, d1_ini1, gammma_ini1)
-
-      elseif tagD[:modelid] == SSFGIT
-        if (haskey(_dicM, :envar))
-          error("You can not specify @envar with model SSFGIT")
-        end
-          sf_init = vcat(b_ini, t_ini, d2_ini, g_ini, d1_ini, gammma_ini)
 
       elseif tagD[:modelid] == SSFOADH
           if Wy!=Nothing  # yuv
@@ -1437,27 +1366,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
        sf_maxit = _dicOPT[:main_maxIT] 
        sf_tol   = _dicOPT[:tolerance] 
        sf_table = _dicOPT[:table_format]
-      # 确保 sf_table 是 Symbol 类型（PrettyTables v2+ 要求）
-      if sf_table isa QuoteNode
-          sf_table = sf_table.value
-      elseif sf_table isa Expr
-          sf_table = sf_table.args[1]
-      end
-      sf_table = Symbol(sf_table)
-      # --- 彻底解决自动微分模式处理 ---
-      automode_raw = _dicOPT[:autodiff_mode]
-
-      if automode_raw == :(forward) || automode_raw == :forward
-          automode = :forward
-          ad_backend = ADTypes.AutoForwardDiff()
-      elseif automode_raw == :(finite) || automode_raw == :finite
-          automode = :finite
-          ad_backend = ADTypes.AutoFiniteDiff()
-      else
-          automode = :forward
-          ad_backend = ADTypes.AutoForwardDiff()
-      end
-
+       automode = _dicOPT[:autodiff_mode]
 
 #* ########  Start the Estimation  ##########
 
@@ -1468,7 +1377,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                             _porc, num, pos, rho,
                               eigvalu, rowIDT, _dicM[:misc]),
                    sf_init;               
-                  autodiff = ad_backend) ;
+                  autodiff = automode) ;
   
 
   #* ---- Make placeholders for dictionary recording purposes *#
@@ -1684,17 +1593,17 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
       totalematu, dirematu, indirematu = nothing, nothing, nothing
    end      
   
-   #* ---- marginal effect on x or wx --------------
+   #* ---- marginal effect on x or wx -------------- 
 
-   if _dicOPT[:mareffx]
-      if Wy!=Nothing && _dicM[:wx]!=Nothing
+   if _dicOPT[:mareffx]                    
+      if Wy!=Nothing 
       totalemat, diremat, indiremat = get_mareffx( pos, _coevec,  var_cov_matrix, eigvalu, indices_list, rowIDT )
       else
       totalemat, diremat, indiremat = nothing, nothing, nothing
       end
-   else
+   else      
       totalemat, diremat, indiremat = nothing, nothing, nothing
-   end
+   end      
    #* ---- Counterfactual analysis -------------- 
    if _dicOPT[:counterfact]  
    @views (_counterfacttotal, _counterfactdire,_counterfactindire) = counterfactindex(  tagD[:modelid], yvar, xvar, qvar, wvar, vvar,  zvar, envar, ivvar,
@@ -1780,7 +1689,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
   end
   
   stas[2,3] = num.nofobs
-  if tagD[:modelid] in (SSFOADT,SSFOADH,SSFKUEH,SSFKUET,SSFKKEH,SSFKKET,SSFWHEH,SSFWHET,SSFGIEH,SSFGIET)
+  if tagD[:modelid] in (SSFOADT,SSFOADH,SSFKUEH,SSFKUET,SSFKKEH,SSFKKET,SSFWHEH,SSFWHET)
     llkkkk = -1* prtlloglike(tagD[:modelid], yvar, xvar,  qvar, wvar, vvar,  zvar, envar, ivvar, _porc, num, pos, _coevec,  eigvalu, rowIDT)
     stas[3,3] = llkkkk
     stas[4,3] = (-2)* (llkkkk)+2*(num.nofpara-num.nofphi-num.nofeta)
@@ -1797,7 +1706,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
   end
   table= vcat(table, stas)  
 
-  if tagD[:modelid] in (SSFOADT,SSFOADH,SSFKUEH,SSFKUET,SSFKKEH,SSFKKET,SSFWHET,SSFWHEH,SSFGIEH,SSFGIET)
+  if tagD[:modelid] in (SSFOADT,SSFOADH,SSFKUEH,SSFKUET,SSFKKEH,SSFKKET,SSFWHET,SSFWHEH)
 
     row_indices = setdiff(1:size(table, 1), pos.begphi+1:pos.endphi+1)
     table_show = table[row_indices, :]
@@ -1832,13 +1741,12 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
        print("Log-likelihood value: "); printstyled(round(-1*Optim.minimum(mfun); digits=5); color=:yellow); println()
        println()
    
-       pretty_table(table_show[2:end,:],
-                    header=["", "Var.", "Coef.", "Std.Err.", "z", "P>|z|",
+       pretty_table(table_show[2:end,:],    # could print the whole table as is, but this prettier
+                    header=["", "Var.", "Coef.", "Std.Err.", "z", "P>|z|", 
                             "95%CI_l", "95%CI_u"],
-                    formatters = (ft_printf("%5.4f", 3:8),),
+                    formatters = ft_printf("%5.4f", 3:8),
                     compact_printing = true,
-                    backend = sf_table,
-                    display_size = (-1, -1))
+                    backend = Val(sf_table))
        println()
 
 
@@ -1868,13 +1776,12 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
        end
 
        if rn >= 1  # table is non-empty
-           println("Convert the constant log-parameter to its original scale, e.g., σ² = exp(log_σ²):")
+           println("Convert the constant log-parameter to its original scale, e.g., σ² = exp(log_σ²):")   
            pretty_table(auxtable[1:rn,:],
                         header=["", "Coef.", "Std.Err."],
-                        formatters = (ft_printf("%5.4f", 2:3),),
+                        formatters = ft_printf("%5.4f", 2:3),
                         compact_printing = true,
-                        backend = sf_table,
-                        display_size = (-1, -1))
+                        backend = Val(sf_table))
 
            print("\nTable format: "); printstyled("$(sf_table)"; color=:yellow); println(". Use sfmodel_opt() to choose between text, html, and latex.")
            println()
