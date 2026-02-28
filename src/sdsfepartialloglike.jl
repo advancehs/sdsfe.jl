@@ -134,13 +134,14 @@ KK = zeros(eltype(y),T,1);
 if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
 @views N = rowIDT[1,2];
-@views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));   
+@views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));
 @views Mtau = (I(N)-tau*Wu[1])\I(N);
+@views Mrho = I(N);
 @views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
 
 @floop begin
-@inbounds for ttt=1:T 
+@inbounds for ttt=1:T
   @views ind = rowIDT[ttt,1];
   @views hi[ind]= Mtau*hi[ind];
   @views ϵ[ind] = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] - PorC* Mrho*(eps[ind,:]*eta)  ;
@@ -152,10 +153,11 @@ end # begin
 end # for ttt=1:T
 elseif length(Wy)>1
 @floop begin
-@inbounds for ttt=1:T  
+@inbounds for ttt=1:T
   @views N = rowIDT[ttt,2];
-  @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
+  @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));
 @views Mtau = (I(N)-tau*Wu[ttt])\I(N);
+@views Mrho = I(N);
 @views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
 
@@ -1211,13 +1213,14 @@ KK = zeros(eltype(y),T,1);
 if length(Wy)==1  # 可以传入单个cell的w，则默认cell的长度为时间的长度
 
 @views N = rowIDT[1,2];
-@views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));   
+@views lndetIrhoW = log(det(I(N)-gamma*Wy[1]));
 @views Mtau = (I(N)-tau*Wu[1])\I(N);
+@views Mrho = I(N);
 @views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
 
 @floop begin
-@inbounds for ttt=1:T 
+@inbounds for ttt=1:T
   @views ind = rowIDT[ttt,1];
   @views hi[ind]= Mtau*hi[ind];
   @views ϵ[ind] = ϵ[ind]-PorC*gamma*Wy[1]*y[ind] - PorC* Mrho*(eps[ind,:]*eta)  ;
@@ -1229,10 +1232,11 @@ end # begin
 end # for ttt=1:T
 elseif length(Wy)>1
 @floop begin
-@inbounds for ttt=1:T  
+@inbounds for ttt=1:T
   @views N = rowIDT[ttt,2];
-  @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));   
+  @views lndetIrhoW = log(det(I(N)-gamma*Wy[ttt]));
 @views Mtau = (I(N)-tau*Wu[ttt])\I(N);
+@views Mrho = I(N);
 @views invPi = 1.0/σᵥ²*I(N);
 @views lndetPi = N*log(σᵥ²);
 
