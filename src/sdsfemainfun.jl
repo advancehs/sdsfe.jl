@@ -1446,12 +1446,9 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
           sf_table = Val(:latex)
       end
        automode = _dicOPT[:autodiff_mode]
-       # 兼容新版 Optim.jl: 将 Symbol 转换为 ADTypes 对象
-       if automode == :forward || automode == :(forward)
-           automode_ad = ADTypes.AutoForwardDiff()
+       if automode == :(forward)
            automode = :forward
-       elseif automode == :finite || automode == :(finite)
-           automode_ad = ADTypes.AutoFiniteDiff()
+       elseif automode == :(finite)
            automode = :finite
        end
 
@@ -1464,7 +1461,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                             _porc, num, pos, rho,
                               eigvalu, rowIDT, _dicM[:misc]),
                    sf_init;               
-                  autodiff = automode_ad) ;
+                  autodiff = automode) ;
   
 
   #* ---- Make placeholders for dictionary recording purposes *#
