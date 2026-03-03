@@ -1893,17 +1893,39 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
            print("Converged successfully: "); printstyled(Optim.converged(mfun); color=:red); println()
            redflag = 1
        end
+   end
+
+   # * ------ 创建简化表格（无论是否打印都生成）---------- *#
+
+   # 创建新的表格，只包含需要的列
+   # 列顺序：空列、变量名、系数(带星号)、标准误
+   table_display = hcat(
+       table_show[2:end, 1:2],           # 空列和变量名
+       coef_with_stars,                   # 系数(带星号)
+       table_show[2:end, 4]              # 标准误
+   )
+
+   # * ------ Print Results ----------- *#
+
+   if _dicOPT[:verbose]
+
+       printstyled("*********************************\n "; color=:cyan)
+       printstyled("      Estimation Results:\n"; color=:cyan);
+       printstyled("*********************************\n"; color=:cyan)
+
+       print("Model type: "); printstyled(minfo1; color=:yellow); println()
+       print("Number of observations: "); printstyled(num.nofobs; color=:yellow); println()
+       print("Number of total iterations: "); printstyled(sf_total_iter; color=:yellow); println()
+       if Optim.converged(mfun)
+           print("Converged successfully: "); printstyled(Optim.converged(mfun); color=:yellow); println()
+       elseif Optim.converged(mfun) == false
+           print("Converged successfully: "); printstyled(Optim.converged(mfun); color=:red); println()
+           redflag = 1
+       end
        print("Log-likelihood value: "); printstyled(round(-1*Optim.minimum(mfun); digits=5); color=:yellow); println()
        println()
 
-      # 创建新的表格，只包含需要的列
-      # 列顺序：空列、变量名、系数(带星号)、标准误
-      table_display = hcat(
-          table_show[2:end, 1:2],           # 空列和变量名
-          coef_with_stars,                   # 系数(带星号)
-          table_show[2:end, 4]              # 标准误
-      )
-
+      # 打印表格
        pretty_table(table_display,
                     column_labels=["", "Var.", "Coef.", "Std.Err."],
                     formatters = [ft_printf("%5.4f", 4)],
@@ -1981,6 +2003,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
     _dicRES[:loglikelihood]   = llkkkk
     _dicRES[:table]           = [table][1]
     _dicRES[:table_show]      = [table_show][1]
+    _dicRES[:table_display]   = [table_display][1]  # 简化表格（方程名、变量名、系数带星号、标准误）
     _dicRES[:coeff]           = _coevec_adj
     _dicRES[:coeff_show]      = _coevec_adj_show
     _dicRES[:coeff_with_stars] = coef_with_stars  # 带星号的系数
