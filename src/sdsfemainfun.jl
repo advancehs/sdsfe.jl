@@ -1897,18 +1897,16 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
        println()
 
       # 创建新的表格，只包含需要的列
-      # 列顺序：空列、变量名、系数(带星号)、标准误、置信区间
+      # 列顺序：空列、变量名、系数(带星号)、标准误
       table_display = hcat(
           table_show[2:end, 1:2],           # 空列和变量名
           coef_with_stars,                   # 系数(带星号)
-          table_show[2:end, 4],             # 标准误
-          table_show[2:end, 7:8]            # 置信区间
+          table_show[2:end, 4]              # 标准误
       )
 
        pretty_table(table_display,
-                    column_labels=["", "Var.", "Coef.", "Std.Err.",
-                            "95%CI_l", "95%CI_u"],
-                    formatters = [ft_printf("%5.4f", 4:6)],
+                    column_labels=["", "Var.", "Coef.", "Std.Err."],
+                    formatters = [ft_printf("%5.4f", 4)],
                     compact_printing = true,
                     backend = sf_table,
                     display_size = (-1, -1))
