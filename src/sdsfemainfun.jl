@@ -1933,7 +1933,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
 
       # 打印表格（表头已经在第一行了）
        pretty_table(table_display[2:end, :],
-                    header=Vector(table_display[1, :]),
+                    column_labels=Vector(table_display[1, :]),
                     formatters = [ft_printf("%5.4f", 4:4)],
                     compact_printing = true,
                     backend = sf_table,
