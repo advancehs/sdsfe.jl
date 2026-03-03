@@ -1905,6 +1905,9 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
        table_show[2:end, 4]              # 标准误
    )
 
+   # 表头
+   table_display_header = ["", "Var.", "Coef.", "Std.Err."]
+
    # * ------ Print Results ----------- *#
 
    if _dicOPT[:verbose]
@@ -1927,7 +1930,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
 
       # 打印表格
        pretty_table(table_display,
-                    column_labels=["", "Var.", "Coef.", "Std.Err."],
+                    column_labels=table_display_header,
                     formatters = [ft_printf("%5.4f", 4)],
                     compact_printing = true,
                     backend = sf_table,
@@ -2004,6 +2007,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
     _dicRES[:table]           = [table][1]
     _dicRES[:table_show]      = [table_show][1]
     _dicRES[:table_display]   = [table_display][1]  # 简化表格（方程名、变量名、系数带星号、标准误）
+    _dicRES[:table_display_header] = table_display_header  # 表头
     _dicRES[:coeff]           = _coevec_adj
     _dicRES[:coeff_show]      = _coevec_adj_show
     _dicRES[:coeff_with_stars] = coef_with_stars  # 带星号的系数
