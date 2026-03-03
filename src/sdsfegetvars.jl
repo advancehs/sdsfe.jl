@@ -228,8 +228,8 @@ if Wu!=Nothing
     if Wv!=Nothing #yuv
           eqvec = (frontier = begx + 1, 
                         lnh = begq + 1,
-                      lnσᵤ² = begw + 1,
-                      lnσᵥ² = begv + 1,
+                      σᵤ² = begw + 1,
+                      σᵥ² = begv + 1,
                           μ = begz + 1,
                           ρ = beggamma + 1,
                           τ = begtau + 1,
@@ -238,8 +238,8 @@ if Wu!=Nothing
     else # yu
           eqvec = (frontier = begx + 1, 
                           lnh = begq + 1,
-                          lnσᵤ² = begw + 1,
-                          lnσᵥ² = begv + 1,
+                          σᵤ² = begw + 1,
+                          σᵥ² = begv + 1,
                               μ = begz + 1,
                               ρ = beggamma + 1,
                               τ = begtau + 1 )
@@ -249,16 +249,16 @@ else
     if Wv!=Nothing #yv
           eqvec = (frontier = begx + 1, 
                         lnh = begq + 1,
-                        lnσᵤ² = begw + 1,
-                        lnσᵥ² = begv + 1,
+                        σᵤ² = begw + 1,
+                        σᵥ² = begv + 1,
                             μ = begz + 1,
                             ρ = beggamma + 1,
                             γ = begrho + 1 )
     else #y
           eqvec = (frontier = begx + 1, 
           lnh = begq + 1,
-          lnσᵤ² = begw + 1,
-          lnσᵥ² = begv + 1,
+          σᵤ² = begw + 1,
+          σᵥ² = begv + 1,
               μ = begz + 1,
               ρ = beggamma + 1 )
     
@@ -269,8 +269,8 @@ if Wu!=Nothing
     if Wv!=Nothing #uv
           eqvec = (frontier = begx + 1, 
                         lnh = begq + 1,
-                        lnσᵤ² = begw + 1,
-                        lnσᵥ² = begv + 1,
+                        σᵤ² = begw + 1,
+                        σᵥ² = begv + 1,
                             μ = begz + 1,
                             τ = begtau + 1,
                             γ = begrho + 1 )
@@ -278,8 +278,8 @@ if Wu!=Nothing
     else # u
           eqvec = (frontier = begx + 1, 
                         lnh = begq + 1,
-                        lnσᵤ² = begw + 1,
-                        lnσᵥ² = begv + 1,
+                        σᵤ² = begw + 1,
+                        σᵥ² = begv + 1,
                             μ = begz + 1,
                             τ = begtau + 1 )
     
@@ -288,16 +288,16 @@ else
     if Wv!=Nothing #v
           eqvec = (frontier = begx + 1, 
                         lnh = begq + 1,
-                        lnσᵤ² = begw + 1,
-                        lnσᵥ² = begv + 1,
+                        σᵤ² = begw + 1,
+                        σᵥ² = begv + 1,
                             μ = begz + 1,
                             γ = begrho + 1 )
     
     else # 
           eqvec = (frontier = begx + 1, 
           lnh = begq + 1,
-          lnσᵤ² = begw + 1,
-          lnσᵥ² = begv + 1,
+          σᵤ² = begw + 1,
+          σᵥ² = begv + 1,
               μ = begz + 1)
     end
 end
@@ -678,8 +678,8 @@ if Wu!=Nothing
                         lnh = begq + 1,
                         ϕ        = begphi + 1,
                         η        =  begeta + 1,
-                            lnσᵤ² = begw + 1,
-                            lnσᵥ² = begv + 1,
+                            σᵤ² = begw + 1,
+                            σᵥ² = begv + 1,
                                 μ = begz + 1,
                                 ρ = beggamma + 1,
                                 τ = begtau + 1,
@@ -690,8 +690,8 @@ if Wu!=Nothing
                         lnh = begq + 1,
                         ϕ        = begphi + 1,
                         η        =  begeta + 1,
-                            lnσᵤ² = begw + 1,
-                            lnσᵥ² = begv + 1,
+                            σᵤ² = begw + 1,
+                            σᵥ² = begv + 1,
                                 μ = begz + 1,
                                 ρ = beggamma + 1,
                                 τ = begtau + 1 )
@@ -704,8 +704,8 @@ else
                         lnh = begq + 1,
                         ϕ        = begphi + 1,
                         η        =  begeta + 1,
-                            lnσᵤ² = begw + 1,
-                            lnσᵥ² = begv + 1,
+                            σᵤ² = begw + 1,
+                            σᵥ² = begv + 1,
                                 μ = begz + 1,
                                 ρ = beggamma + 1,
                                 γ = begrho + 1 )
@@ -714,8 +714,8 @@ else
                         lnh = begq + 1,
                         ϕ        = begphi + 1,
                         η        =  begeta + 1,
-                            lnσᵤ² = begw + 1,
-                            lnσᵥ² = begv + 1,
+                            σᵤ² = begw + 1,
+                            σᵥ² = begv + 1,
                                 μ = begz + 1,
                                 ρ = beggamma + 1 )
     
@@ -728,8 +728,8 @@ if Wu!=Nothing
                         lnh = begq + 1,
                         ϕ        = begphi + 1,
                         η        =  begeta + 1,
-                            lnσᵤ² = begw + 1,
-                            lnσᵥ² = begv + 1,
+                            σᵤ² = begw + 1,
+                            σᵥ² = begv + 1,
                                 μ = begz + 1,
                                 τ = begtau + 1,
                                 γ = begrho + 1 )
@@ -739,8 +739,8 @@ if Wu!=Nothing
                         lnh = begq + 1,
                         ϕ        = begphi + 1,
                         η        =  begeta + 1,
-                            lnσᵤ² = begw + 1,
-                            lnσᵥ² = begv + 1,
+                            σᵤ² = begw + 1,
+                            σᵥ² = begv + 1,
                                 μ = begz + 1,
                                 τ = begtau + 1 )
     
@@ -751,8 +751,8 @@ else
                           lnh = begq + 1,
                           ϕ        = begphi + 1,
                           η        =  begeta + 1,
-                              lnσᵤ² = begw + 1,
-                              lnσᵥ² = begv + 1,
+                              σᵤ² = begw + 1,
+                              σᵥ² = begv + 1,
                                   μ = begz + 1,
                                   γ = begrho + 1 )
     
@@ -761,8 +761,8 @@ else
                         lnh = begq + 1,
                         ϕ        = begphi + 1,
                         η        =  begeta + 1,
-                            lnσᵤ² = begw + 1,
-                            lnσᵥ² = begv + 1,
+                            σᵤ² = begw + 1,
+                            σᵥ² = begv + 1,
                                 μ = begz + 1)
     end
 end
@@ -1139,8 +1139,8 @@ if Wu!=Nothing
     if Wv!=Nothing #yuv
           eqvec = (frontier = begx + 1, 
                         lnh = begq + 1,
-                      lnσᵤ² = begw + 1,
-                      lnσᵥ² = begv + 1,
+                      σᵤ² = begw + 1,
+                      σᵥ² = begv + 1,
                           ρ = beggamma + 1,
                           τ = begtau + 1,
                           γ = begrho + 1 )
@@ -1148,8 +1148,8 @@ if Wu!=Nothing
     else # yu
           eqvec = (frontier = begx + 1, 
                           lnh = begq + 1,
-                          lnσᵤ² = begw + 1,
-                          lnσᵥ² = begv + 1,
+                          σᵤ² = begw + 1,
+                          σᵥ² = begv + 1,
                               ρ = beggamma + 1,
                               τ = begtau + 1 )
     
@@ -1158,15 +1158,15 @@ else
     if Wv!=Nothing #yv
           eqvec = (frontier = begx + 1, 
                         lnh = begq + 1,
-                        lnσᵤ² = begw + 1,
-                        lnσᵥ² = begv + 1,
+                        σᵤ² = begw + 1,
+                        σᵥ² = begv + 1,
                             ρ = beggamma + 1,
                             γ = begrho + 1 )
     else #y
           eqvec = (frontier = begx + 1, 
                         lnh = begq + 1,
-                        lnσᵤ² = begw + 1,
-                        lnσᵥ² = begv + 1,
+                        σᵤ² = begw + 1,
+                        σᵥ² = begv + 1,
                             ρ = beggamma + 1 )
                   
     end
@@ -1176,16 +1176,16 @@ if Wu!=Nothing
     if Wv!=Nothing #uv
           eqvec = (frontier = begx + 1, 
                         lnh = begq + 1,
-                        lnσᵤ² = begw + 1,
-                        lnσᵥ² = begv + 1,
+                        σᵤ² = begw + 1,
+                        σᵥ² = begv + 1,
                             τ = begtau + 1,
                             γ = begrho + 1 )
     
     else # u
           eqvec = (frontier = begx + 1, 
                         lnh = begq + 1,
-                        lnσᵤ² = begw + 1,
-                        lnσᵥ² = begv + 1,
+                        σᵤ² = begw + 1,
+                        σᵥ² = begv + 1,
                             τ = begtau + 1 )
     
     end    
@@ -1193,15 +1193,15 @@ else
     if Wv!=Nothing #v
           eqvec = (frontier = begx + 1, 
                         lnh = begq + 1,
-                        lnσᵤ² = begw + 1,
-                        lnσᵥ² = begv + 1,
+                        σᵤ² = begw + 1,
+                        σᵥ² = begv + 1,
                             γ = begrho + 1 )
     
     else # 
           eqvec = (frontier = begx + 1, 
                         lnh = begq + 1,
-                        lnσᵤ² = begw + 1,
-                        lnσᵥ² = begv + 1 )
+                        σᵤ² = begw + 1,
+                        σᵥ² = begv + 1 )
      
     end
 end
@@ -1571,8 +1571,8 @@ if Wu!=Nothing
                        lnh  = begq + 1,
                         ϕ   = begphi + 1,
                         η   =  begeta + 1,
-                    lnσᵤ²   = begw + 1,
-                    lnσᵥ²   = begv + 1,
+                    σᵤ²   = begw + 1,
+                    σᵥ²   = begv + 1,
                         ρ   = beggamma + 1,
                         τ   = begtau + 1,
                         γ   = begrho + 1 )
@@ -1582,8 +1582,8 @@ if Wu!=Nothing
                         lnh  = begq + 1,
                         ϕ   = begphi + 1,
                         η   =  begeta + 1,
-                    lnσᵤ²   = begw + 1,
-                    lnσᵥ²   = begv + 1,
+                    σᵤ²   = begw + 1,
+                    σᵥ²   = begv + 1,
                         ρ   = beggamma + 1,
                         τ   = begtau + 1 )
     
@@ -1594,8 +1594,8 @@ else
                         lnh  = begq + 1,
                         ϕ   = begphi + 1,
                         η   =  begeta + 1,
-                    lnσᵤ²   = begw + 1,
-                    lnσᵥ²   = begv + 1,
+                    σᵤ²   = begw + 1,
+                    σᵥ²   = begv + 1,
                         ρ   = beggamma + 1,
                         γ   = begrho + 1 )
     else #y
@@ -1603,8 +1603,8 @@ else
                         lnh  = begq + 1,
                         ϕ   = begphi + 1,
                         η   =  begeta + 1,
-                    lnσᵤ²   = begw + 1,
-                    lnσᵥ²   = begv + 1,
+                    σᵤ²   = begw + 1,
+                    σᵥ²   = begv + 1,
                         ρ   = beggamma + 1)
     
     end
@@ -1616,8 +1616,8 @@ if Wu!=Nothing
                         lnh  = begq + 1,
                         ϕ   = begphi + 1,
                         η   =  begeta + 1,
-                    lnσᵤ²   = begw + 1,
-                    lnσᵥ²   = begv + 1,
+                    σᵤ²   = begw + 1,
+                    σᵥ²   = begv + 1,
                         τ   = begtau + 1,
                         γ   = begrho + 1 )
                   
@@ -1626,8 +1626,8 @@ if Wu!=Nothing
                         lnh  = begq + 1,
                         ϕ   = begphi + 1,
                         η   =  begeta + 1,
-                    lnσᵤ²   = begw + 1,
-                    lnσᵥ²   = begv + 1,
+                    σᵤ²   = begw + 1,
+                    σᵥ²   = begv + 1,
                         τ   = begtau + 1)
     
     end    
@@ -1637,8 +1637,8 @@ else
                         lnh  = begq + 1,
                         ϕ   = begphi + 1,
                         η   =  begeta + 1,
-                    lnσᵤ²   = begw + 1,
-                    lnσᵥ²   = begv + 1,
+                    σᵤ²   = begw + 1,
+                    σᵥ²   = begv + 1,
                         γ   = begrho + 1 )
     
     else # 
@@ -1646,8 +1646,8 @@ else
                         lnh  = begq + 1,
                         ϕ   = begphi + 1,
                         η   =  begeta + 1,
-                    lnσᵤ²   = begw + 1,
-                    lnσᵥ²   = begv + 1)
+                    σᵤ²   = begw + 1,
+                    σᵥ²   = begv + 1)
      
     end
 end
@@ -2005,8 +2005,8 @@ function getvar(::Type{SSFKUEH}, dat::DataFrame)
     lnh  = begq + 1,
     ϕ   = begphi + 1,
     η   =  begeta + 1,
-lnσᵤ²   = begw + 1,
-lnσᵥ²   = begv + 1,
+σᵤ²   = begw + 1,
+σᵥ²   = begv + 1,
     ρ   = beggamma + 1)
 
    
@@ -2203,8 +2203,8 @@ function getvar(::Type{SSFKUH}, dat::DataFrame)
       #* create equation names and mark positions for making tables
       eqvec = (frontier = begx + 1, 
       lnh  = begq + 1,
-  lnσᵤ²   = begw + 1,
-  lnσᵥ²   = begv + 1,
+  σᵤ²   = begw + 1,
+  σᵥ²   = begv + 1,
       ρ   = beggamma + 1)
   
       
@@ -2419,8 +2419,8 @@ function getvar(::Type{SSFKUET}, dat::DataFrame)
       lnh  = begq + 1,
       ϕ   = begphi + 1,
       η   =  begeta + 1,
-  lnσᵤ²   = begw + 1,
-  lnσᵥ²   = begv + 1,
+  σᵤ²   = begw + 1,
+  σᵥ²   = begv + 1,
       μ   = begz + 1,
       ρ   = beggamma + 1)
   
@@ -2621,8 +2621,8 @@ posvec = (begx=begx, endx=endx, begq=begq, endq=endq, begw=begw, endw=endw,begv=
 #* create equation names and mark positions for making tables
 eqvec = (frontier = begx + 1, 
 lnh = begq + 1,
-lnσᵤ² = begw + 1,
-lnσᵥ² = begv + 1,
+σᵤ² = begw + 1,
+σᵥ² = begv + 1,
     μ = begz + 1,
     ρ = beggamma + 1 )
 
@@ -2801,8 +2801,8 @@ function getvar(::Type{SSFKKEH}, dat::DataFrame)
   lnh  = begq + 1,
   ϕ   = begphi + 1,
   η   =  begeta + 1,
-lnσᵤ²   = begw + 1,
-lnσᵥ²   = begv + 1)
+σᵤ²   = begw + 1,
+σᵥ²   = begv + 1)
 
  
 
@@ -2944,8 +2944,8 @@ function getvar(::Type{SSFKKH}, dat::DataFrame)
     #* create equation names and mark positions for making tables
     eqvec = (frontier = begx + 1, 
     lnh  = begq + 1,
-lnσᵤ²   = begw + 1,
-lnσᵥ²   = begv + 1)
+σᵤ²   = begw + 1,
+σᵥ²   = begv + 1)
 
     #* create equation names and mark positions 
     eqvec2 = (coeff_frontier = (begx:endx), 
@@ -3100,8 +3100,8 @@ function getvar(::Type{SSFKKET}, dat::DataFrame)
     lnh  = begq + 1,
     ϕ   = begphi + 1,
     η   =  begeta + 1,
-lnσᵤ²   = begw + 1,
-lnσᵥ²   = begv + 1,
+σᵤ²   = begw + 1,
+σᵥ²   = begv + 1,
     μ   = begz + 1)
 
    
@@ -3244,8 +3244,8 @@ posvec = (begx=begx, endx=endx, begq=begq, endq=endq, begw=begw, endw=endw,begv=
 #* create equation names and mark positions for making tables
 eqvec = (frontier = begx + 1, 
 lnh = begq + 1,
-lnσᵤ² = begw + 1,
-lnσᵥ² = begv + 1,
+σᵤ² = begw + 1,
+σᵥ² = begv + 1,
   μ = begz + 1 )
 
 #* create equation names and mark positions 
@@ -3488,7 +3488,7 @@ function getvar(::Type{SSFGIEH}, dat::DataFrame)
               beggamma=beggamma, endgamma=endgamma)
 
     eqvec = (frontier=begx+1, lnh=begq+1, ϕ=begphi+1, η=begeta+1,
-             lnσᵤ²=begw+1, lnσᵥ²=begv+1, λ=beggamma+1)
+             σᵤ²=begw+1, σᵥ²=begv+1, λ=beggamma+1)
 
     eqvec2 = (coeff_frontier=(begx:endx), coeff_log_hscale=(begq:endq),
               coeff_ϕ=(begphi:endphi), coeff_η=(begeta:endeta),
@@ -3671,7 +3671,7 @@ function getvar(::Type{SSFGIH}, dat::DataFrame)
               beggamma=beggamma, endgamma=endgamma)
 
     eqvec = (frontier=begx+1, lnh=begq+1,
-             lnσᵤ²=begw+1, lnσᵥ²=begv+1, λ=beggamma+1)
+             σᵤ²=begw+1, σᵥ²=begv+1, λ=beggamma+1)
 
     eqvec2 = (coeff_frontier=(begx:endx), coeff_log_hscale=(begq:endq),
               coeff_log_σᵤ²=(begw:endw), coeff_log_σᵥ²=(begv:endv),
@@ -3877,7 +3877,7 @@ function getvar(::Type{SSFGIET}, dat::DataFrame)
               beggamma=beggamma, endgamma=endgamma)
 
     eqvec = (frontier=begx+1, lnh=begq+1, ϕ=begphi+1, η=begeta+1,
-             lnσᵤ²=begw+1, lnσᵥ²=begv+1, μ=begz+1, λ=beggamma+1)
+             σᵤ²=begw+1, σᵥ²=begv+1, μ=begz+1, λ=beggamma+1)
 
     eqvec2 = (coeff_frontier=(begx:endx), coeff_log_hscale=(begq:endq),
               coeff_ϕ=(begphi:endphi), coeff_η=(begeta:endeta),
@@ -4064,7 +4064,7 @@ function getvar(::Type{SSFGIT}, dat::DataFrame)
               beggamma=beggamma, endgamma=endgamma)
 
     eqvec = (frontier=begx+1, lnh=begq+1,
-             lnσᵤ²=begw+1, lnσᵥ²=begv+1, μ=begz+1, λ=beggamma+1)
+             σᵤ²=begw+1, σᵥ²=begv+1, μ=begz+1, λ=beggamma+1)
 
     eqvec2 = (coeff_frontier=(begx:endx), coeff_log_hscale=(begq:endq),
               coeff_log_σᵤ²=(begw:endw), coeff_log_σᵥ²=(begv:endv),
@@ -4193,8 +4193,8 @@ function getvar(::Type{SSFWHEH}, dat::DataFrame)
   lnh  = begq + 1,
   ϕ   = begphi + 1,
   η   =  begeta + 1,
-lnσᵤ²   = begw + 1,
-lnσᵥ²   = begv + 1)
+σᵤ²   = begw + 1,
+σᵥ²   = begv + 1)
 
  
 
@@ -4352,8 +4352,8 @@ function getvar(::Type{SSFWHH}, dat::DataFrame)
     #* create equation names and mark positions for making tables
     eqvec = (frontier = begx + 1, 
     lnh  = begq + 1,
-lnσᵤ²   = begw + 1,
-lnσᵥ²   = begv + 1)
+σᵤ²   = begw + 1,
+σᵥ²   = begv + 1)
 
     #* create equation names and mark positions 
     eqvec2 = (coeff_frontier = (begx:endx), 
@@ -4534,8 +4534,8 @@ function getvar(::Type{SSFWHET}, dat::DataFrame)
   lnh  = begq + 1,
   ϕ   = begphi + 1,
   η   =  begeta + 1,
-lnσᵤ²   = begw + 1,
-lnσᵥ²   = begv + 1,
+σᵤ²   = begw + 1,
+σᵥ²   = begv + 1,
 μ       = begz + 1
 )
 
@@ -4699,8 +4699,8 @@ function getvar(::Type{SSFWHT}, dat::DataFrame)
     #* create equation names and mark positions for making tables
     eqvec = (frontier = begx + 1, 
     lnh  = begq + 1,
-lnσᵤ²   = begw + 1,
-lnσᵥ²   = begv + 1,
+σᵤ²   = begw + 1,
+σᵥ²   = begv + 1,
 μ       = begz + 1
 )
 
