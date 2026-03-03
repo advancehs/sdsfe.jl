@@ -1848,51 +1848,53 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
     _coevec_adj_show = _coevec_adj
   end
 
+   # * ------ 生成带星号的系数（无论是否打印都生成）---------- *#
+
+   # 创建带显著性星号的系数列
+   coef_with_stars = Array{String}(undef, size(table_show, 1) - 1)
+   for i in 2:size(table_show, 1)
+       coef_val = table_show[i, 3]  # 系数值
+       p_val = table_show[i, 6]     # p 值
+
+       # 根据 p 值添加星号
+       stars = ""
+       if !ismissing(p_val) && isa(p_val, Number) && !isnan(p_val)
+           if p_val < 0.01
+               stars = "***"
+           elseif p_val < 0.05
+               stars = "**"
+           elseif p_val < 0.10
+               stars = "*"
+           end
+       end
+
+       # 格式化系数并添加星号
+       if !ismissing(coef_val) && isa(coef_val, Number) && !isnan(coef_val)
+           coef_with_stars[i-1] = @sprintf("%.4f%s", coef_val, stars)
+       else
+           coef_with_stars[i-1] = ""
+       end
+   end
+
    # * ------ Print Results ----------- *#
 
-   if _dicOPT[:verbose] 
+   if _dicOPT[:verbose]
 
        printstyled("*********************************\n "; color=:cyan)
-       printstyled("      Estimation Results:\n"; color=:cyan); 
+       printstyled("      Estimation Results:\n"; color=:cyan);
        printstyled("*********************************\n"; color=:cyan)
 
        print("Model type: "); printstyled(minfo1; color=:yellow); println()
        print("Number of observations: "); printstyled(num.nofobs; color=:yellow); println()
        print("Number of total iterations: "); printstyled(sf_total_iter; color=:yellow); println()
-       if Optim.converged(mfun) 
+       if Optim.converged(mfun)
            print("Converged successfully: "); printstyled(Optim.converged(mfun); color=:yellow); println()
        elseif Optim.converged(mfun) == false
            print("Converged successfully: "); printstyled(Optim.converged(mfun); color=:red); println()
            redflag = 1
-       end         
+       end
        print("Log-likelihood value: "); printstyled(round(-1*Optim.minimum(mfun); digits=5); color=:yellow); println()
        println()
-   
-      # 创建带显著性星号的系数列
-      coef_with_stars = Array{String}(undef, size(table_show, 1) - 1)
-      for i in 2:size(table_show, 1)
-          coef_val = table_show[i, 3]  # 系数值
-          p_val = table_show[i, 6]     # p 值
-
-          # 根据 p 值添加星号
-          stars = ""
-          if !ismissing(p_val) && isa(p_val, Number) && !isnan(p_val)
-              if p_val < 0.01
-                  stars = "***"
-              elseif p_val < 0.05
-                  stars = "**"
-              elseif p_val < 0.10
-                  stars = "*"
-              end
-          end
-
-          # 格式化系数并添加星号
-          if !ismissing(coef_val) && isa(coef_val, Number) && !isnan(coef_val)
-              coef_with_stars[i-1] = @sprintf("%.4f%s", coef_val, stars)
-          else
-              coef_with_stars[i-1] = ""
-          end
-      end
 
       # 创建新的表格，只包含需要的列
       # 列顺序：空列、变量名、系数(带星号)、标准误、置信区间
@@ -1983,6 +1985,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
     _dicRES[:table_show]      = [table_show][1]
     _dicRES[:coeff]           = _coevec_adj
     _dicRES[:coeff_show]      = _coevec_adj_show
+    _dicRES[:coeff_with_stars] = coef_with_stars  # 带星号的系数
     _dicRES[:std_err]         = stddev_adj
     _dicRES[:var_cov_mat]     = [var_cov_matrix][1]
     _dicRES[:jlms]            = _jlms
