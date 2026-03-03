@@ -864,105 +864,218 @@ function get_mareffx(
     
 end
 
-function get_margeffu_single(pos::NamedTuple, coef::Array{Float64, 1},indices, dire0::Float64, 
-     total0::Float64, L::LowerTriangular,)
-     ## 这是mc method 的版本
+function get_margeffu_single(pos::NamedTuple, coef::Array{Float64, 1}, indices,
+     Q_mat::Matrix{Float64}, W_mat::Matrix{Float64}, Z_mat::Union{Matrix{Float64}, Nothing},
+     obs_ci::Vector{Int}, A_diag::Vector{Float64}, A_colsum::Vector{Float64},
+     L::LowerTriangular, modelid, target_k::Int)
+     ## 修正版：使用完整梯度方法（2026-03-03）与 Henderson 45度图一致
 
-     τ_ind = coef[(pos.begq-1).+indices]
+     τ_coef = coef[pos.begq:pos.endq]
+     δ_coef = coef[pos.begw:pos.endw]
+     nq = length(τ_coef)
+     nw = length(δ_coef)
+     nobs = size(Q_mat, 1)
 
-          diret = dire0 * τ_ind[1]  
-          total = total0 * τ_ind[1]  
-          indiret = total - diret 
+     # 检测模型类型
+     # 半正态模型：所有以 H 结尾的模型（SSFKUH, SSFKUEH, SSFOAH, SSFOADH, SSFKKH, SSFKKEH, SSFWHH, SSFWHEH, SSFGIH, SSFGIEH）
+     # 截断正态模型：所有以 T 结尾的模型（SSFKUT, SSFKUET, SSFOAT, SSFOADT, SSFKKT, SSFKKET, SSFWHT, SSFWHET, SSFGIT, SSFGIET）
+     modelid_str = string(modelid)
+     is_half = endswith(modelid_str, "H")
 
-          diretmat_mc = Array{Any}(undef,0,1)
-          indiretmat_mc   = Array{Any}(undef,0,1)
-          totalmat_mc = Array{Any}(undef,0,1)
+     raw_me = zeros(nobs)
 
-          ## get sd with mc method
-          for _ in range(1, 500)
-               coef_mc = coef + bmc(L)
-               τ_ind_mc = coef_mc[(pos.begq-1).+indices]
-               diret_mc = dire0 *τ_ind_mc[1]  
-               total_mc = total0*τ_ind_mc[1]  
-               indiret_mc  = total_mc - diret_mc 
+     if is_half
+         _Eu_half = let τ_coef=τ_coef, δ_coef=δ_coef, nq=nq, nw=nw
+             x -> begin
+                 q = x[1:nq]; w = x[nq+1:nq+nw]
+                 h = exp(dot(q, τ_coef))
+                 σᵤ = exp(0.5 * dot(w, δ_coef))
+                 return h * σᵤ * sqrt(2.0/π)
+             end
+         end
+         for i in 1:nobs
+             qw = vcat(Q_mat[i,:], W_mat[i,:])
+             grad = ForwardDiff.gradient(_Eu_half, qw)
+             raw_me[i] = grad[target_k]
+         end
+     else
+         μ_coef = coef[pos.begz:pos.endz]
+         for i in 1:nobs
+             z_i = Z_mat[i, :]
+             μ_i = dot(z_i, μ_coef)
+             _Eu_trun = let τ_coef=τ_coef, δ_coef=δ_coef, μ_i=μ_i, nq=nq, nw=nw
+                 x -> begin
+                     q = x[1:nq]; w = x[nq+1:nq+nw]
+                     h = exp(dot(q, τ_coef))
+                     σᵤ = exp(0.5 * dot(w, δ_coef))
+                     Λ = μ_i / σᵤ
+                     return h * σᵤ * (Λ + normpdf(Λ) / normcdf(Λ))
+                 end
+             end
+             qw = vcat(Q_mat[i,:], W_mat[i,:])
+             grad = ForwardDiff.gradient(_Eu_trun, qw)
+             raw_me[i] = grad[target_k]
+         end
+     end
 
-               diretmat_mc   = vcat(diretmat_mc , diret_mc) 
-               indiretmat_mc = vcat(indiretmat_mc , indiret_mc)   
-               totalmat_mc = vcat(totalmat_mc , total_mc) 
-          end
+     direct_vec = [A_diag[obs_ci[i]] * raw_me[i] for i in 1:nobs]
+     total_vec = [A_colsum[obs_ci[i]] * raw_me[i] for i in 1:nobs]
+     indirect_vec = total_vec .- direct_vec
 
-          diret_sd = std(diretmat_mc)
-          indiret_sd = std(indiretmat_mc)
-          total_sd = std(totalmat_mc)
-          # println("aaaaaaaaa",total_sd)
+     diret = mean(direct_vec)
+     total = mean(total_vec)
+     indiret = mean(indirect_vec)
 
-     diret_   = hcat(diret, diret_sd)
-     indiret_ = hcat(indiret , indiret_sd) 
-     total_ = hcat(total,total_sd )
+     diretmat_mc = Float64[]
+     indiretmat_mc = Float64[]
+     totalmat_mc = Float64[]
 
-     return diret_,indiret_,total_
+     for _ in 1:500
+         coef_mc = coef + bmc(L)
+         τ_coef_mc = coef_mc[pos.begq:pos.endq]
+         δ_coef_mc = coef_mc[pos.begw:pos.endw]
+         raw_me_mc = zeros(nobs)
+
+         if is_half
+             _Eu_half_mc = let τ_coef_mc=τ_coef_mc, δ_coef_mc=δ_coef_mc, nq=nq, nw=nw
+                 x -> begin
+                     q = x[1:nq]; w = x[nq+1:nq+nw]
+                     h = exp(dot(q, τ_coef_mc))
+                     σᵤ = exp(0.5 * dot(w, δ_coef_mc))
+                     return h * σᵤ * sqrt(2.0/π)
+                 end
+             end
+             for i in 1:nobs
+                 qw = vcat(Q_mat[i,:], W_mat[i,:])
+                 grad_mc = ForwardDiff.gradient(_Eu_half_mc, qw)
+                 raw_me_mc[i] = grad_mc[target_k]
+             end
+         else
+             μ_coef_mc = coef_mc[pos.begz:pos.endz]
+             for i in 1:nobs
+                 z_i = Z_mat[i, :]
+                 μ_i_mc = dot(z_i, μ_coef_mc)
+                 _Eu_trun_mc = let τ_coef_mc=τ_coef_mc, δ_coef_mc=δ_coef_mc, μ_i_mc=μ_i_mc, nq=nq, nw=nw
+                     x -> begin
+                         q = x[1:nq]; w = x[nq+1:nq+nw]
+                         h = exp(dot(q, τ_coef_mc))
+                         σᵤ = exp(0.5 * dot(w, δ_coef_mc))
+                         Λ = μ_i_mc / σᵤ
+                         return h * σᵤ * (Λ + normpdf(Λ) / normcdf(Λ))
+                     end
+                 end
+                 qw = vcat(Q_mat[i,:], W_mat[i,:])
+                 grad_mc = ForwardDiff.gradient(_Eu_trun_mc, qw)
+                 raw_me_mc[i] = grad_mc[target_k]
+             end
+         end
+
+         direct_vec_mc = [A_diag[obs_ci[i]] * raw_me_mc[i] for i in 1:nobs]
+         total_vec_mc = [A_colsum[obs_ci[i]] * raw_me_mc[i] for i in 1:nobs]
+         indirect_vec_mc = total_vec_mc .- direct_vec_mc
+
+         push!(diretmat_mc, mean(direct_vec_mc))
+         push!(totalmat_mc, mean(total_vec_mc))
+         push!(indiretmat_mc, mean(indirect_vec_mc))
+     end
+
+     diret_sd = std(diretmat_mc)
+     indiret_sd = std(indiretmat_mc)
+     total_sd = std(totalmat_mc)
+
+     diret_ = hcat(diret, diret_sd)
+     indiret_ = hcat(indiret, indiret_sd)
+     total_ = hcat(total, total_sd)
+
+     return diret_, indiret_, total_
 end 
 
 function get_margeffu(
-     ## mc method 
+     ## 修正版：使用完整梯度方法（2026-03-03）
      jlms0, pos::NamedTuple, coef::Array{Float64, 1},  var_cov_matrix::Symmetric{Float64, Matrix{Float64}},
-     eigvalu::NamedTuple ,indices_listz::Vector{Any}, rowIDT::Matrix{Any})
-    
+     eigvalu::NamedTuple, indices_listz::Vector{Any}, rowIDT::Matrix{Any};
+     qvar=nothing, wvar=nothing, zvar=nothing, modelid=nothing)
+
      L = _safe_cholesky_L(var_cov_matrix)
 
-     Wu = _dicM[:wu]
-     Wy = _dicM[:wy]
-     if Wy!=Nothing 
-          gammap = coef[pos.beggamma];
-          gamma  = eigvalu.rymin/(1+exp(gammap))+eigvalu.rymax*exp(gammap)/(1+exp(gammap));
-          if Wu!=Nothing 
-               taup = coef[pos.begtau]
-               tau  = (eigvalu.rumin)/(1.0 +exp(taup))+(eigvalu.rumax)*exp(taup)/(1.0 +exp(taup));
-               dire0, total0= IrhoWItauW(gamma, tau, jlms0, rowIDT)
-          else
-               tau = 1.0;
-               dire0, total0= IrhoWItauW(gamma, tau, jlms0, rowIDT)
-          end
-     else
-          if Wu!=Nothing 
-               taup = coef[pos.begtau]
-               tau  = (eigvalu.rumin)/(1.0 +exp(taup))+(eigvalu.rumax)*exp(taup)/(1.0 +exp(taup));
-               dire0, total0= IrhoWItauW2( tau, jlms0, rowIDT)
-          else
-               tau = 1.0;
-               dire0, total0= IrhoWItauW2( tau, jlms0, rowIDT)
-          end
+     # 获取数据矩阵
+     if qvar === nothing || wvar === nothing
+         error("需要传入 qvar 和 wvar 参数")
      end
 
+     Q_mat = Float64.(Matrix(qvar))
+     W_mat = Float64.(Matrix(wvar))
+     Z_mat = (zvar === nothing || (isa(zvar, Tuple) && isempty(zvar))) ? nothing : Float64.(Matrix(zvar))
 
+     # 获取模型 ID
+     if modelid === nothing
+         modelid = _dicM[:modelid]
+     end
 
-    totalemat = Array{Any}(undef,0,2)
-    diremat   = Array{Any}(undef,0,2)
-    indiremat = Array{Any}(undef,0,2)
-    
+     # 面板结构
+     T = size(rowIDT, 1)
+     N_cities = rowIDT[1, 2]
 
-    
-    for (_, indices) in indices_listz
-        dire,indire,totale = get_margeffu_single(pos,coef,indices,dire0,total0, L)
-		totalemat = vcat(totalemat , totale) 
-		diremat   = vcat(diremat , dire) 
-		indiremat = vcat(indiremat , indire) 
-    end
+     # 观测到城市的映射
+     obs_ci = zeros(Int, size(Q_mat, 1))
+     for ttt in 1:T
+         ind = rowIDT[ttt, 1]
+         for (local_i, global_i) in enumerate(ind)
+             obs_ci[global_i] = local_i
+         end
+     end
 
-    vars =  [string(pair[1]) for pair in indices_listz]
-    indiremat = hcat(indiremat, (indiremat[:,1])./indiremat[:,2],(1.0.-(normcdf.(abs.((indiremat[:,1])./indiremat[:,2])))))
-    indiremat = hcat(vars,indiremat)
-    indiremat =  vcat(["var" "Coef." "Std. Err." "z" "P>|z|"] , indiremat)   
-    
-    diremat   = hcat(diremat, (diremat[:,1])./diremat[:,2],(1.0.-(normcdf.(abs.((diremat[:,1])./diremat[:,2])))))
-    diremat   = hcat(vars,diremat)
-    diremat = vcat(["var" "Coef." "Std. Err." "z" "P>|z|"] , diremat)   
+     # 计算空间乘数
+     Wu = _dicM[:wu]
+     Wy = _dicM[:wy]
 
-    totalemat = hcat(totalemat, (totalemat[:,1])./totalemat[:,2],(1.0.-(normcdf.(abs.((totalemat[:,1])./totalemat[:,2])))))
-    totalemat = hcat(vars,totalemat)
-    totalemat =  vcat(["var" "Coef." "Std. Err." "z" "P>|z|"] , totalemat)   
-    return totalemat, diremat, indiremat
-    
+     if Wy !== Nothing
+          gammap = coef[pos.beggamma]
+          gamma = eigvalu.rymin/(1+exp(gammap)) + eigvalu.rymax*exp(gammap)/(1+exp(gammap))
+          A = inv(I(N_cities) - gamma * Wy[1])
+          A_diag = diag(A)
+          A_colsum = vec(sum(A, dims=1))
+     else
+          A_diag = ones(N_cities)
+          A_colsum = ones(N_cities)
+     end
+
+     # 对每个变量计算边际效应
+     totalemat = Array{Any}(undef, 0, 2)
+     diremat = Array{Any}(undef, 0, 2)
+     indiremat = Array{Any}(undef, 0, 2)
+
+     for (var_symbol, indices) in indices_listz
+         target_k = indices[1]
+
+         dire, indire, totale = get_margeffu_single(
+             pos, coef, indices,
+             Q_mat, W_mat, Z_mat,
+             obs_ci, A_diag, A_colsum,
+             L, modelid, target_k
+         )
+
+         totalemat = vcat(totalemat, totale)
+         diremat = vcat(diremat, dire)
+         indiremat = vcat(indiremat, indire)
+     end
+
+     # 格式化输出
+     vars = [string(pair[1]) for pair in indices_listz]
+
+     indiremat = hcat(indiremat, (indiremat[:,1])./indiremat[:,2], (1.0 .- normcdf.(abs.((indiremat[:,1])./indiremat[:,2]))))
+     indiremat = hcat(vars, indiremat)
+     indiremat = vcat(["var" "Coef." "Std. Err." "z" "P>|z|"], indiremat)
+
+     diremat = hcat(diremat, (diremat[:,1])./diremat[:,2], (1.0 .- normcdf.(abs.((diremat[:,1])./diremat[:,2]))))
+     diremat = hcat(vars, diremat)
+     diremat = vcat(["var" "Coef." "Std. Err." "z" "P>|z|"], diremat)
+
+     totalemat = hcat(totalemat, (totalemat[:,1])./totalemat[:,2], (1.0 .- normcdf.(abs.((totalemat[:,1])./totalemat[:,2]))))
+     totalemat = hcat(vars, totalemat)
+     totalemat = vcat(["var" "Coef." "Std. Err." "z" "P>|z|"], totalemat)
+
+     return totalemat, diremat, indiremat
 end
 
 

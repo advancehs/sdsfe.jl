@@ -1679,7 +1679,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
       jlms0 = jlmsbc0(tagD[:modelid], yvar, xvar,  qvar, wvar, vvar,  zvar, envar, ivvar,
                               _porc, num, pos, _coevec,  eigvalu, rowIDT)
 
-      totalematu, dirematu, indirematu = get_margeffu(jlms0, pos, _coevec,  var_cov_matrix,  eigvalu, indices_listz, rowIDT )
+      totalematu, dirematu, indirematu = get_margeffu(jlms0, pos, _coevec,  var_cov_matrix,  eigvalu, indices_listz, rowIDT; qvar=qvar, wvar=wvar, zvar=zvar, modelid=tagD[:modelid])
    else
       totalematu, dirematu, indirematu = nothing, nothing, nothing
    end      
@@ -1832,10 +1832,45 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
        print("Log-likelihood value: "); printstyled(round(-1*Optim.minimum(mfun); digits=5); color=:yellow); println()
        println()
    
-       pretty_table(table_show[2:end,:],
-                    column_labels=["", "Var.", "Coef.", "Std.Err.", "z", "P>|z|",
+      # 创建带显著性星号的系数列
+      coef_with_stars = Array{String}(undef, size(table_show, 1) - 1)
+      for i in 2:size(table_show, 1)
+          coef_val = table_show[i, 3]  # 系数值
+          p_val = table_show[i, 6]     # p 值
+
+          # 根据 p 值添加星号
+          stars = ""
+          if !ismissing(p_val) && isa(p_val, Number) && !isnan(p_val)
+              if p_val < 0.01
+                  stars = "***"
+              elseif p_val < 0.05
+                  stars = "**"
+              elseif p_val < 0.10
+                  stars = "*"
+              end
+          end
+
+          # 格式化系数并添加星号
+          if !ismissing(coef_val) && isa(coef_val, Number) && !isnan(coef_val)
+              coef_with_stars[i-1] = @sprintf("%.4f%s", coef_val, stars)
+          else
+              coef_with_stars[i-1] = ""
+          end
+      end
+
+      # 创建新的表格，只包含需要的列
+      # 列顺序：空列、变量名、系数(带星号)、标准误、置信区间
+      table_display = hcat(
+          table_show[2:end, 1:2],           # 空列和变量名
+          coef_with_stars,                   # 系数(带星号)
+          table_show[2:end, 4],             # 标准误
+          table_show[2:end, 7:8]            # 置信区间
+      )
+
+       pretty_table(table_display,
+                    column_labels=["", "Var.", "Coef.", "Std.Err.",
                             "95%CI_l", "95%CI_u"],
-                    formatters = [ft_printf("%5.4f", 3:8)],
+                    formatters = [ft_printf("%5.4f", 4:6)],
                     compact_printing = true,
                     backend = sf_table,
                     display_size = (-1, -1))
@@ -1982,6 +2017,23 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
     _dicRES[:tolerance]        = sf_tol
     _dicRES[:eqpo]             = eqvec2
     _dicRES[:eigvalu]          = eigvalu
+
+    # 保存空间权重矩阵信息（如果存在）
+    if @isdefined(_dicM)
+        spatial_matrices = Dict{Symbol, Any}()
+        if haskey(_dicM, :wy) && _dicM[:wy] !== nothing && _dicM[:wy] !== Nothing
+            spatial_matrices[:Wy] = _dicM[:wy][1]
+        end
+        if haskey(_dicM, :wu) && _dicM[:wu] !== nothing && _dicM[:wu] !== Nothing
+            spatial_matrices[:Wu] = _dicM[:wu][1]
+        end
+        if haskey(_dicM, :wv) && _dicM[:wv] !== nothing && _dicM[:wv] !== Nothing
+            spatial_matrices[:Wv] = _dicM[:wv][1]
+        end
+        if !isempty(spatial_matrices)
+            _dicRES[:spatial_matrices] = spatial_matrices
+        end
+    end
 
     _dicRES[:redflag]          = redflag
 

@@ -68,18 +68,25 @@ end
 # ============================================================
 
 function _h45_detect(modelid)
-    wh_set   = (SSFWHH, SSFWHT, SSFWHEH, SSFWHET)
-    gi_set   = (SSFGIH, SSFGIT, SSFGIEH, SSFGIET)
-    half_set = (SSFOAH, SSFOADH, SSFKUH, SSFKUEH, SSFKKH, SSFKKEH, SSFWHH, SSFWHEH, SSFGIH, SSFGIEH)
-    wu_set   = (SSFOAH, SSFOAT, SSFOADH, SSFOADT)
-    wy_set   = (SSFOAH, SSFOAT, SSFOADH, SSFOADT, SSFKUH, SSFKUT, SSFKUEH, SSFKUET,
-                SSFGIH, SSFGIT, SSFGIEH, SSFGIET)
-    is_half = modelid in half_set
-    has_Wu  = modelid in wu_set
-    has_Wy  = modelid in wy_set
+    # 使用字符串匹配以兼容 JLD2 加载的模型（modelid 可能是 JLD2.UnknownType）
+    modelid_str = string(modelid)
+
+    function _match_model(s, names)
+        for n in names
+            occursin(n, s) && return true
+        end
+        return false
+    end
+
+    is_half = _match_model(modelid_str, ["SSFOAH", "SSFOADH", "SSFKUH", "SSFKUEH", "SSFKKH", "SSFKKEH",
+                                          "SSFWHH", "SSFWHEH", "SSFGIH", "SSFGIEH"])
+    has_Wu  = _match_model(modelid_str, ["SSFOAH", "SSFOAT", "SSFOADH", "SSFOADT"])
+    has_Wy  = _match_model(modelid_str, ["SSFOAH", "SSFOAT", "SSFOADH", "SSFOADT", "SSFKUH", "SSFKUT",
+                                          "SSFKUEH", "SSFKUET", "SSFGIH", "SSFGIT", "SSFGIEH", "SSFGIET"])
     has_mu  = !is_half
-    is_wh   = modelid in wh_set
-    is_gi   = modelid in gi_set
+    is_wh   = _match_model(modelid_str, ["SSFWHH", "SSFWHT", "SSFWHEH", "SSFWHET"])
+    is_gi   = _match_model(modelid_str, ["SSFGIH", "SSFGIT", "SSFGIEH", "SSFGIET"])
+
     return (is_half=is_half, has_Wu=has_Wu, has_Wy=has_Wy, has_mu=has_mu, is_wh=is_wh, is_gi=is_gi)
 end
 
@@ -137,7 +144,7 @@ function henderson_45degree(
     vline!(p, [0], line=(:dot,1,:gray60), label="", alpha=0.6)
     hline!(p, [parametric_mean], line=(:dash,2,:blue), label="", alpha=0.7)
     vline!(p, [parametric_mean], line=(:dash,2,:blue),
-           label="Param mean=$(round(parametric_mean,digits=4))", alpha=0.7)
+           label="Param mean=$(round(parametric_mean,digits=3))", alpha=0.7)
 
     # 不显著点
     if show_insignificant && !isempty(insig_idx)
@@ -204,7 +211,8 @@ function sfmodel_henderson45(res;
     target_var::String,
     Wy_mat=nothing, Wu_mat=nothing,
     save_dir::String="result/henderson_45",
-    B::Int=499, confidence_level::Float64=0.95, dpi::Int=600)
+    B::Int=499, confidence_level::Float64=0.95, dpi::Int=600,
+    title::String="")
 
     modelid = res[:modelid]
     cfg = _h45_detect(modelid)
@@ -243,13 +251,22 @@ function sfmodel_henderson45(res;
     end
 
     # --- 获取空间权重矩阵 ---
+    # 从模型结果中获取（不使用全局变量 _dicM，避免多模型混淆）
     if Wy_mat === nothing && cfg.has_Wy
-        Wy_raw = _dicM[:wy]
-        Wy_mat = (Wy_raw !== nothing && Wy_raw !== Nothing) ? Wy_raw[1] : nothing
+        if haskey(res, :spatial_matrices) && haskey(res[:spatial_matrices], :Wy)
+            Wy_mat = res[:spatial_matrices][:Wy]
+            println("    从模型文件中加载 Wy 矩阵: $(size(Wy_mat))")
+        else
+            error("未找到 Wy 空间权重矩阵。请手动传入 Wy_mat 参数，或重新保存模型时包含空间权重矩阵。")
+        end
     end
     if Wu_mat === nothing && cfg.has_Wu
-        Wu_raw = _dicM[:wu]
-        Wu_mat = (Wu_raw !== nothing && Wu_raw !== Nothing) ? Wu_raw[1] : nothing
+        if haskey(res, :spatial_matrices) && haskey(res[:spatial_matrices], :Wu)
+            Wu_mat = res[:spatial_matrices][:Wu]
+            println("    从模型文件中加载 Wu 矩阵: $(size(Wu_mat))")
+        else
+            error("未找到 Wu 空间权重矩阵。请手动传入 Wu_mat 参数，或重新保存模型时包含空间权重矩阵。")
+        end
     end
 
     # --- 获取变量名并构建数据矩阵 ---
@@ -427,19 +444,21 @@ function sfmodel_henderson45(res;
 
             se_vec = vec(std(mc_mat, dims=2))
             path = joinpath(save_dir, "henderson_$(target_var)_$(eff_name).png")
+            plot_title = title == "" ? "45° Diagnostic: $(uppercase(target_var)) $(titlecase(eff_name)) Effect on E(u)" : title
             r = henderson_45degree(Float64.(eff_vec), se_vec;
                 save_path=path, parametric_mean=mean(eff_vec),
                 confidence_level=confidence_level, dpi=dpi,
-                title="45° Diagnostic: $(uppercase(target_var)) $(titlecase(eff_name)) Effect on E(u)")
+                title=plot_title)
             results[eff_name] = r
         end
     else
         se_vec = vec(std(mc_direct, dims=2))
         path = joinpath(save_dir, "henderson_$(target_var).png")
+        plot_title = title == "" ? "45° Diagnostic: $(uppercase(target_var)) Marginal Effect on E(u)" : title
         r = henderson_45degree(Float64.(raw_me), se_vec;
             save_path=path, parametric_mean=mean(raw_me),
             confidence_level=confidence_level, dpi=dpi,
-            title="45° Diagnostic: $(uppercase(target_var)) Marginal Effect on E(u)")
+            title=plot_title)
         results["total"] = r
     end
 
@@ -560,9 +579,14 @@ function sfmodel_henderson45_y(res;
     nobs = nrow(dat)
 
     # --- 获取空间权重矩阵 ---
+    # 从模型结果中获取（不使用全局变量 _dicM，避免多模型混淆）
     if Wy_mat === nothing && cfg.has_Wy
-        Wy_raw = _dicM[:wy]
-        Wy_mat = (Wy_raw !== nothing && Wy_raw !== Nothing) ? Wy_raw[1] : nothing
+        if haskey(res, :spatial_matrices) && haskey(res[:spatial_matrices], :Wy)
+            Wy_mat = res[:spatial_matrices][:Wy]
+            println("    从模型文件中加载 Wy 矩阵: $(size(Wy_mat))")
+        else
+            error("未找到 Wy 空间权重矩阵。请手动传入 Wy_mat 参数，或重新保存模型时包含空间权重矩阵。")
+        end
     end
     # --- 空间参数 ---
     rho_y = nothing; idx_gamma = nothing
@@ -892,9 +916,14 @@ function sfmodel_counterfactual(res;
     end
 
     # --- 获取 Wy ---
+    # 从模型结果中获取（不使用全局变量 _dicM，避免多模型混淆）
     if Wy_mat === nothing && cfg.has_Wy
-        Wy_raw = _dicM[:wy]
-        Wy_mat = (Wy_raw !== nothing && Wy_raw !== Nothing) ? Wy_raw[1] : nothing
+        if haskey(res, :spatial_matrices) && haskey(res[:spatial_matrices], :Wy)
+            Wy_mat = res[:spatial_matrices][:Wy]
+            println("    从模型文件中加载 Wy 矩阵: $(size(Wy_mat))")
+        else
+            error("未找到 Wy 空间权重矩阵。请手动传入 Wy_mat 参数，或重新保存模型时包含空间权重矩阵。")
+        end
     end
     # 处理 Array{Matrix} 包装类型（用户可能传入 Wx 而非 Wx[1]）
     if Wy_mat !== nothing && !(Wy_mat isa AbstractMatrix{<:Real})
@@ -902,18 +931,28 @@ function sfmodel_counterfactual(res;
     end
 
     # --- 获取 Wu (OA 模型) ---
+    # 从模型结果中获取（不使用全局变量 _dicM，避免多模型混淆）
     if Wu_mat === nothing && cfg.has_Wu
-        Wu_raw = _dicM[:wu]
-        Wu_mat = (Wu_raw !== nothing && Wu_raw !== Nothing) ? Wu_raw[1] : nothing
+        if haskey(res, :spatial_matrices) && haskey(res[:spatial_matrices], :Wu)
+            Wu_mat = res[:spatial_matrices][:Wu]
+            println("    从模型文件中加载 Wu 矩阵: $(size(Wu_mat))")
+        else
+            error("未找到 Wu 空间权重矩阵。请手动传入 Wu_mat 参数，或重新保存模型时包含空间权重矩阵。")
+        end
     end
     if Wu_mat !== nothing && !(Wu_mat isa AbstractMatrix{<:Real})
         Wu_mat = Wu_mat[1]
     end
 
     # --- 获取 Wv (OA 模型) ---
+    # 从模型结果中获取（不使用全局变量 _dicM，避免多模型混淆）
     if Wv_mat === nothing && is_oa && rho_v !== nothing
-        Wv_raw = _dicM[:wv]
-        Wv_mat = (Wv_raw !== nothing && Wv_raw !== Nothing) ? Wv_raw[1] : nothing
+        if haskey(res, :spatial_matrices) && haskey(res[:spatial_matrices], :Wv)
+            Wv_mat = res[:spatial_matrices][:Wv]
+            println("    从模型文件中加载 Wv 矩阵: $(size(Wv_mat))")
+        else
+            error("未找到 Wv 空间权重矩阵。请手动传入 Wv_mat 参数，或重新保存模型时包含空间权重矩阵。")
+        end
     end
     if Wv_mat !== nothing && !(Wv_mat isa AbstractMatrix{<:Real})
         Wv_mat = Wv_mat[1]
