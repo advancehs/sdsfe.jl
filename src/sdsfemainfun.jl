@@ -1897,16 +1897,19 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
 
    # * ------ 创建简化表格（无论是否打印都生成）---------- *#
 
+   # 表头
+   table_display_header = ["" "Var." "Coef." "Std.Err."]
+
    # 创建新的表格，只包含需要的列
    # 列顺序：空列、变量名、系数(带星号)、标准误
-   table_display = hcat(
+   table_display_body = hcat(
        table_show[2:end, 1:2],           # 空列和变量名
        coef_with_stars,                   # 系数(带星号)
        table_show[2:end, 4]              # 标准误
    )
 
-   # 表头
-   table_display_header = ["", "Var.", "Coef.", "Std.Err."]
+   # 合并表头和表体
+   table_display = vcat(table_display_header, table_display_body)
 
    # * ------ Print Results ----------- *#
 
@@ -1928,9 +1931,9 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
        print("Log-likelihood value: "); printstyled(round(-1*Optim.minimum(mfun); digits=5); color=:yellow); println()
        println()
 
-      # 打印表格
-       pretty_table(table_display,
-                    column_labels=table_display_header,
+      # 打印表格（表头已经在第一行了）
+       pretty_table(table_display[2:end, :],
+                    header=Vector(table_display[1, :]),
                     formatters = [ft_printf("%5.4f", 4:4)],
                     compact_printing = true,
                     backend = sf_table,
