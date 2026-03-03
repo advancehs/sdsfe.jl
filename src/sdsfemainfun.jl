@@ -1931,7 +1931,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
       # 打印表格
        pretty_table(table_display,
                     column_labels=table_display_header,
-                    formatters = [ft_printf("%5.4f", 4)],
+                    formatters = [ft_printf("%5.4f", 4:4)],
                     compact_printing = true,
                     backend = sf_table,
                     display_size = (-1, -1))
