@@ -1560,7 +1560,7 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
     for i in 1:length(eqvec2)
         # println(typeof(keys(eqvec2)[i] ))
 
-        if keys(eqvec2)[i] ∉ [:coeff_γ, :coeff_τ, :coeff_ρ] 
+        if keys(eqvec2)[i] ∉ [:coeff_γ, :coeff_τ, :coeff_ρ, :coeff_log_σᵤ², :coeff_log_σᵥ²]
         _coevec_adj = vcat(_coevec_adj, _coevec[eqvec2[i]])
         else
             if keys(eqvec2)[i] == :coeff_γ
@@ -1576,7 +1576,21 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
             if keys(eqvec2)[i] == :coeff_ρ
                 ss =  _coevec[eqvec2[i]][1]
                 rho_adj = eigvalu.rvmin/(1+exp(ss))+eigvalu.rvmax*exp(ss)/(1+exp(ss))
-                _coevec_adj = vcat(_coevec_adj, rho_adj)         
+                _coevec_adj = vcat(_coevec_adj, rho_adj)
+            end
+            if keys(eqvec2)[i] == :coeff_log_σᵤ²
+                # 转换 log(σᵤ²) 到 σᵤ²
+                for idx in eqvec2[i]
+                    sigma_u2 = exp(_coevec[idx])
+                    _coevec_adj = vcat(_coevec_adj, sigma_u2)
+                end
+            end
+            if keys(eqvec2)[i] == :coeff_log_σᵥ²
+                # 转换 log(σᵥ²) 到 σᵥ²
+                for idx in eqvec2[i]
+                    sigma_v2 = exp(_coevec[idx])
+                    _coevec_adj = vcat(_coevec_adj, sigma_v2)
+                end
             end
         end
     end
@@ -1713,23 +1727,45 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
   for i in 1:length(eqvec2)
       # println(typeof(keys(eqvec2)[i] ))
 
-      if keys(eqvec2)[i] ∉ [:coeff_γ, :coeff_τ, :coeff_ρ] 
+      if keys(eqvec2)[i] ∉ [:coeff_γ, :coeff_τ, :coeff_ρ, :coeff_log_σᵤ², :coeff_log_σᵥ²]
       stddev_adj = vcat(stddev_adj, stddev[eqvec2[i]])
       else
           if keys(eqvec2)[i] == :coeff_γ
               ss =  stddev[eqvec2[i]][1]
-              stddev_gamma_adj =abs(ss*(eigvalu.rymax-eigvalu.rymin)*exp(ss)/(1+exp(ss))^2  ) 
+              stddev_gamma_adj =abs(ss*(eigvalu.rymax-eigvalu.rymin)*exp(ss)/(1+exp(ss))^2  )
               stddev_adj = vcat(stddev_adj, stddev_gamma_adj)
           end
           if keys(eqvec2)[i] == :coeff_τ
               ss =  stddev[eqvec2[i]][1]
-              stddev_tau_adj = abs(ss*(eigvalu.rumax-eigvalu.rumin)*exp(ss)/(1+exp(ss))^2  ) 
+              stddev_tau_adj = abs(ss*(eigvalu.rumax-eigvalu.rumin)*exp(ss)/(1+exp(ss))^2  )
               stddev_adj = vcat(stddev_adj, stddev_tau_adj)
           end
           if keys(eqvec2)[i] == :coeff_ρ
               ss =  stddev[eqvec2[i]][1]
-              stddev_rho_adj = abs(ss*(eigvalu.rvmax-eigvalu.rvmin)*exp(ss)/(1+exp(ss))^2  ) 
-              stddev_adj = vcat(stddev_adj, stddev_rho_adj)         
+              stddev_rho_adj = abs(ss*(eigvalu.rvmax-eigvalu.rvmin)*exp(ss)/(1+exp(ss))^2  )
+              stddev_adj = vcat(stddev_adj, stddev_rho_adj)
+          end
+          if keys(eqvec2)[i] == :coeff_log_σᵤ²
+              # 转换 log(σᵤ²) 到 σᵤ²: σᵤ² = exp(log_σᵤ²)
+              # Delta method: SE(σᵤ²) = σᵤ² * SE(log_σᵤ²)
+              for idx in eqvec2[i]
+                  log_sigma_u2 = _coevec[idx]
+                  se_log_sigma_u2 = stddev[idx]
+                  sigma_u2 = exp(log_sigma_u2)
+                  se_sigma_u2 = sigma_u2 * se_log_sigma_u2
+                  stddev_adj = vcat(stddev_adj, se_sigma_u2)
+              end
+          end
+          if keys(eqvec2)[i] == :coeff_log_σᵥ²
+              # 转换 log(σᵥ²) 到 σᵥ²: σᵥ² = exp(log_σᵥ²)
+              # Delta method: SE(σᵥ²) = σᵥ² * SE(log_σᵥ²)
+              for idx in eqvec2[i]
+                  log_sigma_v2 = _coevec[idx]
+                  se_log_sigma_v2 = stddev[idx]
+                  sigma_v2 = exp(log_sigma_v2)
+                  se_sigma_v2 = sigma_v2 * se_log_sigma_v2
+                  stddev_adj = vcat(stddev_adj, se_sigma_v2)
+              end
           end
       end
   end
