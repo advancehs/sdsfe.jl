@@ -8,12 +8,26 @@
 # ============================================================
 
 """半正态, 无 Wu"""
+const _H45_CDF_EPS = eps(Float64)
+const _H45_MIN_VALID_RATIO = 0.30
+const _H45_MIN_VALID_DRAWS = 5
+
+function _h45_mills_ratio(x)
+    c = normcdf(x)
+    if !isfinite(c) || c <= _H45_CDF_EPS
+        ax = abs(float(x))
+        return (isfinite(ax) && ax > 0.0) ? (ax + inv(ax)) : 0.0
+    end
+    r = normpdf(x) / c
+    return isfinite(r) ? r : 0.0
+end
+
 function _h45_Eu_half(qw, nq, τ, δ)
     q = qw[1:nq]; w = qw[nq+1:end]
     h  = exp(dot(q, τ))
     σᵤ = exp(0.5 * dot(w, δ))
     Λ  = 0.0 / σᵤ
-    return h * σᵤ * (Λ + normpdf(Λ) / normcdf(Λ))
+    return h * σᵤ * (Λ + _h45_mills_ratio(Λ))
 end
 
 """截断正态, 无 Wu"""
@@ -23,7 +37,7 @@ function _h45_Eu_trun(qwz, nq, nw, τ, δ, δz)
     σᵤ = exp(0.5 * dot(w, δ))
     μ  = dot(z, δz)
     Λ  = μ / σᵤ
-    return h * σᵤ * (Λ + normpdf(Λ) / normcdf(Λ))
+    return h * σᵤ * (Λ + _h45_mills_ratio(Λ))
 end
 
 """半正态, 有 Wu"""
@@ -33,7 +47,7 @@ function _h45_Eu_half_wu(qw, nq, τ, δ, mii)
     σᵤ = exp(0.5 * dot(w, δ))
     hs = mii * h
     Λ  = 0.0 / σᵤ
-    return hs * σᵤ * (Λ + normpdf(Λ) / normcdf(Λ))
+    return hs * σᵤ * (Λ + _h45_mills_ratio(Λ))
 end
 
 """截断正态, 有 Wu"""
@@ -44,7 +58,7 @@ function _h45_Eu_trun_wu(qwz, nq, nw, τ, δ, δz, mii)
     μ  = dot(z, δz)
     hs = mii * h
     Λ  = μ / σᵤ
-    return hs * σᵤ * (Λ + normpdf(Λ) / normcdf(Λ))
+    return hs * σᵤ * (Λ + _h45_mills_ratio(Λ))
 end
 
 # ============================================================
@@ -62,6 +76,26 @@ function _h45_eigbounds(W)
     ev = real.(eigvals(W))
     return 1.0 / minimum(ev), 1.0  # rymax 硬编码为 1.0，与 sdsfe 一致
 end
+
+"""
+    _h45_sigma_coef_to_log(δ_coef)
+
+`sfmodel_fit` 的返回结果中，`coeff_log_σᵤ²` 在部分版本会以原尺度（σᵤ²）保存，
+而 Henderson 的 E(u) 公式需要对数尺度系数（log_σᵤ²）。
+这里做兼容处理，保证 45度图与 `get_margeffu` 的口径一致。
+"""
+function _h45_sigma_coef_to_log(δ_coef)
+    δ = Float64.(δ_coef)
+    # 若全部为正，按“原尺度系数”回转到 log 尺度。
+    # 这与 sdsfemainfun 中对 coeff_log_σᵤ² 的导出方式兼容。
+    if !isempty(δ) && all(>(0.0), δ)
+        return log.(δ)
+    end
+    return δ
+end
+
+"""优先使用优化原尺度系数；缺失时回退到展示系数（兼容旧结果对象）。"""
+_h45_coef_raw(res) = haskey(res, :coeff_raw) ? res[:coeff_raw] : res[:coeff]
 
 # ============================================================
 # 3. 模型类型检测
@@ -132,11 +166,24 @@ function henderson_45degree(
     lims = (v_min - margin, v_max + margin)
 
     gr()
-    p = plot(size=(700,700), fontfamily="Times",
-        xlabel="Marginal Effect Estimate", ylabel="Marginal Effect / CI Bounds",
+    p = plot(size=(700,700), fontfamily="Times Roman",
+        xlabel="Marginal effect estimate", ylabel="Marginal effect / CI bounds",
         xlim=lims, ylim=lims, legend=:topleft,
         title=(title == "" ? "45° Diagnostic (Henderson & Parmeter 2012)" : title),
-        dpi=dpi, grid=true, framestyle=:box, aspect_ratio=:equal)
+        dpi=dpi, grid=true, framestyle=:box, aspect_ratio=:equal,
+        titlefont=font(22, "Times Roman", :black),
+        guidefont=font(19, "Times Roman", :black),
+        tickfont=font(16, "Times Roman", :black),
+        legendfont=font(16, "Times Roman", :black),
+        legend_title_font=font(18, "Times Roman", :black),
+        background_color=:white,
+        background_color_inside=:white,
+        background_color_outside=:white,
+        foreground_color=:black,
+        foreground_color_text=:black,
+        foreground_color_subplot=:black,
+        foreground_color_legend=:black,
+        gridcolor=:gray85)
 
     # 45度线 + 零线 + 参考线
     plot!(p, [lims[1],lims[2]], [lims[1],lims[2]], line=(:solid,2,:black), label="45° line", alpha=0.8)
@@ -178,6 +225,136 @@ function henderson_45degree(
                 :mean_effect=>mean(ghat), :parametric_mean=>parametric_mean, :plot=>p)
 end
 
+"""
+    _h45_save_combined_plot(results, save_path; dpi=600, title="")
+
+Combine total/direct/indirect Henderson 45-degree plots into a two-row layout:
+- top center: total effect
+- bottom left: direct effect
+- bottom right: indirect effect
+"""
+function _h45_save_combined_plot(
+    results::Dict{String, Any},
+    save_path::String;
+    dpi::Int=600,
+    title::String=""
+)
+    required_keys = ("total", "direct", "indirect")
+    all(haskey(results, k) for k in required_keys) || return nothing
+
+    total_info = results["total"]
+    direct_info = results["direct"]
+    indirect_info = results["indirect"]
+
+    if !(total_info isa AbstractDict && direct_info isa AbstractDict && indirect_info isa AbstractDict)
+        return nothing
+    end
+    if !(haskey(total_info, :plot) && haskey(direct_info, :plot) && haskey(indirect_info, :plot))
+        return nothing
+    end
+
+    blank_panel() = plot([0.0], [0.0];
+        seriestype=:scatter, markersize=0, markerstrokewidth=0,
+        markercolor=:white, xaxis=false, yaxis=false,
+        grid=false, legend=false, framestyle=:none,
+        background_color=:white,
+        background_color_inside=:white,
+        background_color_outside=:white)
+
+    # Combined panel style:
+    # - no subplot titles
+    # - effect identity shown in legend title
+    # - optional compact y-axis to shrink internal panel spacing
+    function panel_for_combined(base_plot, effect_label; compact_y_axis::Bool=false)
+        p = deepcopy(base_plot)
+        plot!(p;
+            title="",
+            fontfamily="Times Roman",
+            aspect_ratio=:auto,
+            legend=:topleft,
+            legend_title="$(effect_label) Effect",
+            titlefont=font(22, "Times Roman", :black),
+            guidefont=font(19, "Times Roman", :black),
+            tickfont=font(16, "Times Roman", :black),
+            legendfont=font(16, "Times Roman", :black),
+            legend_title_font=font(18, "Times Roman", :black),
+            background_color=:white,
+            background_color_inside=:white,
+            background_color_outside=:white,
+            foreground_color=:black,
+            foreground_color_text=:black,
+            foreground_color_subplot=:black,
+            foreground_color_legend=:black,
+            gridcolor=:gray85)
+        if compact_y_axis
+            plot!(p;
+                ylabel="",
+                yticks=false)
+        end
+        return p
+    end
+
+    total_panel = panel_for_combined(total_info[:plot], "Total")
+    direct_panel = panel_for_combined(direct_info[:plot], "Direct")
+    indirect_panel = panel_for_combined(indirect_info[:plot], "Indirect"; compact_y_axis=true)
+
+    center_band_width = 0.98
+    side_band_width = (1.0 - center_band_width) / 2
+
+    top_row = plot(
+        blank_panel(), total_panel, blank_panel();
+        layout=grid(1, 3, widths=[side_band_width, center_band_width, side_band_width]),
+        margin=0Plots.mm,
+        background_color=:white,
+        background_color_inside=:white,
+        background_color_outside=:white
+    )
+
+    # Keep the two lower panels visually close with minimal horizontal gap.
+    bottom_pair = plot(
+        direct_panel, indirect_panel;
+        layout=grid(1, 2, widths=[0.5, 0.5], hgap=0.003),
+        margin=0Plots.mm,
+        left_margin=0Plots.mm,
+        right_margin=0Plots.mm,
+        top_margin=0Plots.mm,
+        bottom_margin=0Plots.mm,
+        background_color=:white,
+        background_color_inside=:white,
+        background_color_outside=:white
+    )
+
+    bottom_row = plot(
+        blank_panel(), bottom_pair, blank_panel();
+        layout=grid(1, 3, widths=[side_band_width, center_band_width, side_band_width]),
+        margin=0Plots.mm,
+        background_color=:white,
+        background_color_inside=:white,
+        background_color_outside=:white
+    )
+
+    combined = plot(
+        top_row, bottom_row;
+        layout=grid(2, 1, heights=[0.52, 0.48]),
+        size=(1600, 1400),
+        dpi=dpi,
+        fontfamily="Times Roman",
+        margin=0Plots.mm,
+        plot_titlefont=font(24, "Times Roman", :black),
+        background_color=:white,
+        background_color_inside=:white,
+        background_color_outside=:white,
+        foreground_color=:black,
+        foreground_color_text=:black,
+        plot_title=title
+    )
+
+    mkpath(dirname(save_path))
+    savefig(combined, save_path)
+    println("  Combined chart saved: $save_path")
+    return combined
+end
+
 # ============================================================
 # 5. 主入口函数 sfmodel_henderson45
 # ============================================================
@@ -212,12 +389,15 @@ function sfmodel_henderson45(res;
     Wy_mat=nothing, Wu_mat=nothing,
     save_dir::String="result/henderson_45",
     B::Int=499, confidence_level::Float64=0.95, dpi::Int=600,
-    title::String="")
+    title::String="",
+    save_combined::Bool=true)
 
     modelid = res[:modelid]
     cfg = _h45_detect(modelid)
     eqpo = res[:eqpo]
     coef = res[:coeff]
+    coef_raw = _h45_coef_raw(res)
+    has_raw_coef = haskey(res, :coeff_raw)
     vcov = res[:var_cov_mat]
 
     println(">>> Henderson 45度图 — 模型: $modelid")
@@ -226,13 +406,13 @@ function sfmodel_henderson45(res;
     # --- 提取参数索引和系数 ---
     idx_q = eqpo[:coeff_log_hscale]
     idx_w = eqpo[:coeff_log_σᵤ²]
-    τ_coef = coef[idx_q]
-    δ_coef = coef[idx_w]
+    τ_coef = Float64.(coef_raw[idx_q])
+    δ_coef = has_raw_coef ? Float64.(coef_raw[idx_w]) : _h45_sigma_coef_to_log(coef[idx_w])
     nq = length(τ_coef); nw = length(δ_coef)
 
     idx_z = nothing; δz_coef = nothing; nz = 0
     if cfg.has_mu && haskey(eqpo, :coeff_μ)
-        idx_z = eqpo[:coeff_μ]; δz_coef = coef[idx_z]; nz = length(δz_coef)
+        idx_z = eqpo[:coeff_μ]; δz_coef = coef_raw[idx_z]; nz = length(δz_coef)
     end
 
     # --- 空间参数 ---
@@ -280,11 +460,28 @@ function sfmodel_henderson45(res;
 
     # --- 面板结构 ---
     idvar = Symbol(res[:idvar][1])
+    timevar = Symbol(res[:timevar][1])
     city_codes = sort(unique(dat[!, idvar]))
-    city_map = Dict(c => i for (i,c) in enumerate(city_codes))
-    obs_ci = [city_map[c] for c in dat[!, idvar]]
     N_cities = length(city_codes)
     nobs = nrow(dat)
+
+    # 构建 rowIDT（与 get_margeffu 一致）
+    years = sort(unique(dat[!, timevar]))
+    T = length(years)
+    rowIDT_temp = Array{Any}(undef, T, 2)
+    for (tt, yr) in enumerate(years)
+        rowIDT_temp[tt, 1] = findall(dat[!, timevar] .== yr)
+        rowIDT_temp[tt, 2] = length(rowIDT_temp[tt, 1])
+    end
+
+    # 使用与 get_margeffu 相同的 obs_ci 计算方式（sdsfemarginal.jl:1019-1026）
+    obs_ci = zeros(Int, nobs)
+    for ttt in 1:T
+        ind = rowIDT_temp[ttt, 1]
+        for (local_i, global_i) in enumerate(ind)
+            obs_ci[global_i] = local_i
+        end
+    end
 
     # --- 目标变量位置 ---
     target_sym = Symbol(target_var)
@@ -323,14 +520,14 @@ function sfmodel_henderson45(res;
         if cfg.has_mu && nz > 0
             qwz = vcat(Q_mat[i,:], W_mat[i,:], Z_mat[i,:])
             if Mtau !== nothing
-                grad = ForwardDiff.gradient(v -> _h45_Eu_trun_wu(v, nq, nw, τ_coef, δ_coef, δz_coef, Mtau[ci]), qwz)
+                    grad = ForwardDiff.gradient(v -> _h45_Eu_trun_wu(v, nq, nw, τ_coef, δ_coef, δz_coef, Mtau[ci, ci]), qwz)
             else
                 grad = ForwardDiff.gradient(v -> _h45_Eu_trun(v, nq, nw, τ_coef, δ_coef, δz_coef), qwz)
             end
         else
             qw = vcat(Q_mat[i,:], W_mat[i,:])
             if Mtau !== nothing
-                grad = ForwardDiff.gradient(v -> _h45_Eu_half_wu(v, nq, τ_coef, δ_coef, Mtau[ci]), qw)
+                    grad = ForwardDiff.gradient(v -> _h45_Eu_half_wu(v, nq, τ_coef, δ_coef, Mtau[ci, ci]), qw)
             else
                 grad = ForwardDiff.gradient(v -> _h45_Eu_half(v, nq, τ_coef, δ_coef), qw)
             end
@@ -378,6 +575,9 @@ function sfmodel_henderson45(res;
     sub_vcov = vcov[mc_idx, mc_idx]
     L = _safe_cholesky_L(Symmetric(sub_vcov))
     mc_direct = zeros(nobs, B); mc_indirect = zeros(nobs, B); mc_total = zeros(nobs, B)
+    valid_col = 0
+    skipped_draw = 0
+    min_valid = max(_H45_MIN_VALID_DRAWS, ceil(Int, _H45_MIN_VALID_RATIO * B))
 
     # --- MC 模拟循环 ---
     for b in 1:B
@@ -386,49 +586,117 @@ function sfmodel_henderson45(res;
         δ_b = δ_coef .+ perturb[off_δ]
         δz_b = off_z !== nothing ? δz_coef .+ perturb[off_z] : nothing
 
+        draw_ok = true
+
         # 空间参数扰动
         A_diag_b = ones(N_cities); A_colsum_b = ones(N_cities)
         if has_spatial && off_gamma !== nothing
             g_b = gammap_raw + perturb[off_gamma]
             rho_b = _h45_transform(g_b, rymin, rymax)
-            A_b = inv(I(N_cities) - rho_b * Wy_mat)
-            A_diag_b = diag(A_b); A_colsum_b = vec(sum(A_b, dims=1))
+            A_b = try
+                inv(I(N_cities) - rho_b * Wy_mat)
+            catch
+                draw_ok = false
+                nothing
+            end
+            if draw_ok
+                A_diag_b = diag(A_b); A_colsum_b = vec(sum(A_b, dims=1))
+            end
         end
+
         Mtau_b = nothing
-        if cfg.has_Wu && off_tau !== nothing && Wu_mat !== nothing
+        if draw_ok && cfg.has_Wu && off_tau !== nothing && Wu_mat !== nothing
             t_b = taup_raw + perturb[off_tau]
             tau_b = _h45_transform(t_b, rumin, rumax)
-            Mtau_b = inv(I(N_cities) - tau_b * Wu_mat)
+            Mtau_b = try
+                inv(I(N_cities) - tau_b * Wu_mat)
+            catch
+                draw_ok = false
+                nothing
+            end
         end
+
+        if !draw_ok
+            skipped_draw += 1
+            continue
+        end
+
+        col_direct = zeros(nobs)
+        col_indirect = zeros(nobs)
+        col_total = zeros(nobs)
 
         for i in 1:nobs
             ci = obs_ci[i]
-            if cfg.has_mu && nz > 0
-                qwz = vcat(Q_mat[i,:], W_mat[i,:], Z_mat[i,:])
-                if Mtau_b !== nothing
-                    grad = ForwardDiff.gradient(v -> _h45_Eu_trun_wu(v, nq, nw, τ_b, δ_b, δz_b, Mtau_b[ci]), qwz)
+            grad = try
+                if cfg.has_mu && nz > 0
+                    qwz = vcat(Q_mat[i,:], W_mat[i,:], Z_mat[i,:])
+                    if Mtau_b !== nothing
+                        ForwardDiff.gradient(v -> _h45_Eu_trun_wu(v, nq, nw, τ_b, δ_b, δz_b, Mtau_b[ci, ci]), qwz)
+                    else
+                        ForwardDiff.gradient(v -> _h45_Eu_trun(v, nq, nw, τ_b, δ_b, δz_b), qwz)
+                    end
                 else
-                    grad = ForwardDiff.gradient(v -> _h45_Eu_trun(v, nq, nw, τ_b, δ_b, δz_b), qwz)
+                    qw = vcat(Q_mat[i,:], W_mat[i,:])
+                    if Mtau_b !== nothing
+                        ForwardDiff.gradient(v -> _h45_Eu_half_wu(v, nq, τ_b, δ_b, Mtau_b[ci, ci]), qw)
+                    else
+                        ForwardDiff.gradient(v -> _h45_Eu_half(v, nq, τ_b, δ_b), qw)
+                    end
                 end
-            else
-                qw = vcat(Q_mat[i,:], W_mat[i,:])
-                if Mtau_b !== nothing
-                    grad = ForwardDiff.gradient(v -> _h45_Eu_half_wu(v, nq, τ_b, δ_b, Mtau_b[ci]), qw)
-                else
-                    grad = ForwardDiff.gradient(v -> _h45_Eu_half(v, nq, τ_b, δ_b), qw)
-                end
+            catch
+                draw_ok = false
+                nothing
             end
+
+            if !draw_ok
+                break
+            end
+
             me_raw = grad[target_k]
+            if !isfinite(me_raw)
+                draw_ok = false
+                break
+            end
+
             if has_spatial
-                mc_direct[i,b]   = A_diag_b[ci] * me_raw
-                mc_total[i,b]    = A_colsum_b[ci] * me_raw
-                mc_indirect[i,b] = mc_total[i,b] - mc_direct[i,b]
+                col_direct[i] = A_diag_b[ci] * me_raw
+                col_total[i] = A_colsum_b[ci] * me_raw
+                col_indirect[i] = col_total[i] - col_direct[i]
             else
-                mc_direct[i,b] = me_raw; mc_indirect[i,b] = 0.0; mc_total[i,b] = me_raw
+                col_direct[i] = me_raw
+                col_total[i] = me_raw
+                col_indirect[i] = 0.0
             end
         end
-        b % 100 == 0 && println("  MC draw $b / $B")
+
+        if draw_ok && all(isfinite, col_direct) && all(isfinite, col_total) && all(isfinite, col_indirect)
+            valid_col += 1
+            mc_direct[:, valid_col] = col_direct
+            mc_total[:, valid_col] = col_total
+            mc_indirect[:, valid_col] = col_indirect
+        else
+            skipped_draw += 1
+        end
+
+        b % 100 == 0 && println("  MC draw $b / $B (valid=$valid_col, skipped=$skipped_draw)")
     end
+
+    if valid_col < min_valid
+        @warn "Henderson MC valid draws below threshold; fallback uncertainty used" valid=valid_col required=min_valid total=B
+        if valid_col == 0
+            valid_col = 1
+            mc_direct[:, valid_col] = direct_me
+            mc_indirect[:, valid_col] = indirect_me
+            mc_total[:, valid_col] = total_me
+        end
+    end
+    if skipped_draw > 0
+        @warn "Henderson MC skipped non-finite draws" skipped=skipped_draw valid=valid_col total=B
+    end
+
+    mc_direct = mc_direct[:, 1:valid_col]
+    mc_indirect = mc_indirect[:, 1:valid_col]
+    mc_total = mc_total[:, 1:valid_col]
     println(">>> MC 模拟完成")
 
     # --- 生成 Henderson 45度图 ---
@@ -442,7 +710,7 @@ function sfmodel_henderson45(res;
             ("indirect", indirect_me, mc_indirect),
             ("total", total_me, mc_total)]
 
-            se_vec = vec(std(mc_mat, dims=2))
+            se_vec = vec(std(mc_mat, dims=2; corrected=false))
             path = joinpath(save_dir, "henderson_$(target_var)_$(eff_name).png")
             plot_title = title == "" ? "45° Diagnostic: $(uppercase(target_var)) $(titlecase(eff_name)) Effect on E(u)" : title
             r = henderson_45degree(Float64.(eff_vec), se_vec;
@@ -452,9 +720,9 @@ function sfmodel_henderson45(res;
             results[eff_name] = r
         end
     else
-        se_vec = vec(std(mc_direct, dims=2))
+        se_vec = vec(std(mc_direct, dims=2; corrected=false))
         path = joinpath(save_dir, "henderson_$(target_var).png")
-        plot_title = title == "" ? "45° Diagnostic: $(uppercase(target_var)) Marginal Effect on E(u)" : title
+        plot_title = title == "" ? "45° Diagnostic: $(uppercase(target_var)) Marginal effect on E(u)" : title
         r = henderson_45degree(Float64.(raw_me), se_vec;
             save_path=path, parametric_mean=mean(raw_me),
             confidence_level=confidence_level, dpi=dpi,
@@ -463,6 +731,17 @@ function sfmodel_henderson45(res;
     end
 
     # --- 汇总 ---
+    if save_combined && has_spatial
+        combined_path = joinpath(save_dir, "henderson_$(target_var)_combined.png")
+        combined_title = title == "" ?
+            "45 Degree Diagnostic: $(uppercase(target_var)) Effects (Total / Direct / Indirect)" :
+            title
+        combined_plot = _h45_save_combined_plot(results, combined_path; dpi=dpi, title=combined_title)
+        if combined_plot !== nothing
+            results["combined"] = Dict(:plot => combined_plot, :path => combined_path)
+        end
+    end
+
     println("\n", "="^60)
     println("Henderson 45度图汇总 — $target_var 对 E(u) 的边际效应")
     println("模型: $modelid | 分布: $(cfg.is_half ? "半正态" : "截断正态")")
@@ -515,7 +794,9 @@ function sfmodel_henderson45_y(res;
     wx_deriv::Dict{Symbol, <:Any}=Dict{Symbol, Any}(),
     Wy_mat=nothing,
     save_dir::String="result/henderson_45_y",
-    B::Int=499, confidence_level::Float64=0.95, dpi::Int=600)
+    B::Int=499, confidence_level::Float64=0.95, dpi::Int=600,
+    title::String="",
+    save_combined::Bool=true)
 
     modelid = res[:modelid]
     cfg = _h45_detect(modelid)
@@ -572,11 +853,28 @@ function sfmodel_henderson45_y(res;
 
     # --- 面板结构 ---
     idvar = Symbol(res[:idvar][1])
+    timevar = Symbol(res[:timevar][1])
     city_codes = sort(unique(dat[!, idvar]))
-    city_map = Dict(c => i for (i,c) in enumerate(city_codes))
-    obs_ci = [city_map[c] for c in dat[!, idvar]]
     N_cities = length(city_codes)
     nobs = nrow(dat)
+
+    # 构建 rowIDT（与 get_margeffu 一致）
+    years = sort(unique(dat[!, timevar]))
+    T = length(years)
+    rowIDT_temp = Array{Any}(undef, T, 2)
+    for (tt, yr) in enumerate(years)
+        rowIDT_temp[tt, 1] = findall(dat[!, timevar] .== yr)
+        rowIDT_temp[tt, 2] = length(rowIDT_temp[tt, 1])
+    end
+
+    # 使用与 get_margeffu 相同的 obs_ci 计算方式（sdsfemarginal.jl:1019-1026）
+    obs_ci = zeros(Int, nobs)
+    for ttt in 1:T
+        ind = rowIDT_temp[ttt, 1]
+        for (local_i, global_i) in enumerate(ind)
+            obs_ci[global_i] = local_i
+        end
+    end
 
     # --- 获取空间权重矩阵 ---
     # 从模型结果中获取（不使用全局变量 _dicM，避免多模型混淆）
@@ -686,9 +984,14 @@ function sfmodel_henderson45_y(res;
     sub_vcov = vcov[mc_idx, mc_idx]
     L = _safe_cholesky_L(Symmetric(sub_vcov))
     mc_direct = zeros(nobs, B); mc_indirect = zeros(nobs, B); mc_total = zeros(nobs, B)
+    valid_col = 0
+    skipped_draw = 0
+    min_valid = max(_H45_MIN_VALID_DRAWS, ceil(Int, _H45_MIN_VALID_RATIO * B))
+
     for b in 1:B
         perturb = L * randn(size(L,1))
         β_b = β_frontier .+ perturb[off_beta]
+        draw_ok = true
 
         # 空间参数扰动
         A_diag_b = ones(N_cities); A_colsum_b = ones(N_cities)
@@ -696,15 +999,32 @@ function sfmodel_henderson45_y(res;
         if has_spatial && off_gamma !== nothing
             g_b = gammap_raw + perturb[off_gamma]
             rho_b = _h45_transform(g_b, rymin, rymax)
-            A_b = inv(I(N_cities) - rho_b * Wy_mat)
-            AW_b = A_b * Wy_mat
-            A_diag_b = diag(A_b); A_colsum_b = vec(sum(A_b, dims=1))
-            AW_diag_b = diag(AW_b); AW_colsum_b = vec(sum(AW_b, dims=1))
+            A_b = try
+                inv(I(N_cities) - rho_b * Wy_mat)
+            catch
+                draw_ok = false
+                nothing
+            end
+            if draw_ok
+                AW_b = A_b * Wy_mat
+                A_diag_b = diag(A_b); A_colsum_b = vec(sum(A_b, dims=1))
+                AW_diag_b = diag(AW_b); AW_colsum_b = vec(sum(AW_b, dims=1))
+            end
         end
+
+        if !draw_ok
+            skipped_draw += 1
+            continue
+        end
+
+        col_direct = zeros(nobs)
+        col_indirect = zeros(nobs)
+        col_total = zeros(nobs)
 
         for i in 1:nobs
             ci = obs_ci[i]
-            me_nonwx = 0.0; me_wx = 0.0
+            me_nonwx = 0.0
+            me_wx = 0.0
             for k in 1:nf
                 if k in wx_indices_in_frontier
                     me_wx += β_b[k] * deriv_mat[i, k]
@@ -713,16 +1033,44 @@ function sfmodel_henderson45_y(res;
                 end
             end
             if has_spatial
-                mc_direct[i,b]   = A_diag_b[ci] * me_nonwx + AW_diag_b[ci] * me_wx
-                mc_total[i,b]    = A_colsum_b[ci] * me_nonwx + AW_colsum_b[ci] * me_wx
-                mc_indirect[i,b] = mc_total[i,b] - mc_direct[i,b]
+                col_direct[i] = A_diag_b[ci] * me_nonwx + AW_diag_b[ci] * me_wx
+                col_total[i] = A_colsum_b[ci] * me_nonwx + AW_colsum_b[ci] * me_wx
+                col_indirect[i] = col_total[i] - col_direct[i]
             else
-                mc_direct[i,b] = me_nonwx + me_wx
-                mc_total[i,b]  = me_nonwx + me_wx
+                col_direct[i] = me_nonwx + me_wx
+                col_total[i] = me_nonwx + me_wx
+                col_indirect[i] = 0.0
             end
         end
-        b % 100 == 0 && println("  MC draw $b / $B")
+
+        if all(isfinite, col_direct) && all(isfinite, col_total) && all(isfinite, col_indirect)
+            valid_col += 1
+            mc_direct[:, valid_col] = col_direct
+            mc_total[:, valid_col] = col_total
+            mc_indirect[:, valid_col] = col_indirect
+        else
+            skipped_draw += 1
+        end
+
+        b % 100 == 0 && println("  MC draw $b / $B (valid=$valid_col, skipped=$skipped_draw)")
     end
+
+    if valid_col < min_valid
+        @warn "Henderson-Y MC valid draws below threshold; fallback uncertainty used" valid=valid_col required=min_valid total=B
+        if valid_col == 0
+            valid_col = 1
+            mc_direct[:, valid_col] = direct_me
+            mc_indirect[:, valid_col] = indirect_me
+            mc_total[:, valid_col] = total_me
+        end
+    end
+    if skipped_draw > 0
+        @warn "Henderson-Y MC skipped non-finite draws" skipped=skipped_draw valid=valid_col total=B
+    end
+
+    mc_direct = mc_direct[:, 1:valid_col]
+    mc_indirect = mc_indirect[:, 1:valid_col]
+    mc_total = mc_total[:, 1:valid_col]
     println(">>> MC 模拟完成")
     # --- 生成 Henderson 45度图 ---
     println(">>> 生成 Henderson 45度图...")
@@ -735,22 +1083,35 @@ function sfmodel_henderson45_y(res;
             ("indirect", indirect_me, mc_indirect),
             ("total", total_me, mc_total)]
 
-            se_vec = vec(std(mc_mat, dims=2))
+            se_vec = vec(std(mc_mat, dims=2; corrected=false))
             path = joinpath(save_dir, "henderson_y_$(target_var)_$(eff_name).png")
+            plot_title = title == "" ? "45° Diagnostic: ∂lnC/∂$(target_var) $(titlecase(eff_name)) Effect" : title
             r = henderson_45degree(Float64.(eff_vec), se_vec;
                 save_path=path, parametric_mean=mean(eff_vec),
                 confidence_level=confidence_level, dpi=dpi,
-                title="45° Diagnostic: ∂lnC/∂$(target_var) $(titlecase(eff_name)) Effect")
+                title=plot_title)
             results[eff_name] = r
         end
     else
-        se_vec = vec(std(mc_direct, dims=2))
+        se_vec = vec(std(mc_direct, dims=2; corrected=false))
         path = joinpath(save_dir, "henderson_y_$(target_var).png")
+        plot_title = title == "" ? "45° Diagnostic: ∂lnC/∂$(target_var) Marginal effect" : title
         r = henderson_45degree(Float64.(raw_me), se_vec;
             save_path=path, parametric_mean=mean(raw_me),
             confidence_level=confidence_level, dpi=dpi,
-            title="45° Diagnostic: ∂lnC/∂$(target_var) Marginal Effect")
+            title=plot_title)
         results["total"] = r
+    end
+
+    if save_combined && has_spatial
+        combined_path = joinpath(save_dir, "henderson_y_$(target_var)_combined.png")
+        combined_title = title == "" ?
+            "45 Degree Diagnostic: dlnC/d$(target_var) Effects (Total / Direct / Indirect)" :
+            title
+        combined_plot = _h45_save_combined_plot(results, combined_path; dpi=dpi, title=combined_title)
+        if combined_plot !== nothing
+            results["combined"] = Dict(:plot => combined_plot, :path => combined_path)
+        end
     end
 
     println("\n", "="^60)
@@ -872,6 +1233,8 @@ function sfmodel_counterfactual(res;
     cfg = (is_half=is_half, has_Wu=has_Wu, has_Wy=has_Wy, has_mu=has_mu)
 
     coef = res[:coeff]
+    coef_raw = _h45_coef_raw(res)
+    has_raw_coef = haskey(res, :coeff_raw)
     eqpo = res[:eqpo]
     PorC = res[:PorC]
 
@@ -879,20 +1242,20 @@ function sfmodel_counterfactual(res;
 
     # --- 提取系数 ---
     idx_frontier = eqpo[:coeff_frontier]
-    β = coef[idx_frontier]
+    β = coef_raw[idx_frontier]
     idx_q = eqpo[:coeff_log_hscale]
-    τ = coef[idx_q]
+    τ = coef_raw[idx_q]
     idx_w = eqpo[:coeff_log_σᵤ²]
-    δ2 = coef[first(idx_w)]
+    δ2 = has_raw_coef ? coef_raw[first(idx_w)] : _h45_sigma_coef_to_log([coef[first(idx_w)]])[1]
     idx_v = eqpo[:coeff_log_σᵥ²]
-    γ_val = coef[first(idx_v)]
+    γ_val = has_raw_coef ? coef_raw[first(idx_v)] : _h45_sigma_coef_to_log([coef[first(idx_v)]])[1]
 
     σᵤ² = exp(δ2)
     σᵥ² = exp(γ_val)
     μ = 0.0  # 半正态
     if cfg.has_mu && haskey(eqpo, :coeff_μ)
         idx_z = eqpo[:coeff_μ]
-        μ = coef[first(idx_z)]
+        μ = coef_raw[first(idx_z)]
     end
 
     # --- 空间参数 ---

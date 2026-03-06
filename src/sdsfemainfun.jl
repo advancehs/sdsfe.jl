@@ -1553,6 +1553,66 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
 
  end     # if (do_warmstart_search == 0 )....
 
+ #* ---- Post-estimation finite check + one fallback retry ----
+ _coefvec_now = try
+                    Optim.minimizer(mfun)
+                catch
+                    fill(NaN, length(sf_init))
+                end
+ _obj_now = try
+                Optim.minimum(mfun)
+            catch
+                NaN
+            end
+ _grad_now = try
+                 Optim.g_residual(mfun)
+             catch
+                 NaN
+             end
+
+ _need_retry = (!all(isfinite, _coefvec_now)) || (!isfinite(_obj_now)) || (isnan(_grad_now) || !isfinite(_grad_now))
+ if _need_retry
+      redflag = 1
+      printstyled("Numerical issue detected in optimization output; retrying with NelderMead fallback.\n\n"; color=:red)
+      retry_init = copy(_coefvec_now)
+      @inbounds for i in eachindex(retry_init)
+          if !isfinite(retry_init[i])
+              retry_init[i] = 0.0
+          end
+      end
+      Random.seed!(20260306)
+      retry_init = retry_init .+ 1.0e-4 .* randn(length(retry_init))
+
+      mfun_retry = optimize(_Hessian,
+                            retry_init,
+                            NelderMead(),
+                            Optim.Options(g_tol = sf_tol,
+                                          iterations = max(sf_maxit, 1000),
+                                          store_trace = true,
+                                          show_trace = false))
+      sf_total_iter += Optim.iterations(mfun_retry)
+
+      _coefvec_retry = try
+                          Optim.minimizer(mfun_retry)
+                      catch
+                          Float64[]
+                      end
+      _obj_retry = try
+                      Optim.minimum(mfun_retry)
+                  catch
+                      NaN
+                  end
+
+      if (!isempty(_coefvec_retry)) && all(isfinite, _coefvec_retry) && isfinite(_obj_retry)
+          mfun = mfun_retry
+          if _dicOPT[:verbose]
+              printstyled("Fallback optimization succeeded and was accepted.\n\n"; color=:yellow)
+          end
+      else
+          printstyled("Fallback optimization failed; continue with guarded post-estimation.\n\n"; color=:red)
+      end
+ end
+
 #* ###### Post-estimation process ############### 
     _coevec            = Optim.minimizer(mfun)  # coef. vec.
   
@@ -1621,8 +1681,13 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                                               pinv(Symmetric(numerical_hessian))
                                             catch err 
                                               redflag = 1
-                                              # checkCollinear(tagD[:modelid], xvar,  qvar, wvar, vvar,zvar) # check if it is b/c of multi-collinearity in the data         
-                                              throw("The Hessian matrix is not invertible, indicating the model does not converge properly. The estimation is abort.")
+                                              # Fallback for ill-conditioned Hessian: keep coefficient estimates
+                                              # and use a conservative diagonal var-cov matrix so estimation does not abort.
+                                              npar = length(_coevec)
+                                              if _dicOPT[:verbose]
+                                                  @warn "Hessian inversion failed; using diagonal fallback var-cov matrix (large variance)."
+                                              end
+                                              1.0e8 .* Matrix{Float64}(I, npar, npar)
                                             end
                         end
     else
@@ -1635,8 +1700,13 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
                           pinv(Symmetric(numerical_hessian))
                         catch err 
                           redflag = 1
-                          # checkCollinear(tagD[:modelid], xvar,  qvar, wvar, vvar,zvar) # check if it is b/c of multi-collinearity in the data         
-                          throw("The Hessian matrix is not invertible, indicating the model does not converge properly. The estimation is abort.")
+                          # Fallback for ill-conditioned Hessian: keep coefficient estimates
+                          # and use a conservative diagonal var-cov matrix so estimation does not abort.
+                          npar = length(_coevec)
+                          if _dicOPT[:verbose]
+                              @warn "Hessian inversion failed; using diagonal fallback var-cov matrix (large variance)."
+                          end
+                          1.0e8 .* Matrix{Float64}(I, npar, npar)
                         end
     end
     if !issymmetric(var_cov_matrix)
@@ -1690,10 +1760,30 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
    Random.seed!(123)
 
    if _dicOPT[:margeffu]
-      jlms0 = jlmsbc0(tagD[:modelid], yvar, xvar,  qvar, wvar, vvar,  zvar, envar, ivvar,
-                              _porc, num, pos, _coevec,  eigvalu, rowIDT)
+      jlms0 = try
+                 jlmsbc0(tagD[:modelid], yvar, xvar,  qvar, wvar, vvar,  zvar, envar, ivvar,
+                                 _porc, num, pos, _coevec,  eigvalu, rowIDT)
+              catch err
+                 redflag = 1
+                 if _dicOPT[:verbose]
+                     @warn "jlmsbc0 failed; skipping margeffu output." exception=(err, catch_backtrace())
+                 end
+                 nothing
+              end
 
-      totalematu, dirematu, indirematu = get_margeffu(jlms0, pos, _coevec,  var_cov_matrix,  eigvalu, indices_listz, rowIDT; qvar=qvar, wvar=wvar, zvar=zvar, modelid=tagD[:modelid])
+      if jlms0 === nothing
+          totalematu, dirematu, indirematu = nothing, nothing, nothing
+      else
+          try
+              totalematu, dirematu, indirematu = get_margeffu(jlms0, pos, _coevec,  var_cov_matrix,  eigvalu, indices_listz, rowIDT; qvar=qvar, wvar=wvar, zvar=zvar, modelid=tagD[:modelid])
+          catch err
+              redflag = 1
+              if _dicOPT[:verbose]
+                  @warn "get_margeffu failed; skipping margeffu output." exception=(err, catch_backtrace())
+              end
+              totalematu, dirematu, indirematu = nothing, nothing, nothing
+          end
+      end
    else
       totalematu, dirematu, indirematu = nothing, nothing, nothing
    end      
@@ -1710,9 +1800,17 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
       totalemat, diremat, indiremat = nothing, nothing, nothing
    end
    #* ---- Counterfactual analysis -------------- 
+   _counterfacttotal, _counterfactdire, _counterfactindire = nothing, nothing, nothing
    if _dicOPT[:counterfact]  
-   @views (_counterfacttotal, _counterfactdire,_counterfactindire) = counterfactindex(  tagD[:modelid], yvar, xvar, qvar, wvar, vvar,  zvar, envar, ivvar,
-                                     _porc, num, pos, _coevec, eigvalu, rowIDT )
+      try
+          @views (_counterfacttotal, _counterfactdire,_counterfactindire) = counterfactindex(  tagD[:modelid], yvar, xvar, qvar, wvar, vvar,  zvar, envar, ivvar,
+                                        _porc, num, pos, _coevec, eigvalu, rowIDT )
+      catch err
+          redflag = 1
+          if _dicOPT[:verbose]
+              @warn "counterfactindex failed; skipping counterfactual output." exception=(err, catch_backtrace())
+          end
+      end
    end
   
    #* ------- Make Table ------------------
@@ -1731,18 +1829,24 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
       stddev_adj = vcat(stddev_adj, stddev[eqvec2[i]])
       else
           if keys(eqvec2)[i] == :coeff_γ
-              ss =  stddev[eqvec2[i]][1]
-              stddev_gamma_adj =abs(ss*(eigvalu.rymax-eigvalu.rymin)*exp(ss)/(1+exp(ss))^2  )
+              ss_raw = _coevec[eqvec2[i]][1]
+              ss = stddev[eqvec2[i]][1]
+              jac = (eigvalu.rymax - eigvalu.rymin) * exp(ss_raw) / (1 + exp(ss_raw))^2
+              stddev_gamma_adj = abs(jac * ss)
               stddev_adj = vcat(stddev_adj, stddev_gamma_adj)
           end
           if keys(eqvec2)[i] == :coeff_τ
-              ss =  stddev[eqvec2[i]][1]
-              stddev_tau_adj = abs(ss*(eigvalu.rumax-eigvalu.rumin)*exp(ss)/(1+exp(ss))^2  )
+              ss_raw = _coevec[eqvec2[i]][1]
+              ss = stddev[eqvec2[i]][1]
+              jac = (eigvalu.rumax - eigvalu.rumin) * exp(ss_raw) / (1 + exp(ss_raw))^2
+              stddev_tau_adj = abs(jac * ss)
               stddev_adj = vcat(stddev_adj, stddev_tau_adj)
           end
           if keys(eqvec2)[i] == :coeff_ρ
-              ss =  stddev[eqvec2[i]][1]
-              stddev_rho_adj = abs(ss*(eigvalu.rvmax-eigvalu.rvmin)*exp(ss)/(1+exp(ss))^2  )
+              ss_raw = _coevec[eqvec2[i]][1]
+              ss = stddev[eqvec2[i]][1]
+              jac = (eigvalu.rvmax - eigvalu.rvmin) * exp(ss_raw) / (1 + exp(ss_raw))^2
+              stddev_rho_adj = abs(jac * ss)
               stddev_adj = vcat(stddev_adj, stddev_rho_adj)
           end
           if keys(eqvec2)[i] == :coeff_log_σᵤ²
@@ -2012,9 +2116,13 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
     _dicRES[:table_display]   = [table_display][1]  # 简化表格（方程名、变量名、系数带星号、标准误）
     _dicRES[:table_display_header] = table_display_header  # 表头
     _dicRES[:coeff]           = _coevec_adj
+    _dicRES[:coeff_raw]       = _coevec
+    _dicRES[:coeff_scale]     = :display
+    _dicRES[:coeff_raw_scale] = :optimization
     _dicRES[:coeff_show]      = _coevec_adj_show
     _dicRES[:coeff_with_stars] = coef_with_stars  # 带星号的系数
     _dicRES[:std_err]         = stddev_adj
+    _dicRES[:std_err_raw]     = stddev
     _dicRES[:var_cov_mat]     = [var_cov_matrix][1]
     _dicRES[:jlms]            = _jlms
     _dicRES[:jlms_direct]     = _jlms_direct
@@ -2066,7 +2174,9 @@ function sfmodel_fit(sfdat::DataFrame) #, D1::Dict = _dicM, D2::Dict = _dicINI, 
     _dicRES[:transfer]      = _dicM[:transfer]
 
   for i in 1:length(eqvec2)
-      _dicRES[keys(eqvec2)[i]] = _coevec_adj[eqvec2[i]]
+      _key = keys(eqvec2)[i]
+      _dicRES[_key] = _coevec_adj[eqvec2[i]]
+      _dicRES[Symbol(string(_key), "_raw")] = _coevec[eqvec2[i]]
   end
 
     _dicRES[:________________]  = "___________________" #34

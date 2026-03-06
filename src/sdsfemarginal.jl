@@ -25,6 +25,21 @@ function _safe_cholesky_L(A::Union{Symmetric{Float64, Matrix{Float64}}, Matrix{F
     return cholesky(A_pd).L
 end
 
+# Numerical guards for truncated-normal marginal effects.
+# Keep Mills ratio finite when `normcdf(x)` underflows and avoid perturbing regular cases.
+const _MARGEFF_CDF_EPS = eps(Float64)
+const _MARGEFF_SD_EPS = sqrt(eps(Float64))
+
+function _safe_mills_ratio(x)
+    c = normcdf(x)
+    if !isfinite(c) || c <= _MARGEFF_CDF_EPS
+        ax = abs(float(x))
+        return (isfinite(ax) && ax > 0.0) ? (ax + inv(ax)) : 0.0
+    end
+    r = normpdf(x) / c
+    return isfinite(r) ? r : 0.0
+end
+
 
 #? ----------- truncated normal, marginal effect function -------
 
@@ -43,10 +58,10 @@ function marg_ssfoadt(ttt::Int, iii::Int, N::Int,# PorC::Int64,
     if Wu!=Nothing 
          if length(Wu)==1
               Mtau = (I(N)-tau*Wu[1])\I(N);
-              hs = Mtau[iii]*h;
+              hs = Mtau[mod1(iii, N), mod1(iii, N)]*h;
          else
               Mtau = (I(N)-tau*Wu[ttt])\I(N);
-              hs = Mtau[iii]*h;
+              hs = Mtau[mod1(iii, N), mod1(iii, N)]*h;
          end
     else
         hs = h;
@@ -55,7 +70,7 @@ function marg_ssfoadt(ttt::Int, iii::Int, N::Int,# PorC::Int64,
      hsσᵤ = hs*σᵤ 
       Λ  = hsμ/hsσᵤ 
     
-     uncondU = hsσᵤ* (Λ + normpdf(Λ) / normcdf(Λ)) # kx1
+     uncondU = hsσᵤ* (Λ + _safe_mills_ratio(Λ)) # kx1
    
 end   
 
@@ -133,10 +148,10 @@ function marg_ssfoadh(ttt::Int, iii::Int, N::Int,# PorC::Int64,
     if Wu!=Nothing 
          if length(Wu)==1
               Mtau = (I(N)-tau*Wu[1])\I(N);
-              hs = Mtau[iii]*h;
+              hs = Mtau[mod1(iii, N), mod1(iii, N)]*h;
          else
               Mtau = (I(N)-tau*Wu[ttt])\I(N);
-              hs = Mtau[iii]*h;
+              hs = Mtau[mod1(iii, N), mod1(iii, N)]*h;
          end
     else
         hs = h;
@@ -145,7 +160,7 @@ function marg_ssfoadh(ttt::Int, iii::Int, N::Int,# PorC::Int64,
      hsσᵤ = hs*σᵤ 
       Λ  = hsμ/hsσᵤ 
     
-     uncondU = hsσᵤ* (Λ + normpdf(Λ) / normcdf(Λ)) # kx1
+     uncondU = hsσᵤ* (Λ + _safe_mills_ratio(Λ)) # kx1
    
 end   
 
@@ -224,10 +239,10 @@ function marg_ssfoah(ttt::Int, iii::Int, N::Int,# PorC::Int64,
 
           if length(Wu)==1
                Mtau = (I(N)-tau*Wu[1])\I(N);
-               hs = Mtau[iii]*h;
+              hs = Mtau[mod1(iii, N), mod1(iii, N)]*h;
           else
                Mtau = (I(N)-tau*Wu[ttt])\I(N);
-               hs = Mtau[iii]*h;
+              hs = Mtau[mod1(iii, N), mod1(iii, N)]*h;
           end
      else
           hs=h
@@ -237,7 +252,7 @@ function marg_ssfoah(ttt::Int, iii::Int, N::Int,# PorC::Int64,
      hsσᵤ = hs*σᵤ 
       Λ  = hsμ/hsσᵤ 
     
-     uncondU = hsσᵤ* (Λ + normpdf(Λ) / normcdf(Λ)) # kx1
+     uncondU = hsσᵤ* (Λ + _safe_mills_ratio(Λ)) # kx1
    
 end   
 
@@ -323,10 +338,10 @@ function marg_ssfoat(ttt::Int, iii::Int, N::Int,# PorC::Int64,
 
           if length(Wu)==1
                Mtau = (I(N)-tau*Wu[1])\I(N);
-               hs = Mtau[iii]*h;
+              hs = Mtau[mod1(iii, N), mod1(iii, N)]*h;
           else
                Mtau = (I(N)-tau*Wu[ttt])\I(N);
-               hs = Mtau[iii]*h;
+              hs = Mtau[mod1(iii, N), mod1(iii, N)]*h;
           end
      else
           hs=h
@@ -336,7 +351,7 @@ function marg_ssfoat(ttt::Int, iii::Int, N::Int,# PorC::Int64,
      hsσᵤ = hs*σᵤ 
       Λ  = hsμ/hsσᵤ 
     
-     uncondU = hsσᵤ* (Λ + normpdf(Λ) / normcdf(Λ)) # kx1
+     uncondU = hsσᵤ* (Λ + _safe_mills_ratio(Λ)) # kx1
    
 end   
 
@@ -866,7 +881,7 @@ end
 
 function get_margeffu_single(pos::NamedTuple, coef::Array{Float64, 1}, indices,
      Q_mat::Matrix{Float64}, W_mat::Matrix{Float64}, Z_mat::Union{Matrix{Float64}, Nothing},
-     obs_ci::Vector{Int}, A_diag::Vector{Float64}, A_colsum::Vector{Float64},
+     obs_ci::Vector{Int}, Mtau_obs::Vector{Float64}, A_diag::Vector{Float64}, A_colsum::Vector{Float64},
      L::LowerTriangular, modelid, target_k::Int)
      ## 修正版：使用完整梯度方法（2026-03-03）与 Henderson 45度图一致
 
@@ -909,12 +924,20 @@ function get_margeffu_single(pos::NamedTuple, coef::Array{Float64, 1}, indices,
                      h = exp(dot(q, τ_coef))
                      σᵤ = exp(0.5 * dot(w, δ_coef))
                      Λ = μ_i / σᵤ
-                     return h * σᵤ * (Λ + normpdf(Λ) / normcdf(Λ))
+                     return h * σᵤ * (Λ + _safe_mills_ratio(Λ))
                  end
              end
              qw = vcat(Q_mat[i,:], W_mat[i,:])
              grad = ForwardDiff.gradient(_Eu_trun, qw)
              raw_me[i] = grad[target_k]
+         end
+     end
+
+     # Wu branch scaling: hs = Mtau_ii * h
+     raw_me .= raw_me .* Mtau_obs
+     @inbounds for i in eachindex(raw_me)
+         if !isfinite(raw_me[i])
+             raw_me[i] = 0.0
          end
      end
 
@@ -961,7 +984,7 @@ function get_margeffu_single(pos::NamedTuple, coef::Array{Float64, 1}, indices,
                          h = exp(dot(q, τ_coef_mc))
                          σᵤ = exp(0.5 * dot(w, δ_coef_mc))
                          Λ = μ_i_mc / σᵤ
-                         return h * σᵤ * (Λ + normpdf(Λ) / normcdf(Λ))
+                         return h * σᵤ * (Λ + _safe_mills_ratio(Λ))
                      end
                  end
                  qw = vcat(Q_mat[i,:], W_mat[i,:])
@@ -970,18 +993,25 @@ function get_margeffu_single(pos::NamedTuple, coef::Array{Float64, 1}, indices,
              end
          end
 
+         raw_me_mc .= raw_me_mc .* Mtau_obs
+         if !all(isfinite, raw_me_mc)
+             continue
+         end
+
          direct_vec_mc = [A_diag[obs_ci[i]] * raw_me_mc[i] for i in 1:nobs]
          total_vec_mc = [A_colsum[obs_ci[i]] * raw_me_mc[i] for i in 1:nobs]
          indirect_vec_mc = total_vec_mc .- direct_vec_mc
 
-         push!(diretmat_mc, mean(direct_vec_mc))
-         push!(totalmat_mc, mean(total_vec_mc))
-         push!(indiretmat_mc, mean(indirect_vec_mc))
+         if all(isfinite, direct_vec_mc) && all(isfinite, total_vec_mc) && all(isfinite, indirect_vec_mc)
+             push!(diretmat_mc, mean(direct_vec_mc))
+             push!(totalmat_mc, mean(total_vec_mc))
+             push!(indiretmat_mc, mean(indirect_vec_mc))
+         end
      end
 
-     diret_sd = std(diretmat_mc)
-     indiret_sd = std(indiretmat_mc)
-     total_sd = std(totalmat_mc)
+     diret_sd = isempty(diretmat_mc) ? 0.0 : std(diretmat_mc; corrected=false)
+     indiret_sd = isempty(indiretmat_mc) ? 0.0 : std(indiretmat_mc; corrected=false)
+     total_sd = isempty(totalmat_mc) ? 0.0 : std(totalmat_mc; corrected=false)
 
      diret_ = hcat(diret, diret_sd)
      indiret_ = hcat(indiret, indiret_sd)
@@ -1029,10 +1059,36 @@ function get_margeffu(
      Wu = _dicM[:wu]
      Wy = _dicM[:wy]
 
+     # Wu scaling at observation level (supports single or time-varying Wu)
+     Mtau_obs = ones(size(Q_mat, 1))
+     if Wu !== Nothing && hasproperty(pos, :begtau)
+          taup = coef[pos.begtau]
+          tau = eigvalu.rumin/(1+exp(taup)) + eigvalu.rumax*exp(taup)/(1+exp(taup))
+          if isfinite(tau)
+              for ttt in 1:T
+                   Wu_t = length(Wu) == 1 ? Wu[1] : Wu[ttt]
+                   Mtau_t = try
+                        inv(I(N_cities) - tau * Wu_t)
+                   catch
+                        Matrix{Float64}(I, N_cities, N_cities)
+                   end
+                   Mtau_diag_t = diag(Mtau_t)
+                   ind = rowIDT[ttt, 1]
+                   for (local_i, global_i) in enumerate(ind)
+                        Mtau_obs[global_i] = Mtau_diag_t[local_i]
+                   end
+              end
+          end
+     end
+
      if Wy !== Nothing
           gammap = coef[pos.beggamma]
           gamma = eigvalu.rymin/(1+exp(gammap)) + eigvalu.rymax*exp(gammap)/(1+exp(gammap))
-          A = inv(I(N_cities) - gamma * Wy[1])
+          A = try
+              inv(I(N_cities) - gamma * Wy[1])
+          catch
+              pinv(I(N_cities) - gamma * Wy[1])
+          end
           A_diag = diag(A)
           A_colsum = vec(sum(A, dims=1))
      else
@@ -1051,7 +1107,7 @@ function get_margeffu(
          dire, indire, totale = get_margeffu_single(
              pos, coef, indices,
              Q_mat, W_mat, Z_mat,
-             obs_ci, A_diag, A_colsum,
+             obs_ci, Mtau_obs, A_diag, A_colsum,
              L, modelid, target_k
          )
 
@@ -1063,15 +1119,19 @@ function get_margeffu(
      # 格式化输出
      vars = [string(pair[1]) for pair in indices_listz]
 
-     indiremat = hcat(indiremat, (indiremat[:,1])./indiremat[:,2], (1.0 .- normcdf.(abs.((indiremat[:,1])./indiremat[:,2]))))
+     z_indire = (indiremat[:,1]) ./ max.(indiremat[:,2], _MARGEFF_SD_EPS)
+     z_dire = (diremat[:,1]) ./ max.(diremat[:,2], _MARGEFF_SD_EPS)
+     z_total = (totalemat[:,1]) ./ max.(totalemat[:,2], _MARGEFF_SD_EPS)
+
+     indiremat = hcat(indiremat, z_indire, (1.0 .- normcdf.(abs.(z_indire))))
      indiremat = hcat(vars, indiremat)
      indiremat = vcat(["var" "Coef." "Std. Err." "z" "P>|z|"], indiremat)
 
-     diremat = hcat(diremat, (diremat[:,1])./diremat[:,2], (1.0 .- normcdf.(abs.((diremat[:,1])./diremat[:,2]))))
+     diremat = hcat(diremat, z_dire, (1.0 .- normcdf.(abs.(z_dire))))
      diremat = hcat(vars, diremat)
      diremat = vcat(["var" "Coef." "Std. Err." "z" "P>|z|"], diremat)
 
-     totalemat = hcat(totalemat, (totalemat[:,1])./totalemat[:,2], (1.0 .- normcdf.(abs.((totalemat[:,1])./totalemat[:,2]))))
+     totalemat = hcat(totalemat, z_total, (1.0 .- normcdf.(abs.(z_total))))
      totalemat = hcat(vars, totalemat)
      totalemat = vcat(["var" "Coef." "Std. Err." "z" "P>|z|"], totalemat)
 
@@ -1135,7 +1195,7 @@ function nonConsDataFrame(D::DataFrame, M::Matrix)
      hsσᵤ = hs*σᵤ 
       Λ  = hsμ/hsσᵤ 
     
-     uncondU = hsσᵤ* (Λ + normpdf(Λ) / normcdf(Λ)) # kx1
+     uncondU = hsσᵤ* (Λ + _safe_mills_ratio(Λ)) # kx1
    
 end   
 
@@ -1214,7 +1274,7 @@ function marg_ssfkut(ttt::Int, iii::Int, N::Int,# PorC::Int64,
      hsσᵤ = hs*σᵤ 
       Λ  = hsμ/hsσᵤ 
     
-     uncondU = hsσᵤ* (Λ + normpdf(Λ) / normcdf(Λ)) # kx1
+     uncondU = hsσᵤ* (Λ + _safe_mills_ratio(Λ)) # kx1
    
 end   
 
@@ -1291,7 +1351,7 @@ function marg_ssfkueh(ttt::Int, iii::Int, N::Int,# PorC::Int64,
      hsσᵤ = hs*σᵤ 
       Λ  = hsμ/hsσᵤ 
     
-     uncondU = hsσᵤ* (Λ + normpdf(Λ) / normcdf(Λ)) # kx1
+     uncondU = hsσᵤ* (Λ + _safe_mills_ratio(Λ)) # kx1
    
 end   
 
@@ -1368,7 +1428,7 @@ function marg_ssfkuet(ttt::Int, iii::Int, N::Int,# PorC::Int64,
      hsσᵤ = hs*σᵤ 
       Λ  = hsμ/hsσᵤ 
     
-     uncondU = hsσᵤ* (Λ + normpdf(Λ) / normcdf(Λ)) # kx1
+     uncondU = hsσᵤ* (Λ + _safe_mills_ratio(Λ)) # kx1
    
 end   
 
@@ -1449,7 +1509,7 @@ function marg_ssfkkh(ttt::Int, iii::Int, N::Int,# PorC::Int64,
      hsσᵤ = hs*σᵤ 
       Λ  = hsμ/hsσᵤ 
     
-     uncondU = hsσᵤ* (Λ + normpdf(Λ) / normcdf(Λ)) # kx1
+     uncondU = hsσᵤ* (Λ + _safe_mills_ratio(Λ)) # kx1
    
 end   
 
@@ -1528,7 +1588,7 @@ function marg_ssfkkt(ttt::Int, iii::Int, N::Int,# PorC::Int64,
      hsσᵤ = hs*σᵤ 
       Λ  = hsμ/hsσᵤ 
     
-     uncondU = hsσᵤ* (Λ + normpdf(Λ) / normcdf(Λ)) # kx1
+     uncondU = hsσᵤ* (Λ + _safe_mills_ratio(Λ)) # kx1
    
 end   
 
@@ -1605,7 +1665,7 @@ function marg_ssfkkeh(ttt::Int, iii::Int, N::Int,# PorC::Int64,
      hsσᵤ = hs*σᵤ 
       Λ  = hsμ/hsσᵤ 
     
-     uncondU = hsσᵤ* (Λ + normpdf(Λ) / normcdf(Λ)) # kx1
+     uncondU = hsσᵤ* (Λ + _safe_mills_ratio(Λ)) # kx1
    
 end   
 
@@ -1682,7 +1742,7 @@ function marg_ssfkket(ttt::Int, iii::Int, N::Int,# PorC::Int64,
      hsσᵤ = hs*σᵤ 
       Λ  = hsμ/hsσᵤ 
     
-     uncondU = hsσᵤ* (Λ + normpdf(Λ) / normcdf(Λ)) # kx1
+     uncondU = hsσᵤ* (Λ + _safe_mills_ratio(Λ)) # kx1
    
 end   
 
